@@ -47,7 +47,7 @@ include(CMakeParseArguments) # cmake_parse_arguments
 
 option(HUNTER_ENABLED "Enable Hunter package manager support" ON)
 option(HUNTER_STATUS_PRINT "Print working status" ON)
-option(HUNTER_STATUS_DEBUG "Print a lot info" ON)
+option(HUNTER_STATUS_DEBUG "Print a lot info" OFF)
 
 set(HUNTER_WIKI "https://github.com/ruslo/hunter/wiki")
 

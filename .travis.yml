@@ -3,6 +3,17 @@
 # This file can be validated on:
 # http://lint.travis-ci.org/
 
+sudo: required
+dist: trusty
+
+os:
+  - linux
+#  - osx
+language: cpp
+compiler:
+  - gcc
+#  - clang
+
 install:
 # /usr/bin/gcc is 4.6 always, but gcc-X.Y is available.
 - if [ "$CXX" = "g++" ]; then export CXX="g++-4.9" CC="gcc-4.9"; fi
@@ -13,15 +24,9 @@ install:
 - ${CXX} --version
 - ${CXX} -v
 
-sudo: required
-dist: trusty
 
 addons:
   apt:
-    # List of whitelisted in travis packages for ubuntu-precise can be found here:
-    #   https://github.com/travis-ci/apt-package-whitelist/blob/master/ubuntu-precise
-    # List of whitelisted in travis apt-sources:
-    #   https://github.com/travis-ci/apt-source-whitelist/blob/master/ubuntu.json
     sources:
       - ubuntu-toolchain-r-test
     packages:
@@ -34,11 +39,17 @@ addons:
       - g++-4.9
 #    - clang-3.7
 #    - valgrind
-os:
-  - linux
-#  - osx
-language: cpp
-compiler:
-  - gcc
-#  - clang
-script: ./travis.sh
+
+before_script:
+  - ${CXX} --version
+  - ${CC} --version
+  - cmake --version
+  - curl --version
+
+script:
+  - mkdir build
+  - cd build
+  - cmake ..
+  - cmake --build
+  - ctest
+

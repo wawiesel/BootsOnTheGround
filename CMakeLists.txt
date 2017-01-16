@@ -16,10 +16,8 @@ IF( NOT TRIBITS_PROCESSING_PACKAGE )
     INCLUDE( ProjectName.cmake )
     PROJECT(${PROJECT_NAME} NONE)
 
-    # Enable tests.
-    SET(${PROJECT_NAME}_ENABLE_TESTS ON CACHE BOOL "Enable all tests by default.")
-
     # Perform standard initialization.
+    BOTG_InitializeOptions()
     BOTG_InitializeTriBITS( external/TriBITS/tribits )
     BOTG_PreventInSourceBuilds()
 
