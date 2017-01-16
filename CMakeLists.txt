@@ -3,14 +3,14 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8 FATAL_ERROR)
 # Includes all the "BootsOnTheGround" (BOTG) functions.
 INCLUDE( cmake/BOTG.cmake )
 
-# Enable the hunter gate!
-INCLUDE("cmake/HunterGate.cmake")
-
 # We enter here if this is a being built as a standalone TriBITS **project**.
 IF( NOT TRIBITS_PROCESSING_PACKAGE )
 
     # Clear the cache unless provided -D KEEP_CACHE:BOOL=ON.
     BOTG_ClearCMakeCache("${KEEP_CACHE}")
+
+    # Enable the hunter gate!
+    INCLUDE( cmake/HunterGate.cmake )
 
     # Declare **project**.
     INCLUDE( ProjectName.cmake )
