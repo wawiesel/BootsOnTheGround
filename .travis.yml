@@ -21,7 +21,7 @@ addons:
       - cmake-data
 
 ## Run on container environment
-sudo: false
+sudo: required
 
 before_script:
   - mkdir build
