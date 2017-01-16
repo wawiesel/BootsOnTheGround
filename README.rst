@@ -17,7 +17,10 @@ downloaded and built with Hunter!
 TriBITS
 -------
 
-TriBITS is embedded as a subtree with the following command::
+TriBITS is embedded as a subtree with the following command
+
+::
+
     git subtree add --prefix external/TriBITS https://github.com/TriBITSPub/TriBITS.git master --squash
 
 .. _Hunter: http://github.com/ruslo/hunter
