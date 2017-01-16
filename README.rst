@@ -14,14 +14,18 @@ BOTG uses Hunter_, a CMake-based package manager, for when the
 appropriate TPL cannot be found on the system of interest--it is automatically
 downloaded and built with Hunter!
 
-TriBITS
--------
+Tricky Details
+--------------
 
 TriBITS_ is embedded as a subtree with the following command
 
 ::
 
     git subtree add --prefix external/TriBITS https://github.com/TriBITSPub/TriBITS.git master --squash
+
+To enable the Travis CI to be able to use curl and https (for Hunter_), I
+followed the steps on `Cees-Jan Kiewiet's Blog Post
+<https://blog.wyrihaximus.net/2015/09/github-auth-token-on-travis/>`_.
 
 .. _Hunter: http://github.com/ruslo/hunter
 .. _BOTG: http://github.com/wawiesel/BootsOnTheGround
