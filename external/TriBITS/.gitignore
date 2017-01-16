@@ -1,0 +1,20 @@
+# Standard ignores
+*~
+*.pyc
+\#*#
+.#*
+.*.swp
+
+# TriBITSDoc repo
+/TriBITSDoc/
+
+# Ignore generated files
+/README.html
+/README.pdf
+/README.tex.log
+
+# Ignore build dirs
+BUILD/
+
+# Ignore the standard local gitdist override file
+/.gitdist
