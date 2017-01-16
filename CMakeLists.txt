@@ -1,0 +1,48 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8 FATAL_ERROR)
+
+# Includes all the "BootsOnTheGround" (BOTG) functions.
+INCLUDE( cmake/BOTG.cmake )
+
+# Enable the hunter gate!
+INCLUDE("cmake/HunterGate.cmake")
+
+# We enter here if this is a being built as a standalone TriBITS **project**.
+IF( NOT TRIBITS_PROCESSING_PACKAGE )
+
+    # Clear the cache unless provided -D KEEP_CACHE:BOOL=ON.
+    BOTG_ClearCMakeCache("${KEEP_CACHE}")
+
+    # Declare **project**.
+    INCLUDE( ProjectName.cmake )
+    PROJECT(${PROJECT_NAME} NONE)
+
+    # Enable tests.
+    SET(${PROJECT_NAME}_ENABLE_TESTS ON CACHE BOOL "Enable all tests by default.")
+
+    # Perform standard initialization.
+    BOTG_InitializeTriBITS( external/TriBITS/tribits )
+    BOTG_PreventInSourceBuilds()
+
+    # Process this TriBITS **project**.
+    TRIBITS_PROJECT_ENABLE_ALL()
+
+# We enter here when we build this as a TriBITS **package**, including
+# when we come through a second pass after initializing the **project**.
+ELSE()
+
+    # Declare **package**.
+    TRIBITS_PACKAGE_DECL( BootsOnTheGround )
+    TRIBITS_PROCESS_SUBPACKAGES()
+    TRIBITS_PACKAGE_DEF()
+    TRIBITS_PACKAGE_POSTPROCESS()
+
+    # Final print of all the variables for inspection.
+    # For example: -D MATCH_VARIABLE_REGEX:STRING="" will print everything.
+    #              -D MATCH_VARIABLE_REGEX:STRING="^BootsOnTheGround" will
+    #                 print all the BootsOnTheGround variables.
+    #
+    IF( DEFINED MATCH_VARIABLE_REGEX )
+        BOTG_PrintAllVariables("${MATCH_VARIABLE_REGEX}")
+    ENDIF()
+
+ENDIF()
