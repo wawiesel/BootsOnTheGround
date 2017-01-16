@@ -23,6 +23,9 @@ addons:
       - llvm-toolchain-precise-3.7
       - george-edison55-precise-backports # cmake 3.2.3 / doxygen 1.8.3
     packages:
+      - openssl
+      - libssl
+      - libcurl4-openssl
       - cmake
       - cmake-data
       - gcc-4.9
