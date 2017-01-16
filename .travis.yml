@@ -1,32 +1,23 @@
-# OSX/Linux (https://github.com/travis-ci-tester/toolchain-table)
-
 language:
   - cpp
 
 os:
   - linux
-  - osx
+#  - osx
 
-# Container-based infrastructure (Linux)
-# * https://docs.travis-ci.com/user/migrating-from-legacy/#How-can-I-use-container-based-infrastructure%3F
+compiler:
+  - clang
+#  - gcc
+
+before_script:
+  - mkdir build
+  - cd build
+  - cmake ..
+
+script: make
+
 sudo:
   - false
-
-# Install packages differs for container-based infrastructure
-# * https://docs.travis-ci.com/user/migrating-from-legacy/#How-do-I-install-APT-sources-and-packages%3F
-# * http://stackoverflow.com/a/30925448/2288008
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      # https://github.com/travis-ci-tester/travis-test-clang-cxx-11
-      - libstdc++-4.8-dev
-
-      # https://github.com/travis-ci-tester/travis-test-gcc-cxx-11
-      - g++-4.8
-
-env:
 
 install:
   # Info about OS
