@@ -1,0 +1,122 @@
+<Project name="Trilinos">
+  <SubProject name="TrilinosFramework">
+    <EmailAddresses>
+      <Email address="trilinosframework-regression@repo.site.gov"/>
+    </EmailAddresses>
+  </SubProject>
+  <SubProject name="Teuchos">
+    <EmailAddresses>
+      <Email address="teuchos-regression@repo.site.gov"/>
+    </EmailAddresses>
+  </SubProject>
+  <SubProject name="RTOp">
+    <EmailAddresses>
+      <Email address="thyra-regression@software.sandia.gov"/>
+    </EmailAddresses>
+  </SubProject>
+  <SubProject name="Epetra">
+    <EmailAddresses>
+      <Email address="epetra-regression@repo.site.gov"/>
+    </EmailAddresses>
+  </SubProject>
+  <SubProject name="Zoltan">
+    <EmailAddresses>
+      <Email address="zoltan-regression@repo.site.gov"/>
+    </EmailAddresses>
+  </SubProject>
+  <SubProject name="Shards">
+    <EmailAddresses>
+      <Email address="shards-regression@repo.site.gov"/>
+    </EmailAddresses>
+  </SubProject>
+  <SubProject name="Triutils">
+    <EmailAddresses>
+      <Email address="triutils-regression@repo.site.gov"/>
+    </EmailAddresses>
+  </SubProject>
+  <SubProject name="Tpetra">
+    <EmailAddresses>
+      <Email address="tpetra-regression@repo.site.gov"/>
+    </EmailAddresses>
+  </SubProject>
+  <SubProject name="EpetraExt">
+    <EmailAddresses>
+      <Email address="epetraext-regression@repo.site.gov"/>
+    </EmailAddresses>
+  </SubProject>
+  <SubProject name="Stokhos">
+    <EmailAddresses>
+      <Email address="stokhos-regression@repo.site.gov"/>
+    </EmailAddresses>
+  </SubProject>
+  <SubProject name="Sacado">
+    <EmailAddresses>
+      <Email address="sacado-regression@repo.site.gov"/>
+    </EmailAddresses>
+  </SubProject>
+  <SubProject name="Thyra">
+    <EmailAddresses>
+      <Email address="thyra-boneheads@gmail.com"/>
+    </EmailAddresses>
+  </SubProject>
+  <SubProject name="Isorropia">
+    <EmailAddresses>
+      <Email address="isorropia-regression@repo.site.gov"/>
+    </EmailAddresses>
+  </SubProject>
+  <SubProject name="AztecOO">
+    <EmailAddresses>
+      <Email address="aztecoo-regression@repo.site.gov"/>
+    </EmailAddresses>
+  </SubProject>
+  <SubProject name="Galeri">
+    <EmailAddresses>
+      <Email address="galeri-regression@repo.site.gov"/>
+    </EmailAddresses>
+  </SubProject>
+  <SubProject name="Amesos">
+    <EmailAddresses>
+      <Email address="amesos-regression@repo.site.gov"/>
+    </EmailAddresses>
+  </SubProject>
+  <SubProject name="Intrepid">
+    <EmailAddresses>
+      <Email address="intrepid-regression@repo.site.gov"/>
+    </EmailAddresses>
+  </SubProject>
+  <SubProject name="Ifpack">
+    <EmailAddresses>
+      <Email address="ifpack-regression@repo.site.gov"/>
+    </EmailAddresses>
+  </SubProject>
+  <SubProject name="ML">
+    <EmailAddresses>
+      <Email address="ml-regression@repo.site.gov"/>
+    </EmailAddresses>
+  </SubProject>
+  <SubProject name="Belos">
+    <EmailAddresses>
+      <Email address="belos-regression@repo.site.gov"/>
+    </EmailAddresses>
+  </SubProject>
+  <SubProject name="Stratimikos">
+    <EmailAddresses>
+      <Email address="stratimikos-regression@repo.site.gov"/>
+    </EmailAddresses>
+  </SubProject>
+  <SubProject name="RBGen">
+    <EmailAddresses>
+      <Email address="rbgen-regression@repo.site.gov"/>
+    </EmailAddresses>
+  </SubProject>
+  <SubProject name="Phalanx">
+    <EmailAddresses>
+      <Email address="phalanx-regression@repo.site.gov"/>
+    </EmailAddresses>
+  </SubProject>
+  <SubProject name="Panzer">
+    <EmailAddresses>
+      <Email address="panzer-regression@repo.site.gov"/>
+    </EmailAddresses>
+  </SubProject>
+</Project>
