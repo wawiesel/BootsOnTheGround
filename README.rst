@@ -24,13 +24,6 @@ Principles
   to link to a particular version, either ``MAJOR.MINOR`` or ``MAJOR`` (in which case
   the latest ``MINOR`` is chosen).
   
-External package management
----------------------------
-BOTG_ should find local libraries on your machine that meet the version 
-requirements. However, when it does not, BOTG uses Hunter_, a CMake-based 
-package manager. We looked at using `spack<https://spack.io/>`_ but it is
-not clear if they will ever have Windows support.
-
 Connection to TriBITS
 ---------------------
 TriBITS_ does all the heavy lifting of package dependency management, 
@@ -44,6 +37,7 @@ Say you needed TPL ``CURL`` for your library and ``GTest`` for testing.
 cmake/Dependencies.cmake file, you would need to specify:
 
 .. code-block:: cmake
+
     SET(LIB_REQUIRED_DEP_PACKAGES)
     SET(TEST_REQUIRED_DEP_PACKAGES)
     SET(LIB_REQUIRED_DEP_TPLS CURL OpenSSL ZLib)
@@ -54,6 +48,7 @@ called ``BootsOnTheGround_CURL`` and it will handle linking
 in dependent TPLs automatically.
 
 .. code-block:: cmake
+
     SET(LIB_REQUIRED_DEP_PACKAGES BootsOnTheGround_CURL)
     SET(TEST_REQUIRED_DEP_PACKAGES BootsOnTheGround_GTest)
     SET(LIB_REQUIRED_DEP_TPLS)
@@ -62,6 +57,15 @@ in dependent TPLs automatically.
 Note, the other magic gained by using ``BootsOnTheGround_CURL`` is
 that Hunter_ is used to download, build, and install any TPLs it 
 cannot find!
+
+Connection to Hunter
+--------------------
+BOTG_ should find local libraries on your machine that meet the version 
+requirements. However, when it does not, BOTG uses Hunter_, a CMake-based 
+package manager. We looked at using `spack<https://spack.io/>`_ but it is
+not clear if they will ever have Windows support.
+
+-----------------------------------------------------------------------------
 
 Tricky Details
 --------------
