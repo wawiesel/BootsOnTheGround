@@ -2,7 +2,7 @@ This is BootsOnTheGround [BOTG_]!
 =================================
 
 BOTG_ provides a set of FindTPL*.cmake files to find and link Third Party
-Libraries (TPLs) to other packages using the CMake/TriBITS_ framework.
+Libraries (TPLs) to other packages using the CMake / TriBITS_ framework.
 
 The goal of BOTG is to provide easy TPL linkages to a set of software
 packages which build and operate correctly on Windows, Mac, and Linux.
@@ -31,7 +31,8 @@ followed the steps on `Cees-Jan Kiewiet's Blog Post
 <https://blog.wyrihaximus.net/2015/09/github-auth-token-on-travis/>`_.
 
 .. _Hunter: http://github.com/ruslo/hunter
+.. _TriBITS: https://tribits.org/
 .. _BOTG: http://github.com/wawiesel/BootsOnTheGround
 .. _GTest: http://github.com/google/googletest
-.. _BoostFilesystem:http://www.boost.org/doc/libs/1_63_0/libs/filesystem/doc/reference.html
+.. _BoostFilesystem :http://www.boost.org/doc/libs/1_63_0/libs/filesystem/doc/reference.html
 
