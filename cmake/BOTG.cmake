@@ -77,7 +77,12 @@ FUNCTION( BOTG_HuntTPL tribits_name headers libs hunter_name hunter_args )
         MESSAGE(STATUS "[BootsOnTheGround] Calling hunter_add_package( ${hunter_argx} )...")
 
         HUNTER_ADD_PACKAGE( ${hunter_argx} )
+
+        #issue found in: cmake-3.7/Modules/CheckSymbolExists.cmake
+        CMAKE_POLICY(PUSH)
+        CMAKE_POLICY(SET CMP0054 OLD)
         FIND_PACKAGE( ${hunter_argx} )
+        CMAKE_POLICY(POP)
 
         #no choice but to be successful with hunter
         GLOBAL_SET(${tribits_name}_FOUND TRUE)
@@ -135,21 +140,15 @@ ENDFUNCTION()
 # Main BootsOnTheGround setup macro.
 MACRO( BOTG_Setup )
 
-    # Set the BootsOnTheGround source directory!
-    GLOBAL_SET(BOTG_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
-
-    # Process each language that is enabled. (Always C/CXX.)
+    # Process default flags for each language.
     BOTG_ProcessDefaultFlags( C )
     BOTG_ProcessDefaultFlags( CXX )
-    IF(${PROJECT_NAME}_ENABLE_Fortran)
-        BOTG_ProcessDefaultFlags( Fortran )
-    ENDIF()
+    BOTG_ProcessDefaultFlags( Fortran )
 
 ENDMACRO()
 
 # Processes all the default flags for a single language.
-MACRO( BOTG_ProcessDefaultFlags lang )
-
+FUNCTION( BOTG_ProcessDefaultFlags lang )
     # This is the compiler name.
     SET( compiler "${CMAKE_${lang}_COMPILER_ID}")
 
@@ -173,16 +172,16 @@ MACRO( BOTG_ProcessDefaultFlags lang )
             MESSAGE( STATUS "[BootsOnTheGround] using default BOTG flags from path='${proj_flags_path}'.")
             INCLUDE( "${botg_flags_path}" )
         ELSE()
-            MESSAGE( WARNING "[BootsOnTheGround] unknown--no default flags used!")
+            MESSAGE( WARNING "[BootsOnTheGround] neither '${proj_flags_path}' or '${botg_flags_path}' was valid--no default flags used!")
         ENDIF()
 
     ENDFOREACH()
-ENDMACRO()
+ENDFUNCTION()
 
 # Used inside the Flags.cmake files for convenience.
 FUNCTION( BOTG_AddCompilerFlags lang flags )
     MESSAGE(STATUS "[BootsOnTheGround] adding flags='${flags}' for lang='${lang}'")
-    GLOBAL_SET(CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS} ${flags}")
+    SET(CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS} ${flags}" CACHE BOOL "Compiler flags for lang='${lang}'" FORCE)
 ENDFUNCTION()
 
 

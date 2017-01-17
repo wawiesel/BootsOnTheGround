@@ -2,6 +2,9 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.0 FATAL_ERROR)
 
 # Includes all the "BootsOnTheGround" (BOTG) functions.
 INCLUDE( cmake/BOTG.cmake )
+    
+# Set the BootsOnTheGround source directory!
+SET(BOTG_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}" CACHE BOOL INTERNAL)
 
 # We enter here if this is a being built as a standalone TriBITS **project**.
 IF( NOT TRIBITS_PROCESSING_PACKAGE )
@@ -14,24 +17,21 @@ IF( NOT TRIBITS_PROCESSING_PACKAGE )
 
     # Declare **project**.
     INCLUDE( ProjectName.cmake )
-    PROJECT(${PROJECT_NAME} NONE)
-
+    PROJECT(${PROJECT_NAME} C CXX Fortran)
     # Perform standard initialization.
     BOTG_InitializeTriBITS( external/TriBITS/tribits )
     BOTG_PreventInSourceBuilds()
 
     # Default settings.
     SET(${PROJECT_NAME}_ENABLE_TESTS ON CACHE BOOL "Enable all tests by default.")
-    SET(${PROJECT_NAME}_ENABLE_Fortran OFF CACHE BOOL "Disable fortran by default.")
-
+    BOTG_Setup()
+    
     # Process this TriBITS **project**.
     TRIBITS_PROJECT_ENABLE_ALL()
 
 # We enter here when we build this as a TriBITS **package**, including
-# when we come through a second pass after initializing the **project**.
+# when we come through a second pass during TRIBITS_PROJECT_ENABLE_ALL..
 ELSE()
-    # Do some general setup.
-    BOTG_Setup()
 
     # Declare **package**.
     TRIBITS_PACKAGE_DECL( BootsOnTheGround )
