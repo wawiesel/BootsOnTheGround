@@ -4,7 +4,9 @@
 # http://lint.travis-ci.org/
 
 sudo: required
+
 dist: trusty
+
 language: cpp
 
 os:
@@ -34,15 +36,15 @@ addons:
 before_install:
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install gcc; fi
-    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then;
-          if [[ "$CXX" == "g++" ]]; then;
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+          if [[ "$CXX" == "g++" ]]; then
               export CXX="g++-4.9";
               export CC="gcc-4.9";
               export FC="gfortran-4.9";
-          elif [[ "$CXX" == "clang" ]]; then;
+          elif [[ "$CXX" == "clang" ]]; then
               export FC="gfortran";
           fi;
-      elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then;
+      elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
           export FC="gfortran";
       fi
 
@@ -65,3 +67,5 @@ script:
     - cmake ..
     - cmake --build .
     - ctest
+
+cache: ccache
