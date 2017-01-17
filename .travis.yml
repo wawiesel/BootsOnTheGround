@@ -9,10 +9,10 @@ language: cpp
 
 os:
     - linux
-#    - osx
+    - osx
 compiler:
     - gcc
-#    - clang
+    - clang
 
 addons:
     apt:
@@ -27,7 +27,7 @@ addons:
             - gcc-4.9
             - g++-4.9
             - gfortran-4.9
-            #    - clang-3.7
+            - clang-3.7
             #    - valgrind
 install:
     - echo ${PATH}
