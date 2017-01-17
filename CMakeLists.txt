@@ -17,9 +17,12 @@ IF( NOT TRIBITS_PROCESSING_PACKAGE )
     PROJECT(${PROJECT_NAME} NONE)
 
     # Perform standard initialization.
-    BOTG_InitializeOptions()
     BOTG_InitializeTriBITS( external/TriBITS/tribits )
     BOTG_PreventInSourceBuilds()
+
+    # Default settings.
+    SET(${PROJECT_NAME}_ENABLE_TESTS ON CACHE BOOL "Enable all tests by default.")
+    SET(${PROJECT_NAME}_ENABLE_Fortran OFF CACHE BOOL "Disable fortran by default.")
 
     # Process this TriBITS **project**.
     TRIBITS_PROJECT_ENABLE_ALL()
@@ -27,6 +30,8 @@ IF( NOT TRIBITS_PROCESSING_PACKAGE )
 # We enter here when we build this as a TriBITS **package**, including
 # when we come through a second pass after initializing the **project**.
 ELSE()
+    # Do some general setup.
+    BOTG_Setup()
 
     # Declare **package**.
     TRIBITS_PACKAGE_DECL( BootsOnTheGround )

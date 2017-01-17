@@ -106,6 +106,9 @@ ENDFUNCTION()
 
 MACRO( BOTG_InitializeTriBITS TriBITS_dir )
 
+    # Turn off some things here.
+    SET(TPL_ENABLE_MPI OFF CACHE BOOL "Turn off MPI by default.")
+
     # Why TriBITS do you blow away my MODULE_PATH?
     SET(save_path ${CMAKE_MODULE_PATH})
 
@@ -128,6 +131,60 @@ FUNCTION(BOTG_PreventInSourceBuilds)
     MESSAGE(FATAL_ERROR "[BootsOnTheGround] in-source builds are not allowed!")
   ENDIF()
 ENDFUNCTION()
+
+# Main BootsOnTheGround setup macro.
+MACRO( BOTG_Setup )
+
+    # Set the BootsOnTheGround source directory!
+    GLOBAL_SET(BOTG_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+
+    # Process each language that is enabled. (Always C/CXX.)
+    BOTG_ProcessDefaultFlags( C )
+    BOTG_ProcessDefaultFlags( CXX )
+    IF(${PROJECT_NAME}_ENABLE_Fortran)
+        BOTG_ProcessDefaultFlags( Fortran )
+    ENDIF()
+
+ENDMACRO()
+
+# Processes all the default flags for a single language.
+MACRO( BOTG_ProcessDefaultFlags lang )
+
+    # This is the compiler name.
+    SET( compiler "${CMAKE_${lang}_COMPILER_ID}")
+
+    # This is a prefix for the files.
+    SET( pre "cmake/${lang}/${compiler}" )
+
+    # The first flag_file is language+compiler dependent.
+    # The second is language+compiler+operation system dependent.
+    FOREACH( flag_file "${pre}/Flags.cmake" "${pre}/${CMAKE_SYSTEM_NAME}/Flags.cmake" )
+
+        # Check both the project path and the BootsOnTheGround path.
+        # Project has precendence.
+        SET(proj_flags_path "${CMAKE_SOURCE_DIR}/${flag_file}")
+        SET(botg_flags_path "${BOTG_SOURCE_DIR}/${flag_file}")
+
+        # Choose which flags to load.
+        IF( EXISTS "${proj_flags_path}")
+            MESSAGE( STATUS "[BootsOnTheGround] using ${PROJECT_NAME} flags from path='${proj_flags_path}'.")
+            INCLUDE( "${proj_flags_path}" )
+        ELSEIF( EXISTS "${botg_flags_path}" )
+            MESSAGE( STATUS "[BootsOnTheGround] using default BOTG flags from path='${proj_flags_path}'.")
+            INCLUDE( "${botg_flags_path}" )
+        ELSE()
+            MESSAGE( WARNING "[BootsOnTheGround] unknown--no default flags used!")
+        ENDIF()
+
+    ENDFOREACH()
+ENDMACRO()
+
+# Used inside the Flags.cmake files for convenience.
+FUNCTION( BOTG_AddCompilerFlags lang flags )
+    MESSAGE(STATUS "[BootsOnTheGround] adding flags='${flags}' for lang='${lang}'")
+    GLOBAL_SET(CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS} ${flags}")
+ENDFUNCTION()
+
 
 # Check if given Fortran source compiles and links into an executable
 #
@@ -219,67 +276,4 @@ MACRO (BOTG_CheckCompilerFlagFortran _flag _result)
      FAIL_REGEX "command option .* is not recognized"       # XL
      )
    SET (CMAKE_REQUIRED_DEFINITIONS "${save_defs}")
-ENDMACRO()
-
-MACRO( BOTG_InitializeOptions )
-
-    # Default to off because TriBITS complains otherwise.
-    SET(TPL_ENABLE_MPI OFF CACHE BOOL "Turn off MPI by default.")
-    SET(CMAKE_CXX_STANDARD 11 CACHE STRING "Set C++11 standard on by default.")
-    SET(${PROJECT_NAME}_ENABLE_TESTS ON CACHE BOOL "Enable all tests by default.")
-    SET(${PROJECT_NAME}_ENABLE_Fortran OFF CACHE BOOL "Disable fortran by default.")
-
-    # Project wide conflict resolution for windows min/max macro
-    # that gets set in "windows.h"
-    IF(CMAKE_SYSTEM_NAME MATCHES "Windows")
-      ADD_DEFINITIONS(-DNOMINMAX -DNOGDI)
-    ENDIF()
-
-    # Include os-specific flags.
-    SET(defaults_path "${CMAKE_SOURCE_DIR}/cmake/${CMAKE_SYSTEM_NAME}/Defaults.cmake")
-    IF( NOT EXISTS "${defaults_path}")
-        MESSAGE( WARNING "[BootsOnTheGround] No Global defaults for ${CMAKE_SYSTEM_NAME}.")
-    ELSE()
-        INCLUDE( "${defaults_path}" )
-    ENDIF()
-
-    # Fortran
-    IF(${PROJECT_NAME}_ENABLE_Fortran)
-        #
-        # Only detect traceback flags
-        # if they have not already been set
-        #
-        IF(NOT CMAKE_Fortran_FLAGS_TRACEBACK)
-            SET(TRACEBACK_OPTIONS
-                "-fbacktrace" # Standard gcc
-                "/traceback"  # Standard intel windows
-                "-traceback"  # Standard intel linux
-            )
-            FOREACH( TOPTION ${TRACEBACK_OPTIONS})
-                IF(${PROJECT_NAME}_VERBOSE_CONFIGURE})
-                    MESSAGE(STATUS "[BootsOnTheGround] Testing Fortran traceback flag: ${TOPTION}")
-                ENDIF()
-                BOTG_CheckCompilerFlagFortran("${TOPTION}" CMAKE_Fortran_FLAGS_TRACEBACK_RESULT)
-                IF(CMAKE_Fortran_FLAGS_TRACEBACK_RESULT)
-                    # CACHE the successful flags
-                    SET(CMAKE_Fortran_FLAGS_TRACEBACK "${TOPTION}" CACHE INTERNAL "Fortran traceback flags")
-
-                    # Append compiler flag to CMAKE_Fortran_FLAGS
-                    SET(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${CMAKE_Fortran_FLAGS_TRACEBACK}")
-                    IF(${PROJECT_NAME}_VERBOSE_CONFIGURE})
-                        MESSAGE(STATUS "[BootsOnTheGround] Success Fortran traceback flag: ${TOPTION}")
-                    ENDIF()
-                    BREAK()
-                ENDIF()
-            ENDFOREACH()
-            IF(${PROJECT_NAME}_VERBOSE_CONFIGURE})
-                IF(NOT CMAKE_Fortran_FLAGS_TRACEBACK)
-                   MESSAGE(WARNING "[BootsOnTheGround] Failed to detect Fortran traceback flag: ${TRACEBACK_OPTIONS}")
-                ENDIF()
-            ENDIF()
-        ELSE()
-            SET(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${CMAKE_Fortran_FLAGS_TRACEBACK}")
-        ENDIF()
-    ENDIF()
-
 ENDMACRO()
