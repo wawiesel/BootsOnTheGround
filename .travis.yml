@@ -41,7 +41,7 @@ before_install:
               export CXX="g++-4.9";
               export CC="gcc-4.9";
               export FC="gfortran-4.9";
-          elif [[ "$CXX" == "clang" ]]; then
+          elif [[ "$CXX" == "clang++" ]]; then
               export FC="gfortran";
           fi;
       elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
