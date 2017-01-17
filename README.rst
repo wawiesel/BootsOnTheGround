@@ -9,6 +9,7 @@ packages which build and operate correctly on Windows, Mac, and Linux.
 Currently it provides TPLs for
 
 - GTest_ -- Google's C++ unit testing system
+- BoostFilesystem_ -- Cross-platform file system queries
 
 BOTG uses Hunter_, a CMake-based package manager, for when the
 appropriate TPL cannot be found on the system of interest--it is automatically
@@ -21,7 +22,9 @@ TriBITS_ is embedded as a subtree with the following command
 
 ::
 
-    git subtree add --prefix external/TriBITS https://github.com/TriBITSPub/TriBITS.git master --squash
+    git subtree add --prefix external/TriBITS
+        https://github.com/TriBITSPub/TriBITS.git
+        master --squash
 
 To enable the Travis CI to be able to use curl and https (for Hunter_), I
 followed the steps on `Cees-Jan Kiewiet's Blog Post
@@ -30,3 +33,5 @@ followed the steps on `Cees-Jan Kiewiet's Blog Post
 .. _Hunter: http://github.com/ruslo/hunter
 .. _BOTG: http://github.com/wawiesel/BootsOnTheGround
 .. _GTest: http://github.com/google/googletest
+.. _BoostFilesystem:http://www.boost.org/doc/libs/1_63_0/libs/filesystem/doc/reference.html
+
