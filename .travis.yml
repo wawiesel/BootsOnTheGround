@@ -10,6 +10,7 @@ language: cpp
 os:
     - linux
     - osx
+
 compiler:
     - gcc
     - clang
@@ -29,6 +30,11 @@ addons:
             - gfortran-4.9
             - clang-3.7
             #    - valgrind
+
+before_install:
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install gcc; export FC=gfortran; fi
+
 install:
     - echo ${PATH}
     # /usr/bin/gcc is 4.6 always, but gcc-X.Y is available.
