@@ -33,15 +33,21 @@ addons:
 
 before_install:
     - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
-    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install gcc; export FC=gfortran; fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install gcc; fi
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+          if [[ "$CXX" == "g++" ]]; then
+              export CXX="g++-4.9"
+              export CC="gcc-4.9"
+              export FC="gfortran-4.9"
+          elif [[ "$CXX" == "clang" ]]; then
+              export FC="gfortran"
+          fi
+      elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+          export FC="gfortran"
+      endif
 
 install:
     - echo ${PATH}
-    # /usr/bin/gcc is 4.6 always, but gcc-X.Y is available.
-    - if [ "$CXX" = "g++" ]; then export CXX="g++-4.9" CC="gcc-4.9"; fi
-    # /usr/bin/clang is 3.4, lets override with modern one.
-    - if [ "$CXX" = "clang++" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then export CXX="clang++-3.7" CC="clang-3.7"; fi
-    - export FC="gfortran-4.9"
     - echo ${CC}
     - echo ${CXX}
     - echo ${FC}
