@@ -10,6 +10,7 @@ Currently it provides TPLs for
 
 - GTest_ -- Google's C++ unit testing system
 - BoostFilesystem_ -- Cross-platform file system queries
+- Fmt_ -- text formatting
 
 BOTG uses Hunter_, a CMake-based package manager, for when the
 appropriate TPL cannot be found on the system of interest--it is automatically
@@ -35,4 +36,5 @@ followed the steps on `Cees-Jan Kiewiet's Blog Post
 .. _BOTG: http://github.com/wawiesel/BootsOnTheGround
 .. _GTest: http://github.com/google/googletest
 .. _BoostFilesystem: http://www.boost.org/doc/libs/1_63_0/libs/filesystem/doc/reference.html
+.. _Fmt: http://fmtlib.net/latest/index.html
 
