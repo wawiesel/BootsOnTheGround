@@ -17,9 +17,6 @@ compiler:
     - gcc
     - clang
 
-matrix:
-  fast_finish: true
-
 addons:
     apt:
         sources:
