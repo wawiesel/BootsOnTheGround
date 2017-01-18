@@ -105,9 +105,15 @@ This repository uses
 `Gitflow <https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow/>`_,
 i.e.
   
-#. Development is on ``Feature/X`` branches of ``develop``, which can be unstable.
-#. The ``master`` branch is the most current **stable** version.
-#. Tags off the ``master`` branch are releases ``master``.
+#. Development is **feature-based**, always on ``feature/X`` branches of ``develop``. 
+   The ``develop`` branch can be unstable.
+#. The ``master`` branch is only updated from ``develop`` when all tests pass. 
+   The ``master`` branch is always **stable**.
+#. Releases are first created as a release branch, ``release/vMAJOR.MINOR``, then when
+   ready are merged into the ``master`` branch and tagged ``vMAJOR.MINOR.0``.
+#. Hotfixes are created as a branch off ``master``: ``hotfix/vMAJOR.MINOR.PATCH``, 
+   when finished are merged into ``master`` and tagged ``vMAJOR.MINOR.PATCH``, 
+   then merged into ``develop``.
 
 Tricky Details
 --------------
