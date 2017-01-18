@@ -20,10 +20,14 @@ Currently we have the following TPLs wrapped up nice and purdy:
 Downloads
 ---------
 
-[`latest stable <https://github.com/wawiesel/BootsOnTheGround/archive/master.zip>`_]
-[`last release v0.1-alpha <https://github.com/wawiesel/BootsOnTheGround/archive/v0.1-alpha.zip>`_]
+Below are some links to  and unzip one of the following sources directly to your
+TriBITS_ repository, perhaps to ``external/BootsOnTheGround``, we **strongly
+encourage** using GIT subtrees instead, linking directly to a particular version tag or the master
+branch of the repo.
 
-See `Repository Structure`_ for details.
+[`latest unstable (develop) <https://github.com/wawiesel/BootsOnTheGround/archive/develop.zip>`_]
+[`latest stable (master) <https://github.com/wawiesel/BootsOnTheGround/archive/master.zip>`_]
+[`latest release (v0.1-alpha) <https://github.com/wawiesel/BootsOnTheGround/archive/v0.1-alpha.zip>`_]
 
 
 Principles
@@ -102,9 +106,15 @@ This repository uses
 `Gitflow <https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow/>`_,
 i.e.
 
-#. Development is on ``Feature/X`` branches of ``develop``, which can be unstable.
-#. The ``master`` branch is the most current **stable** version.
-#. Tags off the ``master`` branch are releases ``master``.
+#. Development is **feature-based**, always on ``feature/X`` branches of ``develop``.
+   The ``develop`` branch can be unstable.
+#. The ``master`` branch is only updated from ``develop`` when all tests pass.
+   The ``master`` branch is always **stable**.
+#. Releases are first created as a release branch, ``release/vMAJOR.MINOR``, then when
+   ready are merged into the ``master`` branch and tagged ``vMAJOR.MINOR.0``.
+#. Hotfixes are created as a branch off ``master``: ``hotfix/vMAJOR.MINOR.PATCH``,
+   when finished are merged into ``master`` and tagged ``vMAJOR.MINOR.PATCH``,
+   then merged into ``develop``.
 
 Tricky Details
 --------------
