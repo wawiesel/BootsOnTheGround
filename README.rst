@@ -22,10 +22,10 @@ Principles
   and perform correctly. This implies that we need a way to download and install
   packages (we use Hunter_).
 - All TPLS must have permissible, 
-  `non-copyleft licenses<http://fosslawyers.org/permissive-foss-licenses-bsd-apache-mit/>`_. 
+  `non-copyleft licenses <http://fosslawyers.org/permissive-foss-licenses-bsd-apache-mit>`_. 
   We need these TPLs in our open source TriBITS_ projects, but also in special, 
   export-controlled nuclear reactor simulations like CASL_.
-- All TPLs should use `semantic versioning<http://semver.org/>`_ with the ability
+- All TPLs should use `semantic versioning <http://semver.org>`_ with the ability
   to link to a particular version, either ``MAJOR.MINOR`` or ``MAJOR`` (in which case
   the latest ``MINOR`` is chosen).
   
