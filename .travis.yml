@@ -64,4 +64,5 @@ script:
     - cmake --build .
     - ctest
 
-cache: ccache
+# enable cache
+#cache: ccache
