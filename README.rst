@@ -6,13 +6,24 @@ This is BootsOnTheGround [BOTG_]!
     
 BOTG_ provides a set of FindTPL*.cmake files to find and link Third Party
 Libraries (TPLs) to other packages using the CMake / TriBITS_ framework
-for C/C++/Fortran code. Currently it enables the following TPLs:
+for C/C++/Fortran code. 
+
+Currently we have the following TPLs wrapped up nice and purdy:
 
 - GTest_ -- Google's C++ unit testing system
 - BoostFilesystem_ -- Cross-platform file system queries
 - Fmt_ -- amazing sprintf, printf replacement
 - GFlags_ -- command line flags parsing
 - Spdlog_ -- fast, versatile logging 
+
+Downloads
+---------
+
+[`latest stable <https://github.com/wawiesel/BootsOnTheGround/archive/master.zip>`_]
+[`last release v0.1-alpha <https://github.com/wawiesel/BootsOnTheGround/archive/v0.1-alpha.zip>`_]
+
+See `Repository Structure`_ for details.
+
 
 Principles
 ----------
@@ -80,6 +91,19 @@ The Future
 - Currently there is no support for versioning TPLs, i.e. requesting a particular
   version. There is in Hunter_ but not in TriBITS_. We need to enable this.
 - Complete RST documentation of the BOTG functions and the framework itself.
+
+.. _repo_structure:
+
+Repository Structure
+--------------------
+
+This repository uses 
+`Gitflow <https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow/>`_,
+i.e.
+  
+#. Development is on ``Feature/X`` branches of ``develop``, which can be unstable.
+#. The ``master`` branch is the most current **stable** version.
+#. Tags off the ``master`` branch are releases ``master``.
 
 Tricky Details
 --------------
