@@ -1,6 +1,9 @@
 This is BootsOnTheGround [BOTG_]!
 =================================
 
+.. image:: https://travis-ci.org/wawiesel/BootsOnTheGround.svg?branch=master
+    :target: https://travis-ci.org/wawiesel/BootsOnTheGround
+    
 BOTG_ provides a set of FindTPL*.cmake files to find and link Third Party
 Libraries (TPLs) to other packages using the CMake / TriBITS_ framework
 for C/C++/Fortran code.
