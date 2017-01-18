@@ -6,16 +6,28 @@ This is BootsOnTheGround [BOTG_]!
     
 BOTG_ provides a set of FindTPL*.cmake files to find and link Third Party
 Libraries (TPLs) to other packages using the CMake / TriBITS_ framework
-for C/C++/Fortran code.
+for C/C++/Fortran code. 
 
-Currently it provides TPLs for
+Currently we have the following TPLs wrapped up nice and purdy:
 
 - GTest_ -- Google's C++ unit testing system
 - BoostFilesystem_ -- Cross-platform file system queries
-- Fmt_ -- text formatting
+- Fmt_ -- amazing sprintf, printf replacement
+- GFlags_ -- command line flags parsing
+- Spdlog_ -- fast, versatile logging 
+
+Downloads
+---------
+
+[`latest stable <https://github.com/wawiesel/BootsOnTheGround/archive/master.zip>`_]
+[`last release v0.1-alpha <https://github.com/wawiesel/BootsOnTheGround/archive/v0.1-alpha.zip>`_]
+
+See `Repository Structure`_ for details.
+
 
 Principles
 ----------
+
 - All TPLs must be linkable with ``mkdir build && cd build && cmake ..`` on 
   - Windows, Mac, and Linux operating systems with 
   - Intel, GNU, and Clang compilers
@@ -31,6 +43,7 @@ Principles
   
 Connection to TriBITS
 ---------------------
+
 TriBITS_ does all the heavy lifting of package dependency management, 
 however, it has some limitations in dealing with TPLs. One TPL cannot
 be dependent on another TPL, and TPLs cannot have versions. The idea
@@ -65,12 +78,32 @@ cannot find!
 
 Connection to Hunter
 --------------------
+
 BOTG_ should find local libraries on your machine that meet the version 
 requirements. However, when it does not, BOTG uses Hunter_, a CMake-based 
 package manager. We looked at using `spack<https://spack.io/>`_ but it is
 not clear if they will ever have Windows support.
 
 -----------------------------------------------------------------------------
+
+The Future
+----------
+- Currently there is no support for versioning TPLs, i.e. requesting a particular
+  version. There is in Hunter_ but not in TriBITS_. We need to enable this.
+- Complete RST documentation of the BOTG functions and the framework itself.
+
+.. _repo_structure:
+
+Repository Structure
+--------------------
+
+This repository uses 
+`Gitflow <https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow/>`_,
+i.e.
+  
+#. Development is on ``Feature/X`` branches of ``develop``, which can be unstable.
+#. The ``master`` branch is the most current **stable** version.
+#. Tags off the ``master`` branch are releases ``master``.
 
 Tricky Details
 --------------
@@ -87,9 +120,11 @@ followed the steps on `Cees-Jan Kiewiet's Blog Post
 <https://blog.wyrihaximus.net/2015/09/github-auth-token-on-travis/>`_.
 
 .. _Hunter: http://github.com/ruslo/hunter
-.. _TriBITS: https://tribits.org/
+.. _TriBITS: https://tribits.org
 .. _BOTG: http://github.com/wawiesel/BootsOnTheGround
 .. _GTest: http://github.com/google/googletest
+.. _GFlags: https://gflags.github.io/gflags
 .. _BoostFilesystem: http://www.boost.org/doc/libs/1_63_0/libs/filesystem/doc/reference.html
 .. _Fmt: http://fmtlib.net/latest/index.html
-.. _CASL: http://www.casl.gov/
+.. _Spdlog: https://github.com/gabime/spdlog/wiki/1.-QuickStart
+.. _CASL: http://www.casl.gov
