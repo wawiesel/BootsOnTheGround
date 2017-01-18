@@ -3,18 +3,19 @@ This is BootsOnTheGround [BOTG_]!
 
 .. image:: https://travis-ci.org/wawiesel/BootsOnTheGround.svg?branch=master
     :target: https://travis-ci.org/wawiesel/BootsOnTheGround
-    
+
 BOTG_ provides a set of FindTPL*.cmake files to find and link Third Party
 Libraries (TPLs) to other packages using the CMake / TriBITS_ framework
-for C/C++/Fortran code. 
+for C/C++/Fortran code.
 
 Currently we have the following TPLs wrapped up nice and purdy:
 
-- GTest_ -- Google's C++ unit testing system
-- BoostFilesystem_ -- Cross-platform file system queries
-- Fmt_ -- amazing sprintf, printf replacement
-- GFlags_ -- command line flags parsing
-- Spdlog_ -- fast, versatile logging 
+- GTest_ -- Google's unit testing system [C++]
+- BoostFilesystem_ -- Cross-platform file system queries [C++]
+- Fmt_ -- amazing sprintf, printf replacement [C++]
+- GFlags_ -- command line flags parsing [C++]
+- Spdlog_ -- fast, versatile logging [C++]
+- NLJson_ -- NLohmann's JSON as a first-class citizen [C++]
 
 Downloads
 ---------
@@ -28,30 +29,30 @@ See `Repository Structure`_ for details.
 Principles
 ----------
 
-- All TPLs must be linkable with ``mkdir build && cd build && cmake ..`` on 
-  - Windows, Mac, and Linux operating systems with 
+- All TPLs must be linkable with ``mkdir build && cd build && cmake ..`` on
+  - Windows, Mac, and Linux operating systems with
   - Intel, GNU, and Clang compilers
   and perform correctly. This implies that we need a way to download and install
   packages (we use Hunter_).
-- All TPLS must have permissible, 
-  `non-copyleft licenses <http://fosslawyers.org/permissive-foss-licenses-bsd-apache-mit>`_. 
-  We need these TPLs in our open source TriBITS_ projects, but also in special, 
+- All TPLS must have permissible,
+  `non-copyleft licenses <http://fosslawyers.org/permissive-foss-licenses-bsd-apache-mit>`_.
+  We need these TPLs in our open source TriBITS_ projects, but also in special,
   export-controlled nuclear reactor simulations like CASL_.
 - All TPLs should use `semantic versioning <http://semver.org>`_ with the ability
   to link to a particular version, either ``MAJOR.MINOR`` or ``MAJOR`` (in which case
   the latest ``MINOR`` is chosen).
-  
+
 Connection to TriBITS
 ---------------------
 
-TriBITS_ does all the heavy lifting of package dependency management, 
+TriBITS_ does all the heavy lifting of package dependency management,
 however, it has some limitations in dealing with TPLs. One TPL cannot
 be dependent on another TPL, and TPLs cannot have versions. The idea
 is that we wrap each TPL in a TriBITS *package*, which does provide
-this capability.  
+this capability.
 
 Say you needed TPL ``CURL`` for your library and ``GTest`` for testing.
-``CURL`` requires ``OpenSSL`` and ``ZLib``. In every TriBITS 
+``CURL`` requires ``OpenSSL`` and ``ZLib``. In every TriBITS
 cmake/Dependencies.cmake file, you would need to specify:
 
 .. code-block:: cmake
@@ -61,7 +62,7 @@ cmake/Dependencies.cmake file, you would need to specify:
     SET(LIB_REQUIRED_DEP_TPLS CURL OpenSSL ZLib)
     SET(TEST_REQUIRED_DEP_TPLS GTest)
 
-With BOTG_, you can use instead a *package* dependency 
+With BOTG_, you can use instead a *package* dependency
 called ``BootsOnTheGround_CURL`` and it will handle linking
 in dependent TPLs automatically.
 
@@ -73,14 +74,14 @@ in dependent TPLs automatically.
     SET(TEST_REQUIRED_DEP_TPLS)
 
 Note, the other magic gained by using ``BootsOnTheGround_CURL`` is
-that Hunter_ is used to download, build, and install any TPLs it 
+that Hunter_ is used to download, build, and install any TPLs it
 cannot find!
 
 Connection to Hunter
 --------------------
 
-BOTG_ should find local libraries on your machine that meet the version 
-requirements. However, when it does not, BOTG uses Hunter_, a CMake-based 
+BOTG_ should find local libraries on your machine that meet the version
+requirements. However, when it does not, BOTG uses Hunter_, a CMake-based
 package manager. We looked at using `spack<https://spack.io/>`_ but it is
 not clear if they will ever have Windows support.
 
@@ -97,10 +98,10 @@ The Future
 Repository Structure
 --------------------
 
-This repository uses 
+This repository uses
 `Gitflow <https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow/>`_,
 i.e.
-  
+
 #. Development is on ``Feature/X`` branches of ``develop``, which can be unstable.
 #. The ``master`` branch is the most current **stable** version.
 #. Tags off the ``master`` branch are releases ``master``.
@@ -127,4 +128,5 @@ followed the steps on `Cees-Jan Kiewiet's Blog Post
 .. _BoostFilesystem: http://www.boost.org/doc/libs/1_63_0/libs/filesystem/doc/reference.html
 .. _Fmt: http://fmtlib.net/latest/index.html
 .. _Spdlog: https://github.com/gabime/spdlog/wiki/1.-QuickStart
+.. _NLJson: https://github.com/nlohmann/json#examples
 .. _CASL: http://www.casl.gov
