@@ -5,6 +5,7 @@ SET( SUBPACKAGES_DIRS_CLASSIFICATIONS_OPTREQS
     _Spdlog           TPLs/Spdlog           PT OPTIONAL
     _GFlags           TPLs/GFlags           PT OPTIONAL
     _Fmt              TPLs/Fmt              PT OPTIONAL
+    _NLJson           TPLs/NLJson           PT OPTIONAL
 )
 
 SET(LIB_REQUIRED_DEP_PACKAGES)

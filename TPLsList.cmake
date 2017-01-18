@@ -4,4 +4,5 @@ TRIBITS_REPOSITORY_DEFINE_TPLS(
     Spdlog            TPLs/Spdlog/FindTPLSpdlog.cmake                         PT
     GFlags            TPLs/GFlags/FindTPLGFlags.cmake                         PT
     Fmt               TPLs/Fmt/FindTPLFmt.cmake                               PT
+    NLJson            TPLs/NLJson/FindTPLNLJson.cmake                         PT
 )
