@@ -3,6 +3,7 @@ SET( SUBPACKAGES_DIRS_CLASSIFICATIONS_OPTREQS
     _GTest            TPLs/GTest            PT OPTIONAL
     _BoostFilesystem  TPLs/Boost/Filesystem PT OPTIONAL
     _GFlags           TPLs/GFlags           PT OPTIONAL
+    _Fmt              TPLs/Fmt              PT OPTIONAL
 )
 
 SET(LIB_REQUIRED_DEP_PACKAGES)

@@ -4,7 +4,9 @@
 # http://lint.travis-ci.org/
 
 sudo: required
+
 dist: trusty
+
 language: cpp
 
 os:
@@ -32,15 +34,18 @@ addons:
             #    - valgrind
 
 before_install:
-    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
-    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install gcc; export CXX=clang++ CC=clang FC=gfortran; fi
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+          export FC="gfortran-4.9";
+          if [[ "$CXX" == "g++" ]]; then
+              export CXX="g++-4.9";
+              export CC="gcc-4.9";
+          fi;
+      elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+          brew update && brew install gcc && export FC="gfortran";
+      fi
 
 install:
     - echo ${PATH}
-    # /usr/bin/gcc is 4.6 always, but gcc-X.Y is available.
-    - if [ "$CXX" = "g++" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then export CXX="g++-4.9" CC="gcc-4.9" FC="gfortran-4.9"; fi
-    # /usr/bin/clang is 3.4, lets override with modern one.
-    - if [ "$CXX" = "clang++" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then export CXX="clang++-3.7" CC="clang-3.7" FC="gfortran-4.9"; fi
     - echo ${CC}
     - echo ${CXX}
     - echo ${FC}
@@ -58,3 +63,5 @@ script:
     - cmake ..
     - cmake --build .
     - ctest
+
+cache: ccache

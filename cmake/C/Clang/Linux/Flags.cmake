@@ -1,0 +1,1 @@
+BOTG_AddCompilerFlags( C "" )

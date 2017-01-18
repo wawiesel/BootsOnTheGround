@@ -8,6 +8,7 @@ for C/C++/Fortran code.
 Currently it provides TPLs for
 - GTest_ -- Google's C++ unit testing system
 - BoostFilesystem_ -- Cross-platform file system queries
+- Fmt_ -- text formatting
 
 Principles
 ----------
@@ -86,4 +87,5 @@ followed the steps on `Cees-Jan Kiewiet's Blog Post
 .. _BOTG: http://github.com/wawiesel/BootsOnTheGround
 .. _GTest: http://github.com/google/googletest
 .. _BoostFilesystem: http://www.boost.org/doc/libs/1_63_0/libs/filesystem/doc/reference.html
+.. _Fmt: http://fmtlib.net/latest/index.html
 .. _CASL: http://www.casl.gov/
