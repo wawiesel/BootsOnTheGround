@@ -11,11 +11,13 @@ language: cpp
 
 os:
     - linux
-    - osx
 
 compiler:
     - gcc
     - clang
+
+matrix:
+  fast_finish: true
 
 addons:
     apt:
