@@ -19,10 +19,14 @@ Currently we have the following TPLs wrapped up nice and purdy:
 Downloads
 ---------
 
-[`latest stable <https://github.com/wawiesel/BootsOnTheGround/archive/master.zip>`_]
-[`last release v0.1-alpha <https://github.com/wawiesel/BootsOnTheGround/archive/v0.1-alpha.zip>`_]
+Below are some links to  and unzip one of the following sources directly to your
+TriBITS_ repository, perhaps to ``external/BootsOnTheGround``, we **strongly 
+encourage** using GIT subtrees instead, linking directly to a particular version tag or the master
+branch of the repo. 
 
-See `Repository Structure`_ for details.
+[`latest unstable (develop) <https://github.com/wawiesel/BootsOnTheGround/archive/develop.zip>`_]
+[`latest stable (master) <https://github.com/wawiesel/BootsOnTheGround/archive/master.zip>`_]
+[`latest release (v0.1-alpha) <https://github.com/wawiesel/BootsOnTheGround/archive/v0.1-alpha.zip>`_]
 
 
 Principles
