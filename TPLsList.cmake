@@ -6,4 +6,5 @@ TRIBITS_REPOSITORY_DEFINE_TPLS(
     Fmt               TPLs/Fmt/FindTPLFmt.cmake                               PT
     NLJson            TPLs/NLJson/FindTPLNLJson.cmake                         PT
     ZLib              TPLs/ZLib/FindTPLZLib.cmake                             PT
+    SZip              TPLs/SZip/FindTPLSZip.cmake                             PT
 )
