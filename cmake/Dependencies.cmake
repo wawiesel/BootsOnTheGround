@@ -6,6 +6,7 @@ SET( SUBPACKAGES_DIRS_CLASSIFICATIONS_OPTREQS
     _Fmt              TPLs/Fmt              PT OPTIONAL
     _NLJson           TPLs/NLJson           PT OPTIONAL
     _OpenSSL          TPLs/OpenSSL          PT OPTIONAL
+    _CUrl             TPLs/CUrl             PT OPTIONAL
 )
 
 SET(LIB_REQUIRED_DEP_PACKAGES)
