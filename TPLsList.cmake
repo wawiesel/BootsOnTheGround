@@ -5,6 +5,7 @@ BOTG_DefineTPLs(
     GFlags
     Fmt
     NLJson
+    OpenSSL
     ZLib
     SZip
 )

@@ -25,9 +25,15 @@ TriBITS_ repository, perhaps to ``external/BootsOnTheGround``, we **strongly
 encourage** using GIT subtrees instead, linking directly to a particular version tag or the master
 branch of the repo.
 
-[`latest unstable (develop) <https://github.com/wawiesel/BootsOnTheGround/archive/develop.zip>`_]
-[`latest stable (master) <https://github.com/wawiesel/BootsOnTheGround/archive/master.zip>`_]
-[`latest release (v0.1-alpha) <https://github.com/wawiesel/BootsOnTheGround/archive/v0.1-alpha.zip>`_]
+**Latest Versions**
+
+[`unstable (develop) <https://github.com/wawiesel/BootsOnTheGround/archive/develop.zip>`_]
+[`stable (master) <https://github.com/wawiesel/BootsOnTheGround/archive/master.zip>`_]
+[`release (v0.1-beta) <https://github.com/wawiesel/BootsOnTheGround/archive/v0.1-beta.zip>`_]
+
+**Previous Versions**
+
+[`release (v0.1-alpha) <https://github.com/wawiesel/BootsOnTheGround/archive/v0.1-alpha.zip>`_]
 
 
 Principles
