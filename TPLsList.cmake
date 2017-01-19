@@ -5,4 +5,5 @@ TRIBITS_REPOSITORY_DEFINE_TPLS(
     GFlags            TPLs/GFlags/FindTPLGFlags.cmake                         PT
     Fmt               TPLs/Fmt/FindTPLFmt.cmake                               PT
     NLJson            TPLs/NLJson/FindTPLNLJson.cmake                         PT
+    OpenSSL           TPLs/OpenSSL/FindTPLOpenSSL.cmake                       PT
 )
