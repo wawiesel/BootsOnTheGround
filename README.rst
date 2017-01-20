@@ -149,5 +149,7 @@ followed the steps on `Cees-Jan Kiewiet's Blog Post
 .. _BoostFilesystem: http://www.boost.org/doc/libs/1_63_0/libs/filesystem/doc/reference.html
 .. _Fmt: http://fmtlib.net/latest/index.html
 .. _Spdlog: https://github.com/gabime/spdlog/wiki/1.-QuickStart
+:: _SZip: http://www.compressconsult.com/szip
+:: _ZLib: http://www.zlib.net/
 .. _NLJson: https://github.com/nlohmann/json#examples
 .. _CASL: http://www.casl.gov
