@@ -50,6 +50,10 @@ FUNCTION( BOTG_HuntTPL tribits_name headers libs hunter_name hunter_args )
 
     SET(${tribits_name}_FORCE_HUNTER OFF
       CACHE BOOL "Force hunter download of TPL ${tribits_name}.")
+    
+    #This is necessary to avoid TriBITs thinking we have found libraries when all we have set is
+    #the library names. (First noticed with HDF5 on ORNL's Jupiter Linux cluster)
+    SET(${tribits_name}_FORCE_PRE_FIND_PACKAGE ON)
 
     #This is necessary to avoid TriBITs thinking we have found libraries when all we have set is
     #the library names. (First noticed with HDF5 on ORNL's Jupiter Linux cluster)
@@ -58,7 +62,7 @@ FUNCTION( BOTG_HuntTPL tribits_name headers libs hunter_name hunter_args )
     TRIBITS_TPL_ALLOW_PRE_FIND_PACKAGE( ${tribits_name}  ${tribits_name}_ALLOW_PREFIND)
 
     MESSAGE( STATUS "[BootsOnTheGround] ${tribits_name}_ALLOW_PREFIND=${${tribits_name}_ALLOW_PREFIND}" )
-
+    
     IF( ${tribits_name}_ALLOW_PREFIND OR ${tribits_name}_FORCE_HUNTER )
 
       #vanilla find

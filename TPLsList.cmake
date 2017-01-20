@@ -8,6 +8,7 @@ BOTG_DefineTPLs(
     OpenSSL
     ZLib
     SZip
+    HDF5
 )
 
 
