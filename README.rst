@@ -10,12 +10,17 @@ for C/C++/Fortran code.
 
 Currently we have the following TPLs wrapped up nice and purdy:
 
-- GTest_ -- Google's unit testing system [C++]
 - BoostFilesystem_ -- Cross-platform file system queries [C++]
+- CUrl_ -- push and pull across the web [C++]
 - Fmt_ -- amazing sprintf, printf replacement [C++]
 - GFlags_ -- command line flags parsing [C++]
-- Spdlog_ -- fast, versatile logging [C++]
+- GTest_ -- Google's unit testing system [C++]
+- HDF5_ -- hierarchical binary data containers [C++]
 - NLJson_ -- NLohmann's JSON as a first-class citizen [C++]
+- OpenSSL_ -- hash for security [C++[
+- SZip -- scientific zip algorithm [C++]
+- Spdlog_ -- fast, versatile logging [C++]
+- ZLib -- compession/decompression algorithm [C++]
 
 Downloads
 ---------
@@ -29,10 +34,10 @@ branch of the repo.
 
 [`unstable (develop) <https://github.com/wawiesel/BootsOnTheGround/archive/develop.zip>`_]
 [`stable (master) <https://github.com/wawiesel/BootsOnTheGround/archive/master.zip>`_]
-[`release (v0.1-beta) <https://github.com/wawiesel/BootsOnTheGround/archive/v0.1-beta.zip>`_]
+[`release (v0.1) <https://github.com/wawiesel/BootsOnTheGround/archive/v0.1.zip>`_]
 
 **Previous Versions**
-
+[`release (v0.1-beta) <https://github.com/wawiesel/BootsOnTheGround/archive/v0.1-beta.zip>`_]
 [`release (v0.1-alpha) <https://github.com/wawiesel/BootsOnTheGround/archive/v0.1-alpha.zip>`_]
 
 
