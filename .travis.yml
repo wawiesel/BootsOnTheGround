@@ -11,11 +11,13 @@ language: cpp
 
 os:
     - linux
-    - osx
 
 compiler:
     - gcc
     - clang
+
+matrix:
+  fast_finish: true
 
 addons:
     apt:
@@ -60,9 +62,9 @@ before_script:
 script:
     - mkdir build
     - cd build
-    - cmake ..
+      #limits screen output
+    - cmake .. 2>stderr.log >stdout.log
     - cmake --build .
     - ctest
-
 # enable cache
 #cache: ccache
