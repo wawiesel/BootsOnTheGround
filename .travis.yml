@@ -62,7 +62,7 @@ script:
     - cd build
       #limits screen output
     - cmake .. 2>stderr.log | grep BootsOnTheGround
-    - cmake --build .
+    - make VERBOSE=1
     - ctest
 # enable cache
 #cache: ccache
