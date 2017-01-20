@@ -62,8 +62,8 @@ before_script:
 script:
     - mkdir build
     - cd build
-    #limits compilation information
-    - cmake -DHUNTER_STATUS_PRINT:BOOL=OFF ..
+      #limits screen output
+    - cmake .. 2>stderr.log
     - cmake --build .
     - ctest
 # enable cache
