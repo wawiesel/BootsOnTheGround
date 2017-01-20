@@ -153,3 +153,5 @@ followed the steps on `Cees-Jan Kiewiet's Blog Post
 .. _ZLib: http://www.zlib.net/
 .. _NLJson: https://github.com/nlohmann/json#examples
 .. _CASL: http://www.casl.gov
+.. _OpenSSL: https://www.openssl.org/
+
