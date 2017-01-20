@@ -9,6 +9,7 @@ BOTG_DefineTPLs(
     ZLib
     SZip
     HDF5
+    CUrl
 )
 
 
