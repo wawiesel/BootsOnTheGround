@@ -37,6 +37,7 @@ branch of the repo.
 [`release (v0.1) <https://github.com/wawiesel/BootsOnTheGround/archive/v0.1.zip>`_]
 
 **Previous Versions**
+
 [`release (v0.1-beta) <https://github.com/wawiesel/BootsOnTheGround/archive/v0.1-beta.zip>`_]
 [`release (v0.1-alpha) <https://github.com/wawiesel/BootsOnTheGround/archive/v0.1-alpha.zip>`_]
 
