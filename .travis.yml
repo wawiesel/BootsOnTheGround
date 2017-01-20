@@ -63,7 +63,7 @@ script:
     - mkdir build
     - cd build
       #limits screen output
-    - cmake .. 2>stderr.log >stdout.log
+    - cmake .. 2>stderr.log | grep BootsOnTheGround
     - cmake --build .
     - ctest
 # enable cache
