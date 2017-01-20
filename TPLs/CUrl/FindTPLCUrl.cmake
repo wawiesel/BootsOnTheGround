@@ -11,7 +11,7 @@ SET(libs
     ldap
     dl
 )
-SET(hunter_name CUrl)
+SET(hunter_name CURL)
 SET(hunter_args )
 
 BOTG_HuntTPL(
