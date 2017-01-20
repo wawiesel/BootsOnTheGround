@@ -51,6 +51,10 @@ FUNCTION( BOTG_HuntTPL tribits_name headers libs hunter_name hunter_args )
     SET(${tribits_name}_FORCE_HUNTER OFF
       CACHE BOOL "Force hunter download of TPL ${tribits_name}.")
 
+    #This is necessary to avoid TriBITs thinking we have found libraries when all we have set is
+    #the library names. (First noticed with HDF5 on ORNL's Jupiter Linux cluster)
+    SET(${tribits_name}_FORCE_PRE_FIND_PACKAGE ON)
+
     TRIBITS_TPL_ALLOW_PRE_FIND_PACKAGE( ${tribits_name}  ${tribits_name}_ALLOW_PREFIND)
 
     MESSAGE( STATUS "[BootsOnTheGround] ${tribits_name}_ALLOW_PREFIND=${${tribits_name}_ALLOW_PREFIND}" )
@@ -61,6 +65,13 @@ FUNCTION( BOTG_HuntTPL tribits_name headers libs hunter_name hunter_args )
       IF( NOT ${tribits_name}_FORCE_HUNTER )
           MESSAGE( STATUS "[BootsOnTheGround] Calling FIND_PACKAGE(${tribits_name} CONFIG) ...")
           FIND_PACKAGE( ${tribits_name} CONFIG QUIET )
+          #says it found it but it didn't populate any variables we need
+          IF( ${tribits_name}_FOUND )
+	      IF( "${${tribits_name}_LIBRARY_DIRS}" STREQUAL "" AND
+                  "${${tribits_name}_INCLUDE_DIRS}" STREQUAL "" )
+                  SET( ${tribits_name}_FOUND OFF )
+              ENDIF()
+          ENDIF()
           MESSAGE( STATUS "[BootsOnTheGround] Calling FIND_PACKAGE(${tribits_name} CONFIG) ... ${tribits_name}_FOUND=${${tribits_name}_FOUND}")
       ENDIF()
 
@@ -278,10 +289,11 @@ MACRO (BOTG_CheckCompilerFlagFortran _flag _result)
 ENDMACRO()
 
 MACRO( BOTG_DefineTPLs )
-    GLOBAL_SET(BOTG_TPL_LIST ${ARGV} INTERNAL STRING )
+    GLOBAL_SET( BOTG_TPL_LIST ${ARGV} )
     SET(tpl_def )
-    FOREACH( tpl ${ARGV} )
-        LIST(APPEND tpl_def ${tpl} "TPLs/${tpl}/FindTPL${tpl}.cmake" PT )
+    FOREACH( tpl_loc ${ARGV} )
+        STRING(REPLACE "/" "" tpl_name ${tpl_loc})
+        LIST(APPEND tpl_def ${tpl_name} "TPLs/${tpl_loc}/FindTPL${tpl_name}.cmake" PT )
     ENDFOREACH()
     TRIBITS_REPOSITORY_DEFINE_TPLS( ${tpl_def} )
 ENDMACRO()
@@ -300,9 +312,10 @@ MACRO( BOTG_DefineTPLSubPackages )
     SET(TEST_OPTIONAL_DEP_TPLS)
 
     # setup up the subpackages list
-    FOREACH( tpl ${BOTG_TPL_LIST} )
+    FOREACH( tpl_loc ${BOTG_TPL_LIST} )
+        STRING(REPLACE "/" "" tpl_name ${tpl_loc})
         LIST(APPEND SUBPACKAGES_DIRS_CLASSIFICATIONS_OPTREQS
-             "_${tpl}" TPLs/${tpl} PT OPTIONAL )
+             "_${tpl_name}" TPLs/${tpl_loc} PT OPTIONAL )
     ENDFOREACH()
 
 ENDMACRO()

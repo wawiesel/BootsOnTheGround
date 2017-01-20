@@ -62,9 +62,9 @@ before_script:
 script:
     - mkdir build
     - cd build
-    - cmake ..
+    #limits compilation information
+    - cmake -DHUNTER_STATUS_PRINT:BOOL=OFF ..
     - cmake --build .
     - ctest
-
 # enable cache
 #cache: ccache

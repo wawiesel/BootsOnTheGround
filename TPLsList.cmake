@@ -1,6 +1,6 @@
 BOTG_DefineTPLs(
     GTest
-    BoostFilesystem
+    Boost/Filesystem
     Spdlog
     GFlags
     Fmt
