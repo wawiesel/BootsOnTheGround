@@ -50,7 +50,7 @@ FUNCTION( BOTG_HuntTPL tribits_name headers libs hunter_name hunter_args )
 
     SET(${tribits_name}_FORCE_HUNTER OFF
       CACHE BOOL "Force hunter download of TPL ${tribits_name}.")
-    
+
     #This is necessary to avoid TriBITs thinking we have found libraries when all we have set is
     #the library names. (First noticed with HDF5 on ORNL's Jupiter Linux cluster)
     SET(${tribits_name}_FORCE_PRE_FIND_PACKAGE ON)
@@ -62,7 +62,7 @@ FUNCTION( BOTG_HuntTPL tribits_name headers libs hunter_name hunter_args )
     TRIBITS_TPL_ALLOW_PRE_FIND_PACKAGE( ${tribits_name}  ${tribits_name}_ALLOW_PREFIND)
 
     MESSAGE( STATUS "[BootsOnTheGround] ${tribits_name}_ALLOW_PREFIND=${${tribits_name}_ALLOW_PREFIND}" )
-    
+
     IF( ${tribits_name}_ALLOW_PREFIND OR ${tribits_name}_FORCE_HUNTER )
 
       #vanilla find
@@ -195,8 +195,12 @@ ENDFUNCTION()
 
 # Used inside the Flags.cmake files for convenience.
 FUNCTION( BOTG_AddCompilerFlags lang flags )
-    MESSAGE(STATUS "[BootsOnTheGround] adding flags='${flags}' for lang='${lang}'")
-    SET(CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS} ${flags}" CACHE BOOL "Compiler flags for lang='${lang}'" FORCE)
+    STRING(FIND "${CMAKE_${lang}_FLAGS}" "${flags}" position)
+    MESSAGE("STRING(FIND '${CMAKE_${lang}_FLAGS}' '${flags}' ${position})")
+    IF( ${position} LESS 0 )
+        MESSAGE(STATUS "[BootsOnTheGround] adding flags='${flags}' for lang='${lang}'")
+        SET(CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS} ${flags}" CACHE BOOL "Compiler flags for lang='${lang}'" FORCE)
+    ENDIF()
 ENDFUNCTION()
 
 
