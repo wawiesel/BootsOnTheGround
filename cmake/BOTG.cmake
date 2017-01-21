@@ -125,6 +125,7 @@ FUNCTION( BOTG_HuntTPL tribits_name headers libs hunter_name hunter_args )
 ENDFUNCTION()
 
 MACRO( BOTG_InitializeTriBITS TriBITS_dir )
+    MESSAGE( STATUS "[BootsOnTheGround] initializing TriBITS ..." )
 
     # Turn off some things here.
     SET(TPL_ENABLE_MPI OFF CACHE BOOL "Turn off MPI by default.")
@@ -152,20 +153,21 @@ FUNCTION(BOTG_PreventInSourceBuilds)
   ENDIF()
 ENDFUNCTION()
 
-# Main BootsOnTheGround setup macro.
-MACRO( BOTG_Setup )
+FUNCTION( BOTG_FixupCompilerNames compiler )
 
-    # Process default flags for each language.
-    BOTG_ProcessDefaultFlags( C )
-    BOTG_ProcessDefaultFlags( CXX )
-    BOTG_ProcessDefaultFlags( Fortran )
+    # Fix up compiler names
+    IF( compiler STREQUAL "AppleClang" )
+        SET( compiler "Clang" PARENT_SCOPE )
+    ENDIF()
 
-ENDMACRO()
+ENDFUNCTION()
 
 # Processes all the default flags for a single language.
 FUNCTION( BOTG_ProcessDefaultFlags lang )
+
     # This is the compiler name.
     SET( compiler "${CMAKE_${lang}_COMPILER_ID}")
+    BOTG_FixUpCompilerNames( compiler )
 
     # This is a prefix for the files.
     SET( pre "cmake/${lang}/${compiler}" )
@@ -196,7 +198,6 @@ ENDFUNCTION()
 # Used inside the Flags.cmake files for convenience.
 FUNCTION( BOTG_AddCompilerFlags lang flags )
     STRING(FIND "${CMAKE_${lang}_FLAGS}" "${flags}" position)
-    MESSAGE("STRING(FIND '${CMAKE_${lang}_FLAGS}' '${flags}' ${position})")
     IF( ${position} LESS 0 )
         MESSAGE(STATUS "[BootsOnTheGround] adding flags='${flags}' for lang='${lang}'")
         SET(CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS} ${flags}" CACHE BOOL "Compiler flags for lang='${lang}'" FORCE)
@@ -301,7 +302,7 @@ MACRO( BOTG_DefineTPLs )
     SET(tpl_def )
     FOREACH( tpl_loc ${ARGV} )
         STRING(REPLACE "/" "" tpl_name ${tpl_loc})
-        LIST(APPEND tpl_def ${tpl_name} "TPLs/${tpl_loc}/FindTPL${tpl_name}.cmake" PT )
+        LIST(APPEND tpl_def ${tpl_name} "${CMAKE_CURRENT_LIST_DIR}/TPLs/${tpl_loc}/FindTPL${tpl_name}.cmake" TT )
     ENDFOREACH()
     TRIBITS_REPOSITORY_DEFINE_TPLS( ${tpl_def} )
 ENDMACRO()
@@ -323,7 +324,63 @@ MACRO( BOTG_DefineTPLSubPackages )
     FOREACH( tpl_loc ${BOTG_TPL_LIST} )
         STRING(REPLACE "/" "" tpl_name ${tpl_loc})
         LIST(APPEND SUBPACKAGES_DIRS_CLASSIFICATIONS_OPTREQS
-             "_${tpl_name}" TPLs/${tpl_loc} PT OPTIONAL )
+             "_${tpl_name}" TPLs/${tpl_loc} ST OPTIONAL )
     ENDFOREACH()
+
+ENDMACRO()
+
+MACRO( BOTG_InitializeProject project_root_dir )
+
+    MESSAGE( STATUS "[BootsOnTheGround] initializing project with root directory=${project_root_dir} ...")
+
+    # Clear the cache unless provided -D KEEP_CACHE:BOOL=ON.
+    BOTG_ClearCMakeCache("${KEEP_CACHE}")
+
+    # Enable the hunter gate for downloading/installing TPLs!
+    PROJECT("" NONE) #hack to make HunterGate happy
+    INCLUDE( "${BOTG_SOURCE_DIR}/cmake/HunterGate.cmake" )
+
+    # Declare **project**.
+    INCLUDE( "${project_root_dir}/ProjectName.cmake" )
+    MESSAGE( STATUS "[BootsOnTheGround] declared PROJECT_NAME=${PROJECT_NAME} ...")
+    PROJECT( ${PROJECT_NAME} C CXX Fortran )
+
+    # Cannot use TriBITS commands until after this statement!
+    BOTG_InitializeTriBITS( "${BOTG_SOURCE_DIR}/external/TriBITS/tribits" )
+
+    # Just good practice.
+    BOTG_PreventInSourceBuilds()
+    SET(${PROJECT_NAME}_ENABLE_TESTS ON CACHE BOOL "Enable all tests by default.")
+
+    # Enable all secondary tested code by default.
+    GLOBAL_SET( ${PROJECT_NAME}_ENABLE_SECONDARY_TESTED_CODE ON )
+
+    # Process default flags for each language.
+    BOTG_ProcessDefaultFlags( C )
+    BOTG_ProcessDefaultFlags( CXX )
+    BOTG_ProcessDefaultFlags( Fortran )
+
+    # TriBITS processing callback.
+    TRIBITS_PROJECT_ENABLE_ALL()
+
+ENDMACRO()
+
+MACRO( BOTG_InitializeSuperPackage package_name )
+
+    MESSAGE( STATUS "[BootsOnTheGround] initializing super package=${package_name} ...")
+
+    TRIBITS_PACKAGE_DECL( ${package_name} )
+    TRIBITS_PROCESS_SUBPACKAGES()
+    TRIBITS_PACKAGE_DEF()
+    TRIBITS_PACKAGE_POSTPROCESS()
+
+    # Final print of all the variables for inspection.
+    # For example: -D MATCH_VARIABLE_REGEX:STRING="" will print everything.
+    #              -D MATCH_VARIABLE_REGEX:STRING="^BootsOnTheGround" will
+    #                 print all the BootsOnTheGround variables.
+    #
+    IF( DEFINED MATCH_VARIABLE_REGEX )
+        BOTG_PrintAllVariables("${MATCH_VARIABLE_REGEX}")
+    ENDIF()
 
 ENDMACRO()
