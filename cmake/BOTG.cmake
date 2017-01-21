@@ -329,7 +329,7 @@ MACRO( BOTG_DefineTPLSubPackages )
 
 ENDMACRO()
 
-MACRO( BOTG_InitializeProject project_root_dir )
+MACRO( BOTG_ConfigureProject project_root_dir )
 
     MESSAGE( STATUS "[BootsOnTheGround] initializing project with root directory=${project_root_dir} ...")
 
@@ -365,7 +365,7 @@ MACRO( BOTG_InitializeProject project_root_dir )
 
 ENDMACRO()
 
-MACRO( BOTG_InitializeSuperPackage package_name )
+MACRO( BOTG_ConfigureSuperPackage package_name )
 
     MESSAGE( STATUS "[BootsOnTheGround] initializing super package=${package_name} ...")
 
@@ -374,13 +374,13 @@ MACRO( BOTG_InitializeSuperPackage package_name )
     TRIBITS_PACKAGE_DEF()
     TRIBITS_PACKAGE_POSTPROCESS()
 
-    # Final print of all the variables for inspection.
-    # For example: -D MATCH_VARIABLE_REGEX:STRING="" will print everything.
-    #              -D MATCH_VARIABLE_REGEX:STRING="^BootsOnTheGround" will
-    #                 print all the BootsOnTheGround variables.
-    #
-    IF( DEFINED MATCH_VARIABLE_REGEX )
-        BOTG_PrintAllVariables("${MATCH_VARIABLE_REGEX}")
-    ENDIF()
+ENDMACRO()
+
+MACRO( BOTG_ConfigurePackage package_name )
+
+    MESSAGE( STATUS "[BootsOnTheGround] initializing simple package=${package_name} ...")
+
+    TRIBITS_PACKAGE( ${package_name} )
+    TRIBITS_PACKAGE_POSTPROCESS()
 
 ENDMACRO()

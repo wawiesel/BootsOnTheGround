@@ -7,12 +7,21 @@ INCLUDE( "${CMAKE_CURRENT_LIST_DIR}/cmake/BOTG_INCLUDE.cmake" )
 # We enter here if this is a being built as a standalone TriBITS **project**.
 IF( NOT TRIBITS_PROCESSING_PACKAGE )
 
-    BOTG_InitializeProject( "${CMAKE_CURRENT_LIST_DIR}" )
+    BOTG_ConfigureProject( "${CMAKE_CURRENT_LIST_DIR}" )
 
 # We enter here when we build this as a TriBITS **package**, including
-# when we come through a second pass during TRIBITS_PROJECT_ENABLE_ALL..
+# when we come through a second pass during TRIBITS_PROJECT_ENABLE_ALL.
 ELSE()
 
-    BOTG_InitializeSuperPackage( BootsOnTheGround )
+    BOTG_ConfigureSuperPackage( BootsOnTheGround )
+
+    # Final print of all the variables for inspection.
+    # For example: -D MATCH_VARIABLE_REGEX:STRING="" will print everything.
+    #              -D MATCH_VARIABLE_REGEX:STRING="^BootsOnTheGround" will
+    #                 print all the BootsOnTheGround variables.
+    #
+    IF( DEFINED MATCH_VARIABLE_REGEX )
+        BOTG_PrintAllVariables("${MATCH_VARIABLE_REGEX}")
+    ENDIF()
 
 ENDIF()
