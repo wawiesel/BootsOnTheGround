@@ -367,7 +367,7 @@ ENDMACRO()
 
 MACRO( BOTG_ConfigureSuperPackage package_name )
 
-    MESSAGE( STATUS "[BootsOnTheGround] initializing super package=${package_name} ...")
+    MESSAGE( STATUS "[BootsOnTheGround] configuring super package=${package_name} ...")
 
     TRIBITS_PACKAGE_DECL( ${package_name} )
     TRIBITS_PROCESS_SUBPACKAGES()
@@ -378,7 +378,7 @@ ENDMACRO()
 
 MACRO( BOTG_ConfigurePackage package_name )
 
-    MESSAGE( STATUS "[BootsOnTheGround] initializing simple package=${package_name} ...")
+    MESSAGE( STATUS "[BootsOnTheGround] configuring simple package=${package_name} ...")
 
     TRIBITS_PACKAGE( ${package_name} )
     TRIBITS_PACKAGE_POSTPROCESS()
