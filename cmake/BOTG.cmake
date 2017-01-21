@@ -352,8 +352,12 @@ MACRO( BOTG_ConfigureProject project_root_dir )
     BOTG_PreventInSourceBuilds()
     SET(${PROJECT_NAME}_ENABLE_TESTS ON CACHE BOOL "Enable all tests by default.")
 
-    # Enable all secondary tested code by default.
-    GLOBAL_SET( ${PROJECT_NAME}_ENABLE_SECONDARY_TESTED_CODE ON )
+    # Enable all secondary tested code only if building BootsOnTheGround.
+    SET( enable OFF )
+    IF( "${PROJECT_NAME}" STREQUAL BootsOnTheGround )
+        SET( enable ON )
+    ENDIF()
+    GLOBAL_SET( BootsOnTheGround_ENABLE_SECONDARY_TESTED_CODE ${enable} )
 
     # Process default flags for each language.
     BOTG_ProcessDefaultFlags( C )
@@ -376,11 +380,14 @@ MACRO( BOTG_ConfigureSuperPackage package_name )
 
 ENDMACRO()
 
-MACRO( BOTG_ConfigurePackage package_name )
+MACRO( BOTG_ConfigurePackage package_name src )
 
     MESSAGE( STATUS "[BootsOnTheGround] configuring simple package=${package_name} ...")
 
     TRIBITS_PACKAGE( ${package_name} )
+    IF( NOT src STREQUAL "" )
+        ADD_SUBDIRECTORY( ${src} )
+    ENDIF()
     TRIBITS_PACKAGE_POSTPROCESS()
 
 ENDMACRO()
