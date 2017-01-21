@@ -34,7 +34,7 @@ branch of the repo.
 
 [`unstable (develop) <https://github.com/wawiesel/BootsOnTheGround/archive/develop.zip>`_]
 [`stable (master) <https://github.com/wawiesel/BootsOnTheGround/archive/master.zip>`_]
-[`release (v0.1) <https://github.com/wawiesel/BootsOnTheGround/archive/v0.1.zip>`_]
+[`release (v0.1.0) <https://github.com/wawiesel/BootsOnTheGround/archive/v0.1.0.zip>`_]
 
 **Previous Versions**
 
@@ -102,13 +102,14 @@ not clear if they will ever have Windows support.
 
 -----------------------------------------------------------------------------
 
-The Future
-----------
-- Currently there is no support for versioning TPLs, i.e. requesting a particular
-  version. There is in Hunter_ but not in TriBITS_. We need to enable this.
+To Do
+-----
+- Enable version specification and process TPL version information. Should
+  be able to print a summary of the linked TPLs.
+- Enable windows testing.
 - Complete RST documentation of the BOTG functions and the framework itself.
-
-.. _repo_structure:
+- Add SuperLU.
+- Handle linking flags better for different compilers/operating systems.
 
 Repository Structure
 --------------------
