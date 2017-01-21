@@ -10,12 +10,17 @@ for C/C++/Fortran code.
 
 Currently we have the following TPLs wrapped up nice and purdy:
 
-- GTest_ -- Google's unit testing system [C++]
 - BoostFilesystem_ -- Cross-platform file system queries [C++]
+- CUrl_ -- push and pull across the web [C++]
 - Fmt_ -- amazing sprintf, printf replacement [C++]
 - GFlags_ -- command line flags parsing [C++]
-- Spdlog_ -- fast, versatile logging [C++]
+- GTest_ -- Google's unit testing system [C++]
+- HDF5_ -- hierarchical binary data containers [C++]
 - NLJson_ -- NLohmann's JSON as a first-class citizen [C++]
+- OpenSSL_ -- hash for security [C++]
+- SZip_ -- scientific zip algorithm [C++]
+- Spdlog_ -- fast, versatile logging [C++]
+- ZLib_ -- compession/decompression algorithm [C++]
 
 Downloads
 ---------
@@ -29,11 +34,11 @@ branch of the repo.
 
 [`unstable (develop) <https://github.com/wawiesel/BootsOnTheGround/archive/develop.zip>`_]
 [`stable (master) <https://github.com/wawiesel/BootsOnTheGround/archive/master.zip>`_]
-[`release (v0.1-beta) <https://github.com/wawiesel/BootsOnTheGround/archive/v0.1-beta.zip>`_]
+[`release (v0.1.0) <https://github.com/wawiesel/BootsOnTheGround/archive/v0.1.0.zip>`_]
 
 **Previous Versions**
 
-[`release (v0.1-alpha) <https://github.com/wawiesel/BootsOnTheGround/archive/v0.1-alpha.zip>`_]
+[`release (v0.1-beta) <https://github.com/wawiesel/BootsOnTheGround/archive/v0.1-beta.zip>`_]
 
 
 Principles
@@ -97,13 +102,14 @@ not clear if they will ever have Windows support.
 
 -----------------------------------------------------------------------------
 
-The Future
-----------
-- Currently there is no support for versioning TPLs, i.e. requesting a particular
-  version. There is in Hunter_ but not in TriBITS_. We need to enable this.
+To Do
+-----
+- Enable version specification and process TPL version information. Should
+  be able to print a summary of the linked TPLs.
+- Enable windows testing.
 - Complete RST documentation of the BOTG functions and the framework itself.
-
-.. _repo_structure:
+- Add SuperLU.
+- Handle linking flags better for different compilers/operating systems.
 
 Repository Structure
 --------------------
@@ -144,5 +150,9 @@ followed the steps on `Cees-Jan Kiewiet's Blog Post
 .. _BoostFilesystem: http://www.boost.org/doc/libs/1_63_0/libs/filesystem/doc/reference.html
 .. _Fmt: http://fmtlib.net/latest/index.html
 .. _Spdlog: https://github.com/gabime/spdlog/wiki/1.-QuickStart
+.. _SZip: http://www.compressconsult.com/szip
+.. _ZLib: http://www.zlib.net/
 .. _NLJson: https://github.com/nlohmann/json#examples
 .. _CASL: http://www.casl.gov
+.. _OpenSSL: https://www.openssl.org/
+
