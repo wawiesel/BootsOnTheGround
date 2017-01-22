@@ -19,9 +19,9 @@ ELSE()
         MESSAGE( ERROR "[BootsOnTheGround] BOTG_SOURCE_DIR=${BOTG_SOURCE_DIR} does not exist!")
     ENDIF()
 
-    # Includes all the "BootsOnTheGround" (BOTG) functions.
-    INCLUDE( "${BOTG_SOURCE_DIR}/cmake/BOTG.cmake" )
-
 ENDIF()
+
+# Includes all the "BootsOnTheGround" (BOTG) functions.
+INCLUDE( "${BOTG_SOURCE_DIR}/cmake/BOTG.cmake" )
 
 
