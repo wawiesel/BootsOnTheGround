@@ -1,7 +1,7 @@
 #define SPDLOG_DEBUG_ON
 #define SPDLOG_TRACE_ON
-#include "spdlog/tweakme.h"
 #include "spdlog/spdlog.h"
+#include "spdlog/tweakme.h"
 
 #include <gtest/gtest.h>
 #include <iostream>
@@ -24,7 +24,7 @@ TEST( Spdlog, Demo )
         auto console = spd::stdout_logger_mt( "console", /*color=*/true );
         console->info( "Welcome to spdlog!" );
         console->error( "Some error message with arg{}..", 1 );
-        console->set_level(spdlog::level::trace);
+        console->set_level( spdlog::level::trace );
 
         // Formatting examples
         console->warn( "Easy padding in numbers like {:08d}", 12 );
