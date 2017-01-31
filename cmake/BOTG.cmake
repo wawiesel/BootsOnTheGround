@@ -391,3 +391,12 @@ MACRO( BOTG_ConfigurePackage package_name src )
     TRIBITS_PACKAGE_POSTPROCESS()
 
 ENDMACRO()
+
+MACRO( BOTG_AddTPL type need name )
+    MESSAGE( STATUS "[BootsOnTheGround] adding TPL type=${type} need=${need} name=${name}...")
+    TRIBITS_PACKAGE_DEFINE_DEPENDENCIES(
+      ${type}_${need}_PACKAGES
+        BootsOnTheGround_${name}
+    )
+    INCLUDE( "${BOTG_SOURCE_DIR}/TPLs/${name}/cmake/Dependencies.cmake" )
+ENDMACRO()
