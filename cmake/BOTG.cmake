@@ -336,6 +336,11 @@ MACRO( BOTG_ConfigureProject project_root_dir )
     # Clear the cache unless provided -D KEEP_CACHE:BOOL=ON.
     BOTG_ClearCMakeCache("${KEEP_CACHE}")
 
+    # Install locally by default.
+    IF( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+        SET( CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/INSTALL" CACHE PATH "default install path" FORCE )
+    ENDIF()
+
     # Enable the hunter gate for downloading/installing TPLs!
     PROJECT("" NONE) #hack to make HunterGate happy
     INCLUDE( "${BOTG_SOURCE_DIR}/cmake/HunterGate.cmake" )
