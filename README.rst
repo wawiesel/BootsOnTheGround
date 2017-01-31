@@ -27,10 +27,10 @@ Take a look at Testing123_ for an example of how to use BOTG_.
 Downloads
 ---------
 
-Below are some links to  and unzip one of the following sources directly to your
-TriBITS_ repository, perhaps to ``external/BootsOnTheGround``, we **strongly
+Below are some links to zipped sources you could download and unzip into your
+repository and gain all the benefits of TriBITS and BOTG, however, we **strongly
 encourage** using GIT subtrees instead, linking directly to a particular version tag or the master
-branch of the repo.
+branch of the repo. See Testing123_ for an example.
 
 **Latest Versions**
 
@@ -46,16 +46,16 @@ branch of the repo.
 Principles
 ----------
 
-- All TPLs must be linkable with ``mkdir build && cd build && cmake ..`` on
+- All BOTG TPLs **must** be linkable with ``mkdir build && cd build && cmake ..`` on
   - Windows, Mac, and Linux operating systems with
   - Intel, GNU, and Clang compilers
   and perform correctly. This implies that we need a way to download and install
   packages (we use Hunter_).
-- All TPLS must have permissible,
+- All BOTG TPLS **must** have permissible,
   `non-copyleft licenses <http://fosslawyers.org/permissive-foss-licenses-bsd-apache-mit>`_.
   We need these TPLs in our open source TriBITS_ projects, but also in special,
   export-controlled nuclear reactor simulations like CASL_.
-- All TPLs should use `semantic versioning <http://semver.org>`_ with the ability
+- All BOTG TPLs **should** use `semantic versioning <http://semver.org>`_ with the ability
   to link to a particular version, either ``MAJOR.MINOR`` or ``MAJOR`` (in which case
   the latest ``MINOR`` is chosen).
 
@@ -80,17 +80,15 @@ cmake/Dependencies.cmake file, you would need to specify:
     SET(TEST_REQUIRED_DEP_TPLS GTest)
 
 With BOTG_, you can use instead a *package* dependency
-called ``BootsOnTheGround_CUrl`` and it will handle linking
-in dependent TPLs automatically.
+on ``BootsOnTheGround_CUrl`` available via a simple MACRO 
+``BOTG_AddTPL``.
 
 .. code-block:: cmake
 
-    SET(LIB_REQUIRED_DEP_PACKAGES BootsOnTheGround_CUrl)
-    SET(TEST_REQUIRED_DEP_PACKAGES BootsOnTheGround_GTest)
-    SET(LIB_REQUIRED_DEP_TPLS)
-    SET(TEST_REQUIRED_DEP_TPLS)
+    BOTG_AddTPL( LIB REQUIRED CUrl )
+    BOTG_AddTPL( TEST REQUIRED GTest )
 
-Note, the other magic gained by using ``BootsOnTheGround_CUrl`` is
+Note, the other magic gained by using BOTG is
 that Hunter_ is used to download, build, and install any TPLs it
 cannot find!
 
