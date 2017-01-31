@@ -22,6 +22,8 @@ Currently we have the following TPLs wrapped up nice and purdy:
 - Spdlog_ -- fast, versatile logging [C++]
 - ZLib_ -- compession/decompression algorithm [C++]
 
+Take a look at Testing123_ for an example of how to use BOTG_.
+
 Downloads
 ---------
 
@@ -78,17 +80,17 @@ cmake/Dependencies.cmake file, you would need to specify:
     SET(TEST_REQUIRED_DEP_TPLS GTest)
 
 With BOTG_, you can use instead a *package* dependency
-called ``BootsOnTheGround_CURL`` and it will handle linking
+called ``BootsOnTheGround_CUrl`` and it will handle linking
 in dependent TPLs automatically.
 
 .. code-block:: cmake
 
-    SET(LIB_REQUIRED_DEP_PACKAGES BootsOnTheGround_CURL)
+    SET(LIB_REQUIRED_DEP_PACKAGES BootsOnTheGround_CUrl)
     SET(TEST_REQUIRED_DEP_PACKAGES BootsOnTheGround_GTest)
     SET(LIB_REQUIRED_DEP_TPLS)
     SET(TEST_REQUIRED_DEP_TPLS)
 
-Note, the other magic gained by using ``BootsOnTheGround_CURL`` is
+Note, the other magic gained by using ``BootsOnTheGround_CUrl`` is
 that Hunter_ is used to download, build, and install any TPLs it
 cannot find!
 
@@ -155,4 +157,6 @@ followed the steps on `Cees-Jan Kiewiet's Blog Post
 .. _NLJson: https://github.com/nlohmann/json#examples
 .. _CASL: http://www.casl.gov
 .. _OpenSSL: https://www.openssl.org/
-
+.. _CUrl: https://curl.haxx.se/libcurl/
+.. _HDF5: https://support.hdfgroup.org/HDF5/
+.. _Testing123: http://github.com/wawiesel/Testing123
