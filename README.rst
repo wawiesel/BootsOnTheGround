@@ -5,7 +5,7 @@ This is BootsOnTheGround [BOTG_]!
     :target: https://travis-ci.org/wawiesel/BootsOnTheGround
 
 BOTG_ provides a set of FindTPL*.cmake files to find and link Third Party
-Libraries (TPLs) to other packages using the CMake / TriBITS_ framework
+Libraries (TPLs) to other packages using the CMake_ / TriBITS_ framework
 for C/C++/Fortran code.
 
 Currently we have the following TPLs wrapped up nice and purdy:
@@ -71,11 +71,14 @@ Say you needed TPL ``CURL`` for your library and ``GTest`` for testing.
 cmake/Dependencies.cmake file, you would need to specify:
 
 .. code-block:: cmake
-
-    SET(LIB_REQUIRED_DEP_PACKAGES)
-    SET(TEST_REQUIRED_DEP_PACKAGES)
-    SET(LIB_REQUIRED_DEP_TPLS CURL OpenSSL ZLib)
-    SET(TEST_REQUIRED_DEP_TPLS GTest)
+    TRIBITS_PACKAGE_DEFINE_DEPENDENCIES(
+      LIB_REQUIRED_TPLS
+        CURL
+        OpenSSL
+        ZLib
+      TEST_REQUIRED_TPLS
+        GTest
+    )
 
 With BOTG_, you can use instead a *package* dependency
 on ``BootsOnTheGround_CUrl`` available via a simple MACRO 
@@ -83,6 +86,7 @@ on ``BootsOnTheGround_CUrl`` available via a simple MACRO
 
 .. code-block:: cmake
 
+    TRIBITS_PACKAGE_DEFINE_DEPENDENCIES()
     BOTG_AddTPL( LIB REQUIRED CUrl )
     BOTG_AddTPL( TEST REQUIRED GTest )
 
