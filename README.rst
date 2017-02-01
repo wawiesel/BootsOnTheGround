@@ -22,7 +22,9 @@ Currently we have the following TPLs wrapped up nice and purdy:
 - Spdlog_ -- fast, versatile logging [C++]
 - ZLib_ -- compession/decompression algorithm [C++]
 
-Take a look at Testing123_ for an example of how to use BOTG_.
+Take a look at Testing123_ for an example of how to use BOTG_ or further
+into the rabbit hole see Template123_ for a simple skeleton project
+that uses Testing123_ for unit testing.
 
 Downloads
 ---------
@@ -51,10 +53,6 @@ Principles
   - Intel, GNU, and Clang compilers
   and perform correctly. This implies that we need a way to download and install
   packages (we use Hunter_).
-- All BOTG TPLS **must** have permissible,
-  `non-copyleft licenses <http://fosslawyers.org/permissive-foss-licenses-bsd-apache-mit>`_.
-  We need these TPLs in our open source TriBITS_ projects, but also in special,
-  export-controlled nuclear reactor simulations like CASL_.
 - All BOTG TPLs **should** use `semantic versioning <http://semver.org>`_ with the ability
   to link to a particular version, either ``MAJOR.MINOR`` or ``MAJOR`` (in which case
   the latest ``MINOR`` is chosen).
@@ -142,9 +140,12 @@ To enable the Travis CI to be able to use curl and https (for Hunter_), I
 followed the steps on `Cees-Jan Kiewiet's Blog Post
 <https://blog.wyrihaximus.net/2015/09/github-auth-token-on-travis/>`_.
 
-.. _Hunter: http://github.com/ruslo/hunter
+.. _CMake: https://cmake.org/
 .. _TriBITS: https://tribits.org
 .. _BOTG: http://github.com/wawiesel/BootsOnTheGround
+.. _Testing123: http://github.com/wawiesel/Testing123
+.. _Template123: http://github.com/wawiesel/Template123
+.. _Hunter: http://github.com/ruslo/hunter
 .. _GTest: http://github.com/google/googletest
 .. _GFlags: https://gflags.github.io/gflags
 .. _BoostFilesystem: http://www.boost.org/doc/libs/1_63_0/libs/filesystem/doc/reference.html
@@ -157,4 +158,4 @@ followed the steps on `Cees-Jan Kiewiet's Blog Post
 .. _OpenSSL: https://www.openssl.org/
 .. _CUrl: https://curl.haxx.se/libcurl/
 .. _HDF5: https://support.hdfgroup.org/HDF5/
-.. _Testing123: http://github.com/wawiesel/Testing123
+
