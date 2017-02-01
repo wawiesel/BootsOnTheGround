@@ -1,5 +1,4 @@
-
-#---------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 FUNCTION( BOTG_ClearCMakeCache keep_cache )
     #quick return if passed anything CMake TRUE
     IF( DEFINED(keep_cache) AND keep_cache )
@@ -22,7 +21,7 @@ FUNCTION( BOTG_ClearCMakeCache keep_cache )
     ENDFOREACH()
 
 ENDFUNCTION()
-#---------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 MACRO(BOTG_PrintAllVariables regex)
     get_cmake_property(_variableNames VARIABLES)
 
@@ -43,9 +42,7 @@ MACRO(BOTG_PrintAllVariables regex)
     endforeach()
 
 ENDMACRO()
-
 #---------------------------------------------------------------------------
-
 FUNCTION( BOTG_HuntTPL tribits_name headers libs hunter_name hunter_args )
 
     SET(${tribits_name}_FORCE_HUNTER OFF
@@ -123,7 +120,7 @@ FUNCTION( BOTG_HuntTPL tribits_name headers libs hunter_name hunter_args )
     MESSAGE( STATUS "[BootsOnTheGround] FINAL result of TPL ${tribits_name}_FOUND=${${tribits_name}_FOUND}")
 
 ENDFUNCTION()
-
+#-------------------------------------------------------------------------------
 MACRO( BOTG_InitializeTriBITS TriBITS_dir )
     MESSAGE( STATUS "[BootsOnTheGround] initializing TriBITS ..." )
 
@@ -142,7 +139,7 @@ MACRO( BOTG_InitializeTriBITS TriBITS_dir )
     SET(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${save_path}")
 
 ENDMACRO()
-
+#-------------------------------------------------------------------------------
 FUNCTION(BOTG_PreventInSourceBuilds)
   GET_FILENAME_COMPONENT(srcdir "${CMAKE_SOURCE_DIR}" REALPATH)
   GET_FILENAME_COMPONENT(bindir "${CMAKE_BINARY_DIR}" REALPATH)
@@ -152,7 +149,7 @@ FUNCTION(BOTG_PreventInSourceBuilds)
     MESSAGE(FATAL_ERROR "[BootsOnTheGround] in-source builds are not allowed!")
   ENDIF()
 ENDFUNCTION()
-
+#-------------------------------------------------------------------------------
 FUNCTION( BOTG_FixupCompilerNames compiler )
 
     # Fix up compiler names
@@ -161,7 +158,7 @@ FUNCTION( BOTG_FixupCompilerNames compiler )
     ENDIF()
 
 ENDFUNCTION()
-
+#-------------------------------------------------------------------------------
 # Processes all the default flags for a single language.
 FUNCTION( BOTG_ProcessDefaultFlags lang )
 
@@ -194,7 +191,7 @@ FUNCTION( BOTG_ProcessDefaultFlags lang )
 
     ENDFOREACH()
 ENDFUNCTION()
-
+#-------------------------------------------------------------------------------
 # Used inside the Flags.cmake files for convenience.
 FUNCTION( BOTG_AddCompilerFlags lang flags )
     STRING(FIND "${CMAKE_${lang}_FLAGS}" "${flags}" position)
@@ -203,8 +200,7 @@ FUNCTION( BOTG_AddCompilerFlags lang flags )
         SET(CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS} ${flags}" CACHE BOOL "Compiler flags for lang='${lang}'" FORCE)
     ENDIF()
 ENDFUNCTION()
-
-
+#-------------------------------------------------------------------------------
 # Check if given Fortran source compiles and links into an executable
 #
 # BOTG_TryCompileFortran(<code> <var> [FAIL_REGEX <fail-regex>])
@@ -277,7 +273,7 @@ MACRO( BOTG_TryCompileFortran source var )
         ENDIF()
     ENDFOREACH()
 ENDMACRO()
-
+#-------------------------------------------------------------------------------
 MACRO (BOTG_CheckCompilerFlagFortran _flag _result)
    SET(save_defs "${CMAKE_REQUIRED_DEFINITIONS}")
    SET(CMAKE_REQUIRED_DEFINITIONS "${_flag}")
@@ -296,39 +292,7 @@ MACRO (BOTG_CheckCompilerFlagFortran _flag _result)
      )
    SET (CMAKE_REQUIRED_DEFINITIONS "${save_defs}")
 ENDMACRO()
-
-MACRO( BOTG_DefineTPLs )
-    GLOBAL_SET( BOTG_TPL_LIST ${ARGV} )
-    SET(tpl_def )
-    FOREACH( tpl_loc ${ARGV} )
-        STRING(REPLACE "/" "" tpl_name ${tpl_loc})
-        LIST(APPEND tpl_def ${tpl_name} "${CMAKE_CURRENT_LIST_DIR}/TPLs/${tpl_loc}/FindTPL${tpl_name}.cmake" TT )
-    ENDFOREACH()
-    TRIBITS_REPOSITORY_DEFINE_TPLS( ${tpl_def} )
-ENDMACRO()
-
-MACRO( BOTG_DefineTPLSubPackages )
-
-    # clear TriBITS variables
-    SET(SUBPACKAGES_DIRS_CLASSIFICATIONS_OPTREQS )
-    SET(LIB_REQUIRED_DEP_PACKAGES)
-    SET(LIB_OPTIONAL_DEP_PACKAGES)
-    SET(TEST_REQUIRED_DEP_PACKAGES)
-    SET(TEST_OPTIONAL_DEP_PACKAGES)
-    SET(LIB_REQUIRED_DEP_TPLS)
-    SET(LIB_OPTIONAL_DEP_TPLS)
-    SET(TEST_REQUIRED_DEP_TPLS)
-    SET(TEST_OPTIONAL_DEP_TPLS)
-
-    # setup up the subpackages list
-    FOREACH( tpl_loc ${BOTG_TPL_LIST} )
-        STRING(REPLACE "/" "" tpl_name ${tpl_loc})
-        LIST(APPEND SUBPACKAGES_DIRS_CLASSIFICATIONS_OPTREQS
-             "_${tpl_name}" TPLs/${tpl_loc} ST OPTIONAL )
-    ENDFOREACH()
-
-ENDMACRO()
-
+#-------------------------------------------------------------------------------
 MACRO( BOTG_ConfigureProject project_root_dir )
 
     MESSAGE( STATUS "[BootsOnTheGround] initializing project with root directory=${project_root_dir} ...")
@@ -355,53 +319,55 @@ MACRO( BOTG_ConfigureProject project_root_dir )
 
     # Just good practice.
     BOTG_PreventInSourceBuilds()
-    SET(${PROJECT_NAME}_ENABLE_TESTS ON CACHE BOOL "Enable all tests by default.")
-
-    # Enable all secondary tested code only if building BootsOnTheGround.
-    SET( enable OFF )
-    IF( "${PROJECT_NAME}" STREQUAL BootsOnTheGround )
-        SET( enable ON )
-    ENDIF()
-    GLOBAL_SET( BootsOnTheGround_ENABLE_SECONDARY_TESTED_CODE ${enable} )
+    GLOBAL_SET(${PROJECT_NAME}_ENABLE_TESTS ON CACHE BOOL "Enable all tests by default.")
 
     # Process default flags for each language.
     BOTG_ProcessDefaultFlags( C )
     BOTG_ProcessDefaultFlags( CXX )
     BOTG_ProcessDefaultFlags( Fortran )
 
-    # TriBITS processing callback.
-    TRIBITS_PROJECT_ENABLE_ALL()
-
 ENDMACRO()
+#-------------------------------------------------------------------------------
+MACRO( BOTG_DefineTPLDependencies lib_required_tpls test_required_tpls)
 
-MACRO( BOTG_ConfigureSuperPackage package_name )
+    #Append to existing if we are using BOTG_AddTPL.
+    IF( BOTG_APPEND_TPLS )
+        #Make sure these are defined.
+        APPEND_SET(REGRESSION_EMAIL_LIST)
+        APPEND_SET(SUBPACKAGES_DIRS_CLASSIFICATIONS_OPTREQS)
+        APPEND_SET(LIB_REQUIRED_DEP_PACKAGES)
+        APPEND_SET(LIB_OPTIONAL_DEP_PACKAGES)
+        APPEND_SET(TEST_REQUIRED_DEP_PACKAGES)
+        APPEND_SET(TEST_OPTIONAL_DEP_PACKAGES)
+        APPEND_SET(LIB_OPTIONAL_DEP_TPLS)
+        APPEND_SET(TEST_OPTIONAL_DEP_TPLS)
 
-    MESSAGE( STATUS "[BootsOnTheGround] configuring super package=${package_name} ...")
-
-    TRIBITS_PACKAGE_DECL( ${package_name} )
-    TRIBITS_PROCESS_SUBPACKAGES()
-    TRIBITS_PACKAGE_DEF()
-    TRIBITS_PACKAGE_POSTPROCESS()
-
-ENDMACRO()
-
-MACRO( BOTG_ConfigurePackage package_name src )
-
-    MESSAGE( STATUS "[BootsOnTheGround] configuring simple package=${package_name} ...")
-
-    TRIBITS_PACKAGE( ${package_name} )
-    IF( NOT src STREQUAL "" )
-        ADD_SUBDIRECTORY( ${src} )
+        #Actually set these.
+        APPEND_SET(  LIB_REQUIRED_DEP_TPLS  ${lib_required_tpls} )
+        APPEND_SET( TEST_REQUIRED_DEP_TPLS ${test_required_tpls} )
+    ELSE()
+        TRIBITS_PACKAGE_DEFINE_DEPENDENCIES(
+           LIB_REQUIRED_TPLS  ${lib_required_tpls}
+          TEST_REQUIRED_TPLS ${test_required_tpls}
+        )
     ENDIF()
-    TRIBITS_PACKAGE_POSTPROCESS()
 
 ENDMACRO()
-
+#-------------------------------------------------------------------------------
 MACRO( BOTG_AddTPL type need name )
+
     MESSAGE( STATUS "[BootsOnTheGround] adding TPL type=${type} need=${need} name=${name}...")
-    TRIBITS_PACKAGE_DEFINE_DEPENDENCIES(
-      ${type}_${need}_PACKAGES
-        BootsOnTheGround_${name}
-    )
-    INCLUDE( "${BOTG_SOURCE_DIR}/TPLs/${name}/cmake/Dependencies.cmake" )
+
+    #Make sure TPL name is correct.
+    ASSERT_DEFINED(BootsOnTheGround_${name}_SOURCE_DIR)
+
+    #Add dependency on BOTG version of TPL.
+    APPEND_SET( ${type}_${need}_DEP_PACKAGES BootsOnTheGround_${name} )
+
+    #Add true TPL dependencies.
+    SET(BOTG_APPEND_TPLS ON)
+    INCLUDE( "${BOTG_SOURCE_DIR}/src/${name}/cmake/Dependencies.cmake" )
+    SET(BOTG_APPEND_TPLS)
+
 ENDMACRO()
+#-------------------------------------------------------------------------------
