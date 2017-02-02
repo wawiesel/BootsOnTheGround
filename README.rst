@@ -5,8 +5,11 @@ This is BootsOnTheGround [BOTG_]!
     :target: https://travis-ci.org/wawiesel/BootsOnTheGround
 
 BOTG_ provides a set of FindTPL*.cmake files to find and link Third Party
-Libraries (TPLs) to other packages using the CMake / TriBITS_ framework
+Libraries (TPLs) to other packages using the CMake_ / TriBITS_ framework
 for C/C++/Fortran code.
+
+TPLs
+----
 
 Currently we have the following TPLs wrapped up nice and purdy:
 
@@ -22,13 +25,56 @@ Currently we have the following TPLs wrapped up nice and purdy:
 - Spdlog_ -- fast, versatile logging [C++]
 - ZLib_ -- compession/decompression algorithm [C++]
 
+Take a look at Testing123_ for an example of how to use BOTG_ or further
+into the rabbit hole see Template123_ for a simple skeleton project
+that uses Testing123_ for unit testing.
+
+How do I use it?
+----------------
+
+Bootstrapping is the recommended way of using BOTG (hence the name!). 
+You need to do three things to enable BOTG in your TriBITS project.
+
+#. Copy ``cmake/BOTG_INCLUDE.cmake`` to your project. 
+#. CMake ``INCLUDE`` the ``cmake/BOTG_INCLUDE.cmake`` first thing in your main ``CMakeLists.txt`` file.
+#. Copy ``external/BootsOnTheGround.in`` to your project. 
+#. Make sure BOTG comes first in your ``PackagesList.cmake`` file.
+
+.. code-block:: cmake
+
+        TRIBITS_REPOSITORY_DEFINE_PACKAGES(
+          BootsOnTheGround external/BootsOnTheGround/src     ST
+          ...
+        )
+
+Note, if you don't want to clone BOTG to ``external``, then you're going to have to change some stuff in 
+``BOTG_INCLUDE.cmake``. See Testing123_ for an example of bootstrapping BOTG.
+
+Then in your ``Dependencies.cmake`` file for any package you can use the
+``BOTG_AddTPL()`` macro **after** ``TRIBITS_PACKAGE_DEFINE_DEPENDENCIES``.
+
+.. code-block:: cmake
+
+        TRIBITS_PACKAGE_DEFINE_DEPENDENCIES(
+            #do not list TPLs--only packages
+        )
+        BOTG_AddTPL( LIB REQUIRED Xyz )
+        BOTG_AddTPL( TEST REQUIRED Uvw )
+        BOTG_AddTPL( LIB OPTIONAL Abc )
+        BOTG_AddTPL( TEST OPTIONAL Def )
+
+Note the first argument is ``LIB`` for a main "library" dependency or ``TEST``
+for a test-only dependency and the second argument is either ``REQUIRED`` or
+``OPTIONAL``. The final is the TPL name from the `TPLs`_ list. See 
+`Connection to TriBITS`_ for details.
+
 Downloads
 ---------
 
-Below are some links to  and unzip one of the following sources directly to your
-TriBITS_ repository, perhaps to ``external/BootsOnTheGround``, we **strongly
-encourage** using GIT subtrees instead, linking directly to a particular version tag or the master
-branch of the repo.
+If you won't bootstrap, below are some links to zipped sources you could download and 
+unzip into your repository and gain all the benefits of TriBITS and BOTG. 
+However, think about using GIT subtrees instead.
+
 
 **Latest Versions**
 
@@ -44,16 +90,12 @@ branch of the repo.
 Principles
 ----------
 
-- All TPLs must be linkable with ``mkdir build && cd build && cmake ..`` on
+- All BOTG TPLs **must** be linkable with ``mkdir build && cd build && cmake ..`` on
   - Windows, Mac, and Linux operating systems with
   - Intel, GNU, and Clang compilers
   and perform correctly. This implies that we need a way to download and install
   packages (we use Hunter_).
-- All TPLS must have permissible,
-  `non-copyleft licenses <http://fosslawyers.org/permissive-foss-licenses-bsd-apache-mit>`_.
-  We need these TPLs in our open source TriBITS_ projects, but also in special,
-  export-controlled nuclear reactor simulations like CASL_.
-- All TPLs should use `semantic versioning <http://semver.org>`_ with the ability
+- All BOTG TPLs **should** use `semantic versioning <http://semver.org>`_ with the ability
   to link to a particular version, either ``MAJOR.MINOR`` or ``MAJOR`` (in which case
   the latest ``MINOR`` is chosen).
 
@@ -71,24 +113,26 @@ Say you needed TPL ``CURL`` for your library and ``GTest`` for testing.
 cmake/Dependencies.cmake file, you would need to specify:
 
 .. code-block:: cmake
-
-    SET(LIB_REQUIRED_DEP_PACKAGES)
-    SET(TEST_REQUIRED_DEP_PACKAGES)
-    SET(LIB_REQUIRED_DEP_TPLS CURL OpenSSL ZLib)
-    SET(TEST_REQUIRED_DEP_TPLS GTest)
+    TRIBITS_PACKAGE_DEFINE_DEPENDENCIES(
+      LIB_REQUIRED_TPLS
+        CURL
+        OpenSSL
+        ZLib
+      TEST_REQUIRED_TPLS
+        GTest
+    )
 
 With BOTG_, you can use instead a *package* dependency
-called ``BootsOnTheGround_CURL`` and it will handle linking
-in dependent TPLs automatically.
+on ``BootsOnTheGround_CUrl`` available via a simple MACRO
+``BOTG_AddTPL``.
 
 .. code-block:: cmake
 
-    SET(LIB_REQUIRED_DEP_PACKAGES BootsOnTheGround_CURL)
-    SET(TEST_REQUIRED_DEP_PACKAGES BootsOnTheGround_GTest)
-    SET(LIB_REQUIRED_DEP_TPLS)
-    SET(TEST_REQUIRED_DEP_TPLS)
+    TRIBITS_PACKAGE_DEFINE_DEPENDENCIES()
+    BOTG_AddTPL( LIB REQUIRED CUrl )
+    BOTG_AddTPL( TEST REQUIRED GTest )
 
-Note, the other magic gained by using ``BootsOnTheGround_CURL`` is
+Note, the other magic gained by using BOTG is
 that Hunter_ is used to download, build, and install any TPLs it
 cannot find!
 
@@ -128,23 +172,19 @@ i.e.
    when finished are merged into ``master`` and tagged ``vMAJOR.MINOR.PATCH``,
    then merged into ``develop``.
 
-Tricky Details
---------------
-TriBITS_ is embedded as a subtree with the following command
-
-::
-
-    git subtree add --prefix external/TriBITS
-        https://github.com/TriBITSPub/TriBITS.git
-        master --squash
+Travis CI
+---------
 
 To enable the Travis CI to be able to use curl and https (for Hunter_), I
 followed the steps on `Cees-Jan Kiewiet's Blog Post
 <https://blog.wyrihaximus.net/2015/09/github-auth-token-on-travis/>`_.
 
-.. _Hunter: http://github.com/ruslo/hunter
+.. _CMake: https://cmake.org/
 .. _TriBITS: https://tribits.org
 .. _BOTG: http://github.com/wawiesel/BootsOnTheGround
+.. _Testing123: http://github.com/wawiesel/Testing123
+.. _Template123: http://github.com/wawiesel/Template123
+.. _Hunter: http://github.com/ruslo/hunter
 .. _GTest: http://github.com/google/googletest
 .. _GFlags: https://gflags.github.io/gflags
 .. _BoostFilesystem: http://www.boost.org/doc/libs/1_63_0/libs/filesystem/doc/reference.html
@@ -155,4 +195,6 @@ followed the steps on `Cees-Jan Kiewiet's Blog Post
 .. _NLJson: https://github.com/nlohmann/json#examples
 .. _CASL: http://www.casl.gov
 .. _OpenSSL: https://www.openssl.org/
+.. _CUrl: https://curl.haxx.se/libcurl/
+.. _HDF5: https://support.hdfgroup.org/HDF5/
 

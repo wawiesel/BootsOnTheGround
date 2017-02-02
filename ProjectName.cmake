@@ -1,1 +1,1 @@
-SET(PROJECT_NAME BootsOnTheGround)
+SET(PROJECT_NAME project-BootsOnTheGround)
