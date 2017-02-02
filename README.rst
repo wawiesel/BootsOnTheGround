@@ -8,6 +8,9 @@ BOTG_ provides a set of FindTPL*.cmake files to find and link Third Party
 Libraries (TPLs) to other packages using the CMake_ / TriBITS_ framework
 for C/C++/Fortran code.
 
+TPLs
+----
+
 Currently we have the following TPLs wrapped up nice and purdy:
 
 - BoostFilesystem_ -- Cross-platform file system queries [C++]
@@ -26,13 +29,52 @@ Take a look at Testing123_ for an example of how to use BOTG_ or further
 into the rabbit hole see Template123_ for a simple skeleton project
 that uses Testing123_ for unit testing.
 
+How do I use it?
+----------------
+
+Bootstrapping is the recommended way of using BOTG (hence the name!). 
+You need to do three things to enable BOTG in your TriBITS project.
+
+#. Copy ``cmake/BOTG_INCLUDE.cmake`` to your project. 
+#. CMake ``INCLUDE`` the ``cmake/BOTG_INCLUDE.cmake`` first thing in your main ``CMakeLists.txt`` file.
+#. Copy ``external/BootsOnTheGround.in`` to your project. 
+#. Make sure BOTG comes first in your ``PackagesList.cmake`` file.
+
+.. code-block:: cmake
+
+        TRIBITS_REPOSITORY_DEFINE_PACKAGES(
+          BootsOnTheGround external/BootsOnTheGround/src     ST
+          ...
+        )
+
+Note, if you don't want to clone BOTG to ``external``, then you're going to have to change some stuff in 
+``BOTG_INCLUDE.cmake``. See Testing123_ for an example of bootstrapping BOTG.
+
+Then in your ``Dependencies.cmake`` file for any package you can use the
+``BOTG_AddTPL()`` macro **after** ``TRIBITS_PACKAGE_DEFINE_DEPENDENCIES``.
+
+.. code-block:: cmake
+
+        TRIBITS_PACKAGE_DEFINE_DEPENDENCIES(
+            #do not list TPLs--only packages
+        )
+        BOTG_AddTPL( LIB REQUIRED Xyz )
+        BOTG_AddTPL( TEST REQUIRED Uvw )
+        BOTG_AddTPL( LIB OPTIONAL Abc )
+        BOTG_AddTPL( TEST OPTIONAL Def )
+
+Note the first argument is ``LIB`` for a main "library" dependency or ``TEST``
+for a test-only dependency and the second argument is either ``REQUIRED`` or
+``OPTIONAL``. The final is the TPL name from the `TPLs`_ list. See 
+`Connection to TriBITS`_ for details.
+
 Downloads
 ---------
 
-Below are some links to zipped sources you could download and unzip into your
-repository and gain all the benefits of TriBITS and BOTG, however, we **strongly
-encourage** using GIT subtrees instead, linking directly to a particular version tag or the master
-branch of the repo. See Testing123_ for an example.
+If you won't bootstrap, below are some links to zipped sources you could download and 
+unzip into your repository and gain all the benefits of TriBITS and BOTG. 
+However, think about using GIT subtrees instead.
+
 
 **Latest Versions**
 
@@ -129,14 +171,6 @@ i.e.
 #. Hotfixes are created as a branch off ``master``: ``hotfix/vMAJOR.MINOR.PATCH``,
    when finished are merged into ``master`` and tagged ``vMAJOR.MINOR.PATCH``,
    then merged into ``develop``.
-
-Dependencies
-------------
-TriBITS_ is embedded as a subtree with the following command
-
-::
-
-    git subtree add --prefix external/TriBITS https://github.com/TriBITSPub/TriBITS.git master --squash
 
 Travis CI
 ---------
