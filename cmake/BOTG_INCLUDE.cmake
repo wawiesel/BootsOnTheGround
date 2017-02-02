@@ -1,3 +1,14 @@
+##
+##
+##cmake/BOTG_INCLUDE.cmake
+##------------------------------------------------------------------------------
+##This file is the key file to include from a project's central
+##CMakeLists.txt to perform the BootsOnTheGround magic. It even
+##bootstraps in a copy of the BootsOnTheGround repo if not found.
+##
+##.. code-block:: cmake
+##
+
 #This function is special and needs to be here so it can be part of a
 #Bootstrapping operation.
 MACRO( BOTG_DownloadExternalProjects external_projects )

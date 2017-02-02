@@ -81,7 +81,7 @@ cmake/Dependencies.cmake file, you would need to specify:
     )
 
 With BOTG_, you can use instead a *package* dependency
-on ``BootsOnTheGround_CUrl`` available via a simple MACRO 
+on ``BootsOnTheGround_CUrl`` available via a simple MACRO
 ``BOTG_AddTPL``.
 
 .. code-block:: cmake
@@ -130,15 +130,16 @@ i.e.
    when finished are merged into ``master`` and tagged ``vMAJOR.MINOR.PATCH``,
    then merged into ``develop``.
 
-Tricky Details
---------------
+Dependencies
+------------
 TriBITS_ is embedded as a subtree with the following command
 
 ::
 
-    git subtree add --prefix external/TriBITS
-        https://github.com/TriBITSPub/TriBITS.git
-        master --squash
+    git subtree add --prefix external/TriBITS https://github.com/TriBITSPub/TriBITS.git master --squash
+
+Travis CI
+---------
 
 To enable the Travis CI to be able to use curl and https (for Hunter_), I
 followed the steps on `Cees-Jan Kiewiet's Blog Post
