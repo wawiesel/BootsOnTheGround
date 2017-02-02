@@ -32,14 +32,19 @@ IF( DEFINED BOTG_SOURCE_DIR )
 
 # Set the BootsOnTheGround source directory!
 ELSE()
+    #Special-case if this is the BOTG project.
+    IF( EXISTS "${CMAKE_SOURCE_DIR}/cmake/BOTG.cmake" )
+        SET(BOTG_SOURCE_DIR "${CMAKE_SOURCE_DIR}" CACHE PATH INTERNAL)
 
-    SET(BOTG_SOURCE_DIR "${CMAKE_SOURCE_DIR}/external/BootsOnTheGround" CACHE PATH INTERNAL)
-
-    IF( EXISTS "${BOTG_SOURCE_DIR}" )
-        MESSAGE( STATUS "[BootsOnTheGround] using BOTG_SOURCE_DIR=${BOTG_SOURCE_DIR} ... ")
+    #Otherwise look in external.
     ELSE()
-        MESSAGE( STATUS "[BootsOnTheGround] bootstrapping in...")
-        BOTG_DownloadExternalProjects( BootsOnTheGround )
+        SET(BOTG_SOURCE_DIR "${CMAKE_SOURCE_DIR}/external/BootsOnTheGround" CACHE PATH INTERNAL)
+        IF( EXISTS "${BOTG_SOURCE_DIR}" )
+            MESSAGE( STATUS "[BootsOnTheGround] using BOTG_SOURCE_DIR=${BOTG_SOURCE_DIR} ... ")
+        ELSE()
+            MESSAGE( STATUS "[BootsOnTheGround] bootstrapping in...")
+            BOTG_DownloadExternalProjects( BootsOnTheGround )
+        ENDIF()
     ENDIF()
 
 ENDIF()
