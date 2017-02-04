@@ -1,0 +1,31 @@
+##
+##
+##external/BootsOnTheGround.in
+##------------------------------------------------------------------------------
+##This file is configured and then treated like its own
+##CMakeLists.txt file to drive the download using only
+##CMake and the awesome ``ExternalProject_Add`` command.
+##
+##.. code-block:: cmake
+##
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.2)
+PROJECT(download-external-BootsOnTheGround NONE)
+
+MESSAGE( STATUS "[BootsOnTheGround] downloading BootsOnTheGround...")
+
+INCLUDE(ExternalProject)
+ExternalProject_Add( download-external-BootsOnTheGround
+  GIT_REPOSITORY
+    https://github.com/wawiesel/BootsOnTheGround.git
+  GIT_TAG
+    develop
+  SOURCE_DIR
+    "${BOTG_EXTERNAL_SOURCE_DIR_BootsOnTheGround}"
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND     ""
+  INSTALL_COMMAND   ""
+  TEST_COMMAND      ""
+  UPDATE_COMMAND    ""
+)
+
+MESSAGE( STATUS "[BootsOnTheGround] done downloading!")

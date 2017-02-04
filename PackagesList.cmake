@@ -1,3 +1,3 @@
 TRIBITS_REPOSITORY_DEFINE_PACKAGES(
-  BootsOnTheGround  .  PT
-  )
+  BootsOnTheGround  src  PT
+)

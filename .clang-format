@@ -1,0 +1,16 @@
+---
+Language:        Cpp
+Standard: Cpp11
+BasedOnStyle:  Google
+IndentWidth:     4
+AccessModifierOffset: -2
+SortIncludes: true
+SpacesInParentheses: true
+BinPackParameters: false
+BinPackArguments: false
+BreakBeforeBraces: Allman
+BreakStringLiterals: true
+BreakConstructorInitializersBeforeComma: true
+SpaceBeforeParens: Never
+...
+
