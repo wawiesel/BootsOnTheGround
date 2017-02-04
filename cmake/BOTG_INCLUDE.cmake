@@ -18,9 +18,9 @@ MACRO( BOTG_DownloadExternalProjects external_projects )
         ENDIF()
         GET_FILENAME_COMPONENT( dir "${ep}" DIRECTORY )
         GET_FILENAME_COMPONENT( project "${ep}" NAME_WE )
-        SET( BOTG_EXTERNAL_SOURCE_DIR_${project} "${dir}/${project}" CACHE PATH INTERNAL)
+        SET( BOTG_EXTERNAL_SOURCE_DIR_${project} "${CMAKE_CURRENT_SOURCE_DIR}/${dir}/${project}" CACHE PATH INTERNAL)
 
-        SET( dest "${CMAKE_BINARY_DIR}/_DOWNLOAD/${botg_external_source_dir}" )
+        SET( dest "${CMAKE_BINARY_DIR}/_DOWNLOAD/${dir}/${project}" )
         MESSAGE( STATUS "[BootsOnTheGround] bootstrapping project ${ep} ... ")
 
         CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/${ep}" "${dest}/CMakeLists.txt" )
