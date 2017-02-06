@@ -2,13 +2,13 @@
 
 if [[ "$1" == "" ]]
 then
-    source_dir=".."
+    args=".."
 else
-    source_dir=$1
+    args="$@"
 fi
 
 XCOL=$(dirname $0)/contrib/xcol/xcolorize.sh
-cmake $source_dir 2>&1 | $XCOL \
+cmake $args 2>&1 | $XCOL \
                yellow '\[BootsOnTheGround\].*' \
                  pink '\[hunter\].*' \
                  cyan '^Processing enabled package.*' \
