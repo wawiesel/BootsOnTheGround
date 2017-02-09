@@ -7,7 +7,8 @@ else
     args="$@"
 fi
 
-XCOL=$(dirname $0)/contrib/xcol/xcolorize.sh
+BOTG_SCRIPT_DIR=$(dirname $0)
+XCOL=$BOTG_SCRIPT_DIR/contrib/xcol/xcolorize.sh
 cmake $args 2>&1 | $XCOL \
                yellow '\[BootsOnTheGround\].*' \
                  pink '\[hunter\].*' \
@@ -20,3 +21,4 @@ cmake $args 2>&1 | $XCOL \
                purple '^-- Generating done.*' \
                purple '^-- Build files have been written to.*' \
                   red '^CMake Error.*' \
+| tee >($BOTG_SCRIPT_DIR/contrib/ansi2html/ansi2html.sh --bg=dark >botg-config.html)
