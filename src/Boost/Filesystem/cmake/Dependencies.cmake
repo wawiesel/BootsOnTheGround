@@ -1,6 +1,4 @@
-TRIBITS_PACKAGE_DEFINE_DEPENDENCIES(
-  LIB_REQUIRED_TPLS
-    BoostFilesystem
-  TEST_REQUIRED_TPLS
-    GTest
+BOTG_DefineTPLDependencies(
+    "BoostFileSystem"        #LIB
+    "GTest"                  #TEST
 )
