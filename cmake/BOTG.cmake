@@ -160,46 +160,15 @@ FUNCTION( BOTG_FixupCompilerNames compiler )
 ENDFUNCTION()
 #-------------------------------------------------------------------------------
 # Processes all the default flags for a single language.
-FUNCTION( BOTG_ProcessDefaultFlags lang )
+MACRO( BOTG_ProcessDefaultFlags lang )
 
-    # This is the compiler name.
+    # Set the compiler name so we can have compiler-dependent flags.
     SET( compiler "${CMAKE_${lang}_COMPILER_ID}")
     BOTG_FixUpCompilerNames( compiler )
+    GLOBAL_SET( BOTG_${lang}_COMPILER ${compiler} )
+    MESSAGE( STATUS "[BootsOnTheGround] BOTG_${lang}_COMPILER=${BOTG_${lang}_COMPILER}")
 
-    # This is a prefix for the files.
-    SET( pre "cmake/${lang}/${compiler}" )
-
-    # The first flag_file is language+compiler dependent.
-    # The second is language+compiler+operation system dependent.
-    FOREACH( flag_file "${pre}/Flags.cmake" "${pre}/${CMAKE_SYSTEM_NAME}/Flags.cmake" )
-
-        # Check both the project path and the BootsOnTheGround path.
-        # Project has precendence.
-        SET(proj_flags_path "${CMAKE_SOURCE_DIR}/${flag_file}")
-        SET(botg_flags_path "${BOTG_SOURCE_DIR}/${flag_file}")
-
-        # Choose which flags to load.
-        IF( EXISTS "${proj_flags_path}")
-            MESSAGE( STATUS "[BootsOnTheGround] using ${PROJECT_NAME} flags from path='${proj_flags_path}'.")
-            INCLUDE( "${proj_flags_path}" )
-        ELSEIF( EXISTS "${botg_flags_path}" )
-            MESSAGE( STATUS "[BootsOnTheGround] using default BOTG flags from path='${proj_flags_path}'.")
-            INCLUDE( "${botg_flags_path}" )
-        ELSE()
-            MESSAGE( WARNING "[BootsOnTheGround] neither '${proj_flags_path}' or '${botg_flags_path}' was valid--no default flags used!")
-        ENDIF()
-
-    ENDFOREACH()
-ENDFUNCTION()
-#-------------------------------------------------------------------------------
-# Used inside the Flags.cmake files for convenience.
-FUNCTION( BOTG_AddCompilerFlags lang flags )
-    STRING(FIND "${CMAKE_${lang}_FLAGS}" "${flags}" position)
-    IF( ${position} LESS 0 )
-        MESSAGE(STATUS "[BootsOnTheGround] adding flags='${flags}' for lang='${lang}'")
-        SET(CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS} ${flags}" CACHE BOOL "Compiler flags for lang='${lang}'" FORCE)
-    ENDIF()
-ENDFUNCTION()
+ENDMACRO()
 #-------------------------------------------------------------------------------
 # Check if given Fortran source compiles and links into an executable
 #
@@ -274,14 +243,14 @@ MACRO( BOTG_TryCompileFortran source var )
     ENDFOREACH()
 ENDMACRO()
 #-------------------------------------------------------------------------------
-MACRO (BOTG_CheckCompilerFlagFortran _flag _result)
+MACRO( BOTG_CheckFortranFlag flag result)
    SET(save_defs "${CMAKE_REQUIRED_DEFINITIONS}")
-   SET(CMAKE_REQUIRED_DEFINITIONS "${_flag}")
+   SET(CMAKE_REQUIRED_DEFINITIONS "${flag}")
    BOTG_TryCompileFortran("
      program main
           print *, \"Hello World\"
      end program main
-     " ${_result}
+     " ${result}
      # Some compilers do not fail with a bad flag
      FAIL_REGEX "unrecognized .*option"                     # GNU
      FAIL_REGEX "ignoring unknown option"                   # MSVC
@@ -293,8 +262,54 @@ MACRO (BOTG_CheckCompilerFlagFortran _flag _result)
    SET (CMAKE_REQUIRED_DEFINITIONS "${save_defs}")
 ENDMACRO()
 #-------------------------------------------------------------------------------
-MACRO( BOTG_ConfigureProject project_root_dir )
+MACRO( BOTG_CheckCompilerFlag lang flag found )
+    IF( ${lang} STREQUAL "Fortran" )
+        #CMake does not have a core one so we provide above.
+        BOTG_CheckFortranFlag( "${flag}" ${found} )
+    ELSEIF( ${lang} STREQUAL "CXX" )
+        INCLUDE(CheckCXXCompilerFlag)
+        CHECK_CXX_COMPILER_FLAG("${flag}" ${found})
+    ELSEIF( ${lang} STREQUAL "C" )
+        INCLUDE(CheckCCompilerFlag)
+        CHECK_C_COMPILER_FLAG("${flag}" ${found})
+    ELSE()
+        MESSAGE(FATAL_ERROR "[BootsOnTheGround] lang=${lang} is not known!" )
+    ENDIF()
+ENDMACRO()
+#-------------------------------------------------------------------------------
+MACRO( BOTG_AddCompilerFlags lang compiler system flags)
+    IF( NOT ${compiler} STREQUAL "ANY" )
+        STRING(REGEX MATCH "${compiler}" found_compiler ${BOTG_${lang}_COMPILER})
+    ELSE()
+        SET(found_compiler "ANY")
+    ENDIF()
+    IF( NOT ${system} STREQUAL "ANY" )
+        STRING(REGEX MATCH "${system}" found_system ${BOTG_SYSTEM})
+    ELSE()
+        SET(found_system "ANY")
+    ENDIF()
 
+    IF( (NOT ${found_system} STREQUAL "") AND (NOT ${found_compiler} STREQUAL "") )
+        MESSAGE(STATUS "[BootsOnTheGround] adding package=${PACKAGE_NAME} ${lang} flags for system='${found_system}' AND compiler='${found_compiler}'")
+        FOREACH( flag ${flags} )
+            #check if flag is already in list
+            STRING(FIND "${CMAKE_${lang}_FLAGS}" "${flag}" position)
+            IF( ${position} LESS 0 )
+                #create a special variable to store whether the flag works
+                STRING(REGEX REPLACE "[^0-9a-zA-Z]" "_" flagname ${flag})
+                BOTG_CheckCompilerFlag( ${lang} ${flag} BOTG_USE_${lang}_FLAG_${flagname})
+                IF( BOTG_USE_${lang}_FLAG_${flagname} )
+                    MESSAGE(STATUS "[BootsOnTheGround] enabled flag='${flag}'!")
+                    SET( CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS} ${flag}")
+                ELSE()
+                    MESSAGE(STATUS "[BootsOnTheGround] could not add invalid flag='${flag}'!")
+                ENDIF()
+            ENDIF()
+        ENDFOREACH()
+    ENDIF()
+ENDMACRO()
+#-------------------------------------------------------------------------------
+MACRO( BOTG_ConfigureProject project_root_dir )
     MESSAGE( STATUS "[BootsOnTheGround] initializing project with root directory=${project_root_dir} ...")
 
     # Clear the cache unless provided -D KEEP_CACHE:BOOL=ON.
@@ -320,6 +335,10 @@ MACRO( BOTG_ConfigureProject project_root_dir )
     # Just good practice.
     BOTG_PreventInSourceBuilds()
     GLOBAL_SET(${PROJECT_NAME}_ENABLE_TESTS ON CACHE BOOL "Enable all tests by default.")
+
+    # Set the operating system name so we can have system-dependent flags.
+    GLOBAL_SET( BOTG_SYSTEM ${CMAKE_SYSTEM_NAME} )
+    MESSAGE( STATUS "[BootsOnTheGround] BOTG_SYSTEM=${BOTG_SYSTEM}")
 
     # Process default flags for each language.
     BOTG_ProcessDefaultFlags( C )
