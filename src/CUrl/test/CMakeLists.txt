@@ -1,3 +1,6 @@
+BOTG_AddCompilerFlags( CXX ANY "Linux"
+    "-pthread"
+)
 TRIBITS_ADD_LIBRARY( BootsOnTheGround_CUrl_TestLib
   SOURCES
     TestLib.cc
