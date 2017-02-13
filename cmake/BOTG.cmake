@@ -362,6 +362,8 @@ MACRO( BOTG_AddCompilerFlags lang compiler system) #list of flags comes at end
                 ELSE()
                     MESSAGE(STATUS "[BootsOnTheGround] could not add invalid flag='${flag}'!")
                 ENDIF()
+            ELSE()
+                MESSAGE(STATUS "[BootsOnTheGround] flag='${flag}' has already been added.")
             ENDIF()
         ENDFOREACH()
     ENDIF()
