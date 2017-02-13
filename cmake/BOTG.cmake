@@ -245,6 +245,7 @@ ENDMACRO()
 #-------------------------------------------------------------------------------
 MACRO( BOTG_CheckFortranFlag flag result)
    SET(save_defs "${CMAKE_REQUIRED_DEFINITIONS}")
+   MESSAGE(STATUS "Performing Test ${flag}")
    SET(CMAKE_REQUIRED_DEFINITIONS "${flag}")
    BOTG_TryCompileFortran("
      program main
@@ -259,6 +260,11 @@ MACRO( BOTG_CheckFortranFlag flag result)
      FAIL_REGEX "[Ww]arning: [Oo]ption"                     # SunPro
      FAIL_REGEX "command option .* is not recognized"       # XL
      )
+   IF( result )
+     MESSAGE(STATUS "Performing Test ${flag} - Success")
+   ELSE()
+     MESSAGE(STATUS "Performing Test ${flag} - Fail")
+   ENDIF()
    SET (CMAKE_REQUIRED_DEFINITIONS "${save_defs}")
 ENDMACRO()
 #-------------------------------------------------------------------------------
