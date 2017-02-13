@@ -1,6 +1,4 @@
 TRIBITS_SUBPACKAGE(_BoostFilesystem)
-BOTG_AddCompilerFlags( CXX ANY ANY
-    "-std=c++11"
-)
+BOTG_UseCxxStandard( 11 )
 TRIBITS_ADD_TEST_DIRECTORIES(test)
 TRIBITS_SUBPACKAGE_POSTPROCESS()

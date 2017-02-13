@@ -262,6 +262,16 @@ MACRO( BOTG_CheckFortranFlag flag result)
    SET (CMAKE_REQUIRED_DEFINITIONS "${save_defs}")
 ENDMACRO()
 #-------------------------------------------------------------------------------
+MACRO( BOTG_UseCxxStandard version )
+    IF( CMAKE_VERSION VERSION_LESS "3.1" )
+        BOTG_AddCompilerFlags( CXX "GNU|Clang" ANY
+            "-std=c++${version}"
+        )
+    ELSE()
+        SET(CMAKE_CXX_STANDARD ${version})
+    ENDIF()
+ENDMACRO()
+#-------------------------------------------------------------------------------
 MACRO( BOTG_CheckCompilerFlag lang flag found )
     IF( ${lang} STREQUAL "Fortran" )
         #CMake does not have a core one so we provide above.
