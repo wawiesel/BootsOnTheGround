@@ -1,5 +1,5 @@
 TRIBITS_SUBPACKAGE(_GTest)
-BOTG_AddCompilerFlags( CXX "GNU" ANY
+BOTG_AddCompilerFlags( CXX ANY "Linux"
     "-pthread"
 )
 TRIBITS_ADD_TEST_DIRECTORIES(test)

@@ -322,6 +322,7 @@ MACRO( BOTG_ConfigureProject project_root_dir )
 
     # Enable the hunter gate for downloading/installing TPLs!
     PROJECT("" NONE) #hack to make HunterGate happy
+    SET(HUNTER_SKIP_LOCK ON)
     INCLUDE( "${BOTG_SOURCE_DIR}/cmake/HunterGate.cmake" )
 
     # Declare **project**.
