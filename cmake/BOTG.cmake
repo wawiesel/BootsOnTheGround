@@ -263,13 +263,21 @@ MACRO( BOTG_CheckFortranFlag flag result)
 ENDMACRO()
 #-------------------------------------------------------------------------------
 MACRO( BOTG_UseCxxStandard version )
-    IF( CMAKE_VERSION VERSION_LESS "3.1" )
-        BOTG_AddCompilerFlags( CXX "GNU|Clang" ANY
-            "-std=c++${version}"
-        )
-    ELSE()
-        SET(CMAKE_CXX_STANDARD ${version})
-    ENDIF()
+    BOTG_AddCompilerFlags( CXX "GNU|Clang" ANY
+        "-std=c++${version}"
+    )
+ENDMACRO()
+#-------------------------------------------------------------------------------
+MACRO( BOTG_EnableFortran )
+    FOREACH( directive ${ARGN} )
+        IF( directive STREQUAL "C_PREPROCESSOR" )
+            BOTG_AddCompilerFlags( Fortran "GNU|Clang" ANY "-cpp" )
+        ELSEIF( directive STREQUAL "UNLIMITED_LINE_LENGTH" )
+            BOTG_AddCompilerFlags( Fortran "GNU|Clang" ANY "-ffree-line-length-none" )
+        ELSE()
+            MESSAGE(FATAL_ERROR "[BootsOnTheGround] EnableFortran directive=${directive} is unknown!")
+        ENDIF()
+    ENDFOREACH()
 ENDMACRO()
 #-------------------------------------------------------------------------------
 MACRO( BOTG_CheckCompilerFlag lang flag found )
