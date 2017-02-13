@@ -279,6 +279,9 @@ MACRO( BOTG_UseCxxStandard version )
     BOTG_AddCompilerFlags( CXX "GNU|Clang" ANY
         "-std=c++${version}"
     )
+    BOTG_AddCompilerFlags( CXX "Intel" "Linux|Darwin"
+        "-std=c${version}"
+    )
 ENDMACRO()
 #-------------------------------------------------------------------------------
 MACRO( BOTG_EnableFortran )
