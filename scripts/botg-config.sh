@@ -9,7 +9,7 @@ fi
 
 BOTG_SCRIPT_DIR=$(dirname $0)
 XCOL=$BOTG_SCRIPT_DIR/contrib/xcol/xcolorize.sh
-cmake $args 2>&1 | $XCOL \
+cmake -Wno-dev $args 2>&1 | $XCOL \
                yellow '\[BootsOnTheGround\].*' \
                  pink '\[hunter\].*' \
                  cyan '^Processing enabled package.*' \
