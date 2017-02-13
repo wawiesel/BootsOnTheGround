@@ -1,4 +1,7 @@
 TRIBITS_SUBPACKAGE(_CUrl)
+BOTG_AddCompilerFlags( CXX ANY "Linux"
+    "-Wl,--no-as-needed -ldl"
+)
 TRIBITS_ADD_TEST_DIRECTORIES(test)
 TRIBITS_SUBPACKAGE_POSTPROCESS()
 
