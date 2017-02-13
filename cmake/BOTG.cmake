@@ -277,7 +277,7 @@ MACRO( BOTG_CheckCompilerFlag lang flag found )
     ENDIF()
 ENDMACRO()
 #-------------------------------------------------------------------------------
-MACRO( BOTG_AddCompilerFlags lang compiler system flags)
+MACRO( BOTG_AddCompilerFlags lang compiler system) #list of flags comes at end
     IF( NOT ${compiler} STREQUAL "ANY" )
         STRING(REGEX MATCH "${compiler}" found_compiler ${BOTG_${lang}_COMPILER})
     ELSE()
@@ -291,7 +291,7 @@ MACRO( BOTG_AddCompilerFlags lang compiler system flags)
 
     IF( (NOT ${found_system} STREQUAL "") AND (NOT ${found_compiler} STREQUAL "") )
         MESSAGE(STATUS "[BootsOnTheGround] adding package=${PACKAGE_NAME} ${lang} flags for system='${found_system}' AND compiler='${found_compiler}'")
-        FOREACH( flag ${flags} )
+        FOREACH( flag ${ARGN} )
             #check if flag is already in list
             STRING(FIND "${CMAKE_${lang}_FLAGS}" "${flag}" position)
             IF( ${position} LESS 0 )
