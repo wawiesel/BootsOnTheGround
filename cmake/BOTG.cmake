@@ -276,11 +276,8 @@ FUNCTION( BOTG_MinimumCompilerVersion compiler lang version )
 ENDFUNCTION()
 #-------------------------------------------------------------------------------
 MACRO( BOTG_UseCxxStandard version )
-    BOTG_AddCompilerFlags( CXX "GNU|Clang" ANY
+    BOTG_AddCompilerFlags( CXX "GNU|Clang|Intel" ANY
         "-std=c++${version}"
-    )
-    BOTG_AddCompilerFlags( CXX "Intel" "Linux|Darwin"
-        "-std=c${version}"
     )
 ENDMACRO()
 #-------------------------------------------------------------------------------
