@@ -260,7 +260,7 @@ MACRO( BOTG_CheckFortranFlag flag result)
      FAIL_REGEX "[Ww]arning: [Oo]ption"                     # SunPro
      FAIL_REGEX "command option .* is not recognized"       # XL
      )
-   IF( result )
+   IF( ${result} )
      MESSAGE(STATUS "Performing Test ${flag} - Success")
    ELSE()
      MESSAGE(STATUS "Performing Test ${flag} - Fail")
