@@ -1,4 +1,7 @@
 TRIBITS_SUBPACKAGE(_Spdlog)
 BOTG_UseCxxStandard( 11 )
+BOTG_AddCompilerFlags( CXX ANY "Linux"
+    "-pthread"
+)
 TRIBITS_ADD_TEST_DIRECTORIES(test)
 TRIBITS_SUBPACKAGE_POSTPROCESS()
