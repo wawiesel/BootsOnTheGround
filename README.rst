@@ -4,6 +4,8 @@ This is BootsOnTheGround [BOTG_]!
 .. image:: https://travis-ci.org/wawiesel/BootsOnTheGround.svg?branch=master
     :target: https://travis-ci.org/wawiesel/BootsOnTheGround
 
+.. image:: http://i.imgur.com/FdJAAxI.jpg
+
 BOTG_ provides a set of FindTPL*.cmake files to find and link Third Party
 Libraries (TPLs) to other packages using the CMake_ / TriBITS_ framework
 for C/C++/Fortran code.
@@ -33,12 +35,12 @@ How do I use it?
 ----------------
 
 Bootstrapping is the recommended way of using BOTG (hence the name!). 
-You need to do three things to enable BOTG in your TriBITS project.
+You need to do four things to enable BOTG in your TriBITS C/C++/Fortran project.
 
-#. Copy ``cmake/BOTG_INCLUDE.cmake`` to your project. 
-#. CMake ``INCLUDE`` the ``cmake/BOTG_INCLUDE.cmake`` first thing in your main ``CMakeLists.txt`` file.
-#. Copy ``external/BootsOnTheGround.in`` to your project. 
-#. Make sure BOTG comes first in your ``PackagesList.cmake`` file.
+#. Copy ``cmake/BOTG_INCLUDE.cmake`` containing bootstrap commands to your project's root ``cmake`` directory. 
+#. Copy ``external/BootsOnTheGround.in`` containing repo link commands to your project's ``external`` directory. 
+#. ``INCLUDE(cmake/BOTG_INCLUDE.cmake)`` first thing in your root ``CMakeLists.txt`` file to execute the bootstrap.
+#. Add BOTG to your TriBITS ``PackagesList.cmake`` file.
 
 .. code-block:: cmake
 
@@ -47,8 +49,8 @@ You need to do three things to enable BOTG in your TriBITS project.
           ...
         )
 
-Note, if you don't want to clone BOTG to ``external``, then you're going to have to change some stuff in 
-``BOTG_INCLUDE.cmake``. See Testing123_ for an example of bootstrapping BOTG.
+Note, if you don't want to bootstrap BOTG to the directory ``external``, then you're going to have to change the line in 
+``BOTG_INCLUDE.cmake`` that references ``external/BootsOnTheGround.in`` . See Testing123_ for an example of bootstrapping BOTG.
 
 Then in your ``Dependencies.cmake`` file for any package you can use the
 ``BOTG_AddTPL()`` macro **after** ``TRIBITS_PACKAGE_DEFINE_DEPENDENCIES``.
