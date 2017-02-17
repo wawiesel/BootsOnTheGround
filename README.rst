@@ -4,7 +4,7 @@ This is BootsOnTheGround [BOTG_]! |build|
 .. |build| image:: https://travis-ci.org/wawiesel/BootsOnTheGround.svg?branch=master
     :target: https://travis-ci.org/wawiesel/BootsOnTheGround
 
-effectively use CMake/TriBITS to link TPLs to your packages
+CMake/TriBITS third-party-library linker for C++/Fortran
 
 .. image:: http://i.imgur.com/V2XfdTv.jpg
 
