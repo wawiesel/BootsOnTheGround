@@ -1,7 +1,7 @@
-This is BootsOnTheGround [BOTG_]!
-=================================
+This is BootsOnTheGround [BOTG_]! |build|
+=========================================
 
-.. image:: https://travis-ci.org/wawiesel/BootsOnTheGround.svg?branch=master
+.. |build| image:: https://travis-ci.org/wawiesel/BootsOnTheGround.svg?branch=master
     :target: https://travis-ci.org/wawiesel/BootsOnTheGround
 
 effectively use CMake/TriBITS to link TPLs to your packages
