@@ -10,8 +10,21 @@ BOTG_ provides a set of FindTPL*.cmake files to find and link Third Party
 Libraries (TPLs) to other packages using the CMake_ / TriBITS_ framework
 for C/C++/Fortran code.
 
-TPLs
-----
+.. code-block:: cmake
+
+    TRIBITS_PACKAGE( MyPackage )
+    TRIBITS_PACKAGE_DEFINE_DEPENDENCIES(
+        LIB_REQUIRED_PACKAGES TheirPackage
+    ) 
+    BOTG_AddTPL( LIB OPTIONAL CUrl )    #Optional for building
+    BOTG_AddTPL( TEST REQUIRED GTest )  #Required only for tests
+    TRIBITS_PACKAGE_POSTPROCESS()
+
+The available ``XXX`` allowed in ``BOTG_AddTPL( LIB|TEST OPTIONAL|REQUIRED XXX)``
+are listed below.
+
+Current TPLs
+------------
 
 Currently we have the following TPLs wrapped up nice and purdy:
 
@@ -148,14 +161,6 @@ not clear if they will ever have Windows support.
 
 -----------------------------------------------------------------------------
 
-To Do
------
-- Enable version specification and process TPL version information. Should
-  be able to print a summary of the linked TPLs.
-- Enable windows testing.
-- Complete RST documentation of the BOTG functions and the framework itself.
-- Add SuperLU.
-- Handle linking flags better for different compilers/operating systems.
 
 Repository Structure
 --------------------
