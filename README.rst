@@ -37,7 +37,7 @@ Currently we have the following TPLs wrapped up nice and purdy:
 - GTEST_ - Google's unit testing system [C++]
 - HDF5_ - hierarchical binary data containers [C++]
 - NLJSON_ - NLohmann's JSON as a first-class citizen [C++]
-- OPENSLLL_ - hash for security [C++]
+- OPENSSL_ - hash for security [C++]
 - SZIP_ - scientific zip algorithm [C++]
 - SPDLOG_ - fast, versatile logging [C++]
 - ZLIB_ - compession/decompression algorithm [C++]
