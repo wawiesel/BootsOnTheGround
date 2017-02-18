@@ -1,4 +1,4 @@
-SET(tribits_name Fmt)
+SET(tribits_name FMT)
 SET(headers
     fmt/format.h
     fmt/ostream.h

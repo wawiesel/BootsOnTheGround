@@ -1,4 +1,4 @@
-SET(tribits_name SZip)
+SET(tribits_name SZIP)
 SET(headers
     szlib.h
 )

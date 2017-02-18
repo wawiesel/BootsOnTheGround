@@ -1,4 +1,4 @@
-SET(tribits_name ZLib)
+SET(tribits_name ZLIB)
 SET(headers
     zlib.h
 )

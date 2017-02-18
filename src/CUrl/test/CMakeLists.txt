@@ -1,18 +1,18 @@
 BOTG_AddCompilerFlags( CXX ANY "Linux"
     "-pthread"
 )
-TRIBITS_ADD_LIBRARY( BootsOnTheGround_CUrl_TestLib
+TRIBITS_ADD_LIBRARY( BootsOnTheGround_CURL_TestLib
   SOURCES
     TestLib.cc
   TESTONLY
 )
 TRIBITS_ADD_EXECUTABLE_AND_TEST( test_cc
   SOURCES
-    tstCUrl.cc
+    tstCURL.cc
   TESTONLYLIBS
-    BootsOnTheGround_CUrl_TestLib
+    BootsOnTheGround_CURL_TestLib
 )
-TRIBITS_COPY_FILES_TO_BINARY_DIR( BootsOnTheGround_CUrl_cacert
+TRIBITS_COPY_FILES_TO_BINARY_DIR( BootsOnTheGround_CURL_cacert
   SOURCE_FILES
     cacert.pem
   EXEDEPS

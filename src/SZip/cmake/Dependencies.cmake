@@ -1,4 +1,4 @@
 BOTG_DefineTPLDependencies(
-    "SZip"                   #LIB
-    "GTest"                  #TEST
+    "SZIP"                   #LIB
+    "GTEST"                  #TEST
 )

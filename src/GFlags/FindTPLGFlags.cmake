@@ -1,4 +1,4 @@
-SET(tribits_name GFlags)
+SET(tribits_name GFLAGS)
 SET(headers
     gflags/gflags.h
 )

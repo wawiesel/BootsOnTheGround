@@ -1,4 +1,4 @@
-TRIBITS_SUBPACKAGE(_CUrl)
+TRIBITS_SUBPACKAGE(_CURL)
 BOTG_AddCompilerFlags( CXX ANY "Linux"
     "-Wl,--no-as-needed -ldl"
 )

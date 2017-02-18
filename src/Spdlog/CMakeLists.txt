@@ -1,4 +1,4 @@
-TRIBITS_SUBPACKAGE(_Spdlog)
+TRIBITS_SUBPACKAGE(_SPDLOG)
 BOTG_UseCxxStandard( 11 )
 BOTG_AddCompilerFlags( CXX ANY "Linux"
     "-pthread"

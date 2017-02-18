@@ -1,4 +1,4 @@
 BOTG_DefineTPLDependencies(
-    "CUrl;OpenSSL;ZLib"      #LIB
-    "GTest"                  #TEST
+    "CURL;OPENSSL;ZLIB"      #LIB
+    "GTEST"                  #TEST
 )

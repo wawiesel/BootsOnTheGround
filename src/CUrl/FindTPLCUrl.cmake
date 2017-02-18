@@ -1,4 +1,4 @@
-SET(tribits_name CUrl)
+SET(tribits_name CURL)
 SET(headers
     curl/curl.h
     curl/easy.h

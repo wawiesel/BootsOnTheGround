@@ -1,4 +1,4 @@
-SET(tribits_name NLJson)
+SET(tribits_name NLJSON)
 SET(headers
     nlohmann/json.hpp
 )

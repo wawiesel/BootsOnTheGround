@@ -1,4 +1,4 @@
-SET(tribits_name Spdlog)
+SET(tribits_name SPDLOG)
 SET(headers
     spdlog/async_logger.h
     spdlog/common.h

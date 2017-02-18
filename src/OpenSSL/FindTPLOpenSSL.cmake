@@ -1,4 +1,4 @@
-SET(tribits_name OpenSSL)
+SET(tribits_name OPENSSL)
 SET(headers
     openssl/ssl.h
     openssl/crypto.h

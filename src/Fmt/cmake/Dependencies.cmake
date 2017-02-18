@@ -1,4 +1,4 @@
 BOTG_DefineTPLDependencies(
-    "Fmt"                    #LIB
-    "GTest"                  #TEST
+    "FMT"                    #LIB
+    "GTEST"                  #TEST
 )

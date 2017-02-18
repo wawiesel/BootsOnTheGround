@@ -1,4 +1,4 @@
 BOTG_DefineTPLDependencies(
-    "OpenSSL"                #LIB
-    "GTest"                  #TEST
+    "OPENSSL"                #LIB
+    "GTEST"                  #TEST
 )

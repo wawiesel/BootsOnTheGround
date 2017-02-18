@@ -1,4 +1,4 @@
-SET(tribits_name GTest)
+SET(tribits_name GTEST)
 SET(headers
     gtest/gtest.h
 )

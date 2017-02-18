@@ -1,4 +1,4 @@
 BOTG_DefineTPLDependencies(
-    "NLJson"                 #LIB
-    "GTest"                  #TEST
+    "NLJSON"                 #LIB
+    "GTEST"                  #TEST
 )

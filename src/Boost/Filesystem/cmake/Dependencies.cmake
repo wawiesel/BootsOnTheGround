@@ -1,4 +1,4 @@
 BOTG_DefineTPLDependencies(
-    "BoostFilesystem"        #LIB
-    "GTest"                  #TEST
+    "BOOST_FILESYSTEM"       #LIB
+    "GTEST"                  #TEST
 )
