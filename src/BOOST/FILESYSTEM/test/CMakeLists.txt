@@ -1,0 +1,7 @@
+BOTG_AddCompilerFlags( CXX ANY "Linux"
+    "-pthread"
+)
+TRIBITS_ADD_EXECUTABLE_AND_TEST( test_cc
+  SOURCES
+    tstBOOST_FILESYSTEM.cc
+)
