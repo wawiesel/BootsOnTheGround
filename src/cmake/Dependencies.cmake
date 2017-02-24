@@ -14,7 +14,7 @@ MACRO( BOTG_DefineTPLSubPackages )
 
     # setup up the subpackages list
     FOREACH( tpl_loc ${BOTG_TPL_LIST} )
-        STRING(REPLACE "/" "" tpl_name ${tpl_loc})
+        STRING(REPLACE "/" "_" tpl_name ${tpl_loc})
         LIST(APPEND SUBPACKAGES_DIRS_CLASSIFICATIONS_OPTREQS
              "_${tpl_name}" ${tpl_loc} ST OPTIONAL )
     ENDFOREACH()

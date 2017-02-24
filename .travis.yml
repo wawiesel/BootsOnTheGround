@@ -3,7 +3,7 @@
 # This file can be validated on:
 # http://lint.travis-ci.org/
 
-sudo: required
+sudo: none
 
 dist: trusty
 
@@ -41,7 +41,7 @@ before_install:
               export CC="gcc-4.9";
           fi;
       elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-          brew update && brew install gcc && brew install libidn && export FC="gfortran";
+          travis_wait brew install gcc && brew install libidn && export FC="gfortran";
       fi
 
 install:

@@ -1,4 +1,4 @@
 BOTG_DefineTPLDependencies(
-    "HDF5;ZLIB;SZIP"         #LIB
+    "OPENSSL"                #LIB
     "GTEST"                  #TEST
 )

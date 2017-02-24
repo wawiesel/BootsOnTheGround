@@ -1,44 +1,59 @@
-This is BootsOnTheGround [BOTG_]!
-=================================
+This is BootsOnTheGround [BOTG_]! |build|
+=========================================
 
-.. image:: https://travis-ci.org/wawiesel/BootsOnTheGround.svg?branch=master
+.. |build| image:: https://travis-ci.org/wawiesel/BootsOnTheGround.svg?branch=master
     :target: https://travis-ci.org/wawiesel/BootsOnTheGround
+
+CMake/TriBITS third-party-library linker for C++/Fortran
+
+.. image:: http://i.imgur.com/V2XfdTv.jpg
 
 BOTG_ provides a set of FindTPL*.cmake files to find and link Third Party
 Libraries (TPLs) to other packages using the CMake_ / TriBITS_ framework
 for C/C++/Fortran code.
 
-TPLs
-----
+.. code-block:: cmake
+
+    TRIBITS_PACKAGE( MyPackage )
+    TRIBITS_PACKAGE_DEFINE_DEPENDENCIES(
+        LIB_REQUIRED_PACKAGES TheirPackage
+    ) 
+    BOTG_AddTPL( LIB OPTIONAL CURL )    #Optional for building
+    BOTG_AddTPL( TEST REQUIRED GTEST )  #Required only for tests
+    TRIBITS_PACKAGE_POSTPROCESS()
+
+The available ``XXX`` allowed in ``BOTG_AddTPL( LIB|TEST OPTIONAL|REQUIRED XXX)``
+are listed below.
+
+Current TPLs
+------------
 
 Currently we have the following TPLs wrapped up nice and purdy:
 
-- BoostFilesystem_ -- Cross-platform file system queries [C++]
-- CUrl_ -- push and pull across the web [C++]
-- Fmt_ -- amazing sprintf, printf replacement [C++]
-- GFlags_ -- command line flags parsing [C++]
-- GTest_ -- Google's unit testing system [C++]
-- HDF5_ -- hierarchical binary data containers [C++]
-- NLJson_ -- NLohmann's JSON as a first-class citizen [C++]
-- OpenSSL_ -- hash for security [C++]
-- SZip_ -- scientific zip algorithm [C++]
-- Spdlog_ -- fast, versatile logging [C++]
-- ZLib_ -- compession/decompression algorithm [C++]
+- BOOST_FILESYSTEM_ - Cross-platform file system queries [C++]
+- CURL_ - push and pull across the web [C++]
+- FMT_ - amazing sprintf, printf replacement [C++]
+- GFLAGS_ - command line flags parsing [C++]
+- GTEST_ - Google's unit testing system [C++]
+- HDF5_ - hierarchical binary data containers [C++]
+- NLJSON_ - NLohmann's JSON as a first-class citizen [C++]
+- OPENSSL_ - hash for security [C++]
+- SZIP_ - scientific zip algorithm [C++]
+- SPDLOG_ - fast, versatile logging [C++]
+- ZLIB_ - compession/decompression algorithm [C++]
 
-Take a look at Testing123_ for an example of how to use BOTG_ or further
-into the rabbit hole see Template123_ for a simple skeleton project
-that uses Testing123_ for unit testing.
+Take a look at Testing123_ for an example of how to use BOTG_.
 
 How do I use it?
 ----------------
 
 Bootstrapping is the recommended way of using BOTG (hence the name!). 
-You need to do three things to enable BOTG in your TriBITS project.
+You need to do four things to enable BOTG in your TriBITS C/C++/Fortran project.
 
-#. Copy ``cmake/BOTG_INCLUDE.cmake`` to your project. 
-#. CMake ``INCLUDE`` the ``cmake/BOTG_INCLUDE.cmake`` first thing in your main ``CMakeLists.txt`` file.
-#. Copy ``external/BootsOnTheGround.in`` to your project. 
-#. Make sure BOTG comes first in your ``PackagesList.cmake`` file.
+#. Copy ``cmake/BOTG_INCLUDE.cmake`` containing bootstrap commands to your project's root ``cmake`` directory. 
+#. Copy ``external/BootsOnTheGround.in`` containing repo link commands to your project's ``external`` directory. 
+#. ``INCLUDE(cmake/BOTG_INCLUDE.cmake)`` first thing in your root ``CMakeLists.txt`` file to execute the bootstrap.
+#. Add BOTG to your TriBITS ``PackagesList.cmake`` file.
 
 .. code-block:: cmake
 
@@ -47,8 +62,8 @@ You need to do three things to enable BOTG in your TriBITS project.
           ...
         )
 
-Note, if you don't want to clone BOTG to ``external``, then you're going to have to change some stuff in 
-``BOTG_INCLUDE.cmake``. See Testing123_ for an example of bootstrapping BOTG.
+Note, if you don't want to bootstrap BOTG to the directory ``external``, then you're going to have to change the line in 
+``BOTG_INCLUDE.cmake`` that references ``external/BootsOnTheGround.in`` . See Testing123_ for an example of bootstrapping BOTG.
 
 Then in your ``Dependencies.cmake`` file for any package you can use the
 ``BOTG_AddTPL()`` macro **after** ``TRIBITS_PACKAGE_DEFINE_DEPENDENCIES``.
@@ -58,15 +73,16 @@ Then in your ``Dependencies.cmake`` file for any package you can use the
         TRIBITS_PACKAGE_DEFINE_DEPENDENCIES(
             #do not list TPLs--only packages
         )
-        BOTG_AddTPL( LIB REQUIRED Xyz )
-        BOTG_AddTPL( TEST REQUIRED Uvw )
-        BOTG_AddTPL( LIB OPTIONAL Abc )
-        BOTG_AddTPL( TEST OPTIONAL Def )
+        BOTG_AddTPL( LIB REQUIRED XYZ )
+        BOTG_AddTPL( TEST REQUIRED UVW )
+        BOTG_AddTPL( LIB OPTIONAL ABC )
+        BOTG_AddTPL( TEST OPTIONAL DEF )
 
 Note the first argument is ``LIB`` for a main "library" dependency or ``TEST``
 for a test-only dependency and the second argument is either ``REQUIRED`` or
 ``OPTIONAL``. The final is the TPL name from the `TPLs`_ list. See 
-`Connection to TriBITS`_ for details.
+`Connection to TriBITS`_ for details. It is always upper case, with "_" used
+to separate words.
 
 Downloads
 ---------
@@ -108,29 +124,29 @@ be dependent on another TPL, and TPLs cannot have versions. The idea
 is that we wrap each TPL in a TriBITS *package*, which does provide
 this capability.
 
-Say you needed TPL ``CURL`` for your library and ``GTest`` for testing.
-``CURL`` requires ``OpenSSL`` and ``ZLib``. In every TriBITS
+Say you needed TPL ``CURL`` for your library and ``GTEST`` for testing.
+``CURL`` requires ``OPENSSL`` and ``ZLIB``. In every TriBITS
 cmake/Dependencies.cmake file, you would need to specify:
 
 .. code-block:: cmake
     TRIBITS_PACKAGE_DEFINE_DEPENDENCIES(
       LIB_REQUIRED_TPLS
         CURL
-        OpenSSL
-        ZLib
+        OPENSSL
+        ZLIB
       TEST_REQUIRED_TPLS
-        GTest
+        GTEST
     )
 
 With BOTG_, you can use instead a *package* dependency
-on ``BootsOnTheGround_CUrl`` available via a simple MACRO
+on ``BootsOnTheGround_CURL`` available via a simple MACRO
 ``BOTG_AddTPL``.
 
 .. code-block:: cmake
 
     TRIBITS_PACKAGE_DEFINE_DEPENDENCIES()
-    BOTG_AddTPL( LIB REQUIRED CUrl )
-    BOTG_AddTPL( TEST REQUIRED GTest )
+    BOTG_AddTPL( LIB REQUIRED CURL )
+    BOTG_AddTPL( TEST REQUIRED GTEST )
 
 Note, the other magic gained by using BOTG is
 that Hunter_ is used to download, build, and install any TPLs it
@@ -146,14 +162,6 @@ not clear if they will ever have Windows support.
 
 -----------------------------------------------------------------------------
 
-To Do
------
-- Enable version specification and process TPL version information. Should
-  be able to print a summary of the linked TPLs.
-- Enable windows testing.
-- Complete RST documentation of the BOTG functions and the framework itself.
-- Add SuperLU.
-- Handle linking flags better for different compilers/operating systems.
 
 Repository Structure
 --------------------
@@ -183,18 +191,18 @@ followed the steps on `Cees-Jan Kiewiet's Blog Post
 .. _TriBITS: https://tribits.org
 .. _BOTG: http://github.com/wawiesel/BootsOnTheGround
 .. _Testing123: http://github.com/wawiesel/Testing123
-.. _Template123: http://github.com/wawiesel/Template123
 .. _Hunter: http://github.com/ruslo/hunter
-.. _GTest: http://github.com/google/googletest
-.. _GFlags: https://gflags.github.io/gflags
-.. _BoostFilesystem: http://www.boost.org/doc/libs/1_63_0/libs/filesystem/doc/reference.html
-.. _Fmt: http://fmtlib.net/latest/index.html
-.. _Spdlog: https://github.com/gabime/spdlog/wiki/1.-QuickStart
-.. _SZip: http://www.compressconsult.com/szip
-.. _ZLib: http://www.zlib.net/
-.. _NLJson: https://github.com/nlohmann/json#examples
+
+.. _GTEST: http://github.com/google/googletest
+.. _GFLAGS: https://gflags.github.io/gflags
+.. _BOOST_FILESYSTEM: http://www.boost.org/doc/libs/1_63_0/libs/filesystem/doc/reference.html
+.. _FMT: http://fmtlib.net/latest/index.html
+.. _SPDLOG: https://github.com/gabime/spdlog/wiki/1.-QuickStart
+.. _SZIP: http://www.compressconsult.com/szip
+.. _ZLIB: http://www.zlib.net/
+.. _NLJSON: https://github.com/nlohmann/json#examples
 .. _CASL: http://www.casl.gov
-.. _OpenSSL: https://www.openssl.org/
-.. _CUrl: https://curl.haxx.se/libcurl/
+.. _OPENSSL: https://www.openssl.org/
+.. _CURL: https://curl.haxx.se/libcurl/
 .. _HDF5: https://support.hdfgroup.org/HDF5/
 

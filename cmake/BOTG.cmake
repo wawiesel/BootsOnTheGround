@@ -52,10 +52,6 @@ FUNCTION( BOTG_HuntTPL tribits_name headers libs hunter_name hunter_args )
     #the library names. (First noticed with HDF5 on ORNL's Jupiter Linux cluster)
     SET(${tribits_name}_FORCE_PRE_FIND_PACKAGE ON)
 
-    #This is necessary to avoid TriBITs thinking we have found libraries when all we have set is
-    #the library names. (First noticed with HDF5 on ORNL's Jupiter Linux cluster)
-    SET(${tribits_name}_FORCE_PRE_FIND_PACKAGE ON)
-
     TRIBITS_TPL_ALLOW_PRE_FIND_PACKAGE( ${tribits_name}  ${tribits_name}_ALLOW_PREFIND)
 
     MESSAGE( STATUS "[BootsOnTheGround] ${tribits_name}_ALLOW_PREFIND=${${tribits_name}_ALLOW_PREFIND}" )
@@ -150,56 +146,26 @@ FUNCTION(BOTG_PreventInSourceBuilds)
   ENDIF()
 ENDFUNCTION()
 #-------------------------------------------------------------------------------
-FUNCTION( BOTG_FixupCompilerNames compiler )
-
-    # Fix up compiler names
-    IF( compiler STREQUAL "AppleClang" )
-        SET( compiler "Clang" PARENT_SCOPE )
+FUNCTION( BOTG_GetCompilerName lang compiler )
+    SET( compiler_ "${CMAKE_${lang}_COMPILER}")
+    GET_FILENAME_COMPONENT(compiler_ "${compiler_}" NAME_WE)
+    SET( compiler_suite_ "${CMAKE_${lang}_COMPILER_ID}")
+    IF( compiler_suite_ STREQUAL "AppleClang" )
+        SET(compiler_suite_ "Clang" )
     ENDIF()
+    SET( ${compiler} "${compiler_suite_}/${compiler_}" PARENT_SCOPE )
 
 ENDFUNCTION()
 #-------------------------------------------------------------------------------
 # Processes all the default flags for a single language.
-FUNCTION( BOTG_ProcessDefaultFlags lang )
+MACRO( BOTG_ProcessDefaultFlags lang )
 
-    # This is the compiler name.
-    SET( compiler "${CMAKE_${lang}_COMPILER_ID}")
-    BOTG_FixUpCompilerNames( compiler )
+    # Set the compiler name so we can have compiler-dependent flags.
+    BOTG_GetCompilerName( ${lang} compiler )
+    GLOBAL_SET( BOTG_${lang}_COMPILER ${compiler} )
+    MESSAGE( STATUS "[BootsOnTheGround] BOTG_${lang}_COMPILER=${BOTG_${lang}_COMPILER}")
 
-    # This is a prefix for the files.
-    SET( pre "cmake/${lang}/${compiler}" )
-
-    # The first flag_file is language+compiler dependent.
-    # The second is language+compiler+operation system dependent.
-    FOREACH( flag_file "${pre}/Flags.cmake" "${pre}/${CMAKE_SYSTEM_NAME}/Flags.cmake" )
-
-        # Check both the project path and the BootsOnTheGround path.
-        # Project has precendence.
-        SET(proj_flags_path "${CMAKE_SOURCE_DIR}/${flag_file}")
-        SET(botg_flags_path "${BOTG_SOURCE_DIR}/${flag_file}")
-
-        # Choose which flags to load.
-        IF( EXISTS "${proj_flags_path}")
-            MESSAGE( STATUS "[BootsOnTheGround] using ${PROJECT_NAME} flags from path='${proj_flags_path}'.")
-            INCLUDE( "${proj_flags_path}" )
-        ELSEIF( EXISTS "${botg_flags_path}" )
-            MESSAGE( STATUS "[BootsOnTheGround] using default BOTG flags from path='${proj_flags_path}'.")
-            INCLUDE( "${botg_flags_path}" )
-        ELSE()
-            MESSAGE( WARNING "[BootsOnTheGround] neither '${proj_flags_path}' or '${botg_flags_path}' was valid--no default flags used!")
-        ENDIF()
-
-    ENDFOREACH()
-ENDFUNCTION()
-#-------------------------------------------------------------------------------
-# Used inside the Flags.cmake files for convenience.
-FUNCTION( BOTG_AddCompilerFlags lang flags )
-    STRING(FIND "${CMAKE_${lang}_FLAGS}" "${flags}" position)
-    IF( ${position} LESS 0 )
-        MESSAGE(STATUS "[BootsOnTheGround] adding flags='${flags}' for lang='${lang}'")
-        SET(CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS} ${flags}" CACHE BOOL "Compiler flags for lang='${lang}'" FORCE)
-    ENDIF()
-ENDFUNCTION()
+ENDMACRO()
 #-------------------------------------------------------------------------------
 # Check if given Fortran source compiles and links into an executable
 #
@@ -274,14 +240,15 @@ MACRO( BOTG_TryCompileFortran source var )
     ENDFOREACH()
 ENDMACRO()
 #-------------------------------------------------------------------------------
-MACRO (BOTG_CheckCompilerFlagFortran _flag _result)
+MACRO( BOTG_CheckFortranFlag flag result)
    SET(save_defs "${CMAKE_REQUIRED_DEFINITIONS}")
-   SET(CMAKE_REQUIRED_DEFINITIONS "${_flag}")
+   MESSAGE(STATUS "Performing Test ${flag}")
+   SET(CMAKE_REQUIRED_DEFINITIONS "${flag}")
    BOTG_TryCompileFortran("
      program main
           print *, \"Hello World\"
      end program main
-     " ${_result}
+     " ${result}
      # Some compilers do not fail with a bad flag
      FAIL_REGEX "unrecognized .*option"                     # GNU
      FAIL_REGEX "ignoring unknown option"                   # MSVC
@@ -290,11 +257,120 @@ MACRO (BOTG_CheckCompilerFlagFortran _flag _result)
      FAIL_REGEX "[Ww]arning: [Oo]ption"                     # SunPro
      FAIL_REGEX "command option .* is not recognized"       # XL
      )
+   IF( ${result} )
+     MESSAGE(STATUS "Performing Test ${flag} - Success")
+   ELSE()
+     MESSAGE(STATUS "Performing Test ${flag} - Fail")
+   ENDIF()
    SET (CMAKE_REQUIRED_DEFINITIONS "${save_defs}")
 ENDMACRO()
 #-------------------------------------------------------------------------------
+FUNCTION( BOTG_MinimumCompilerVersion lang compiler min_version )
+    BOTG_CompilerMatches( ${lang} ${compiler} found )
+    IF( ${found} )
+        SET(version "${CMAKE_${lang}_COMPILER_VERSION}")
+        IF( "${version}" STREQUAL "" )
+            MESSAGE( WARNING "CMAKE_${lang}_COMPILER_VERSION could not be discovered!")
+        ELSEIF( CMAKE_${lang}_COMPILER_VERSION VERSION_LESS ${min_version} )
+            MESSAGE( FATAL_ERROR "compiler=${compiler} for lang=${lang} is required to have minimum version=${min_version} but found ${version}!")
+        ENDIF()
+    ENDIF()
+ENDFUNCTION()
+#-------------------------------------------------------------------------------
+MACRO( BOTG_UseCxxStandard version )
+    BOTG_AddCompilerFlags( CXX "GNU|Clang|Intel" ANY
+        "-std=c++${version}"
+    )
+ENDMACRO()
+#-------------------------------------------------------------------------------
+MACRO( BOTG_EnableFortran )
+    FOREACH( directive ${ARGN} )
+        IF( directive STREQUAL "C_PREPROCESSOR" )
+            BOTG_AddCompilerFlags( Fortran "GNU|Clang" ANY "-cpp" )
+        ELSEIF( directive STREQUAL "UNLIMITED_LINE_LENGTH" )
+            BOTG_AddCompilerFlags( Fortran "GNU|Clang" ANY "-ffree-line-length-none" )
+        ELSE()
+            MESSAGE(FATAL_ERROR "[BootsOnTheGround] EnableFortran directive=${directive} is unknown!")
+        ENDIF()
+    ENDFOREACH()
+ENDMACRO()
+#-------------------------------------------------------------------------------
+MACRO( BOTG_CheckCompilerFlag lang flag found )
+    IF( ${lang} STREQUAL "Fortran" )
+        #CMake does not have a core one so we provide above.
+        BOTG_CheckFortranFlag( "${flag}" ${found} )
+    ELSEIF( ${lang} STREQUAL "CXX" )
+        INCLUDE(CheckCXXCompilerFlag)
+        CHECK_CXX_COMPILER_FLAG("${flag}" ${found})
+    ELSEIF( ${lang} STREQUAL "C" )
+        INCLUDE(CheckCCompilerFlag)
+        CHECK_C_COMPILER_FLAG("${flag}" ${found})
+    ELSE()
+        MESSAGE(FATAL_ERROR "[BootsOnTheGround] lang=${lang} is not known!" )
+    ENDIF()
+ENDMACRO()
+#-------------------------------------------------------------------------------
+FUNCTION( BOTG_CompilerMatches lang compiler found )
+    SET(${found} OFF PARENT_SCOPE)
+    IF( ("${compiler}" STREQUAL "ANY") OR ("${compiler}" STREQUAL "") )
+        SET(${found} ON PARENT_SCOPE )
+    ELSE()
+        STRING(REGEX MATCH "${compiler}" found_ ${BOTG_${lang}_COMPILER})
+        IF( NOT "${found_}" STREQUAL "" )
+            SET(${found} ON PARENT_SCOPE)
+        ENDIF()
+    ENDIF()
+ENDFUNCTION()
+#-------------------------------------------------------------------------------
+FUNCTION( BOTG_SystemMatches system found)
+    SET(${found} OFF PARENT_SCOPE)
+    IF( ("${system}" STREQUAL "ANY") OR ("${system}" STREQUAL "") )
+        SET(${found} ON PARENT_SCOPE )
+    ELSE()
+        STRING(REGEX MATCH "${system}" found_ ${BOTG_SYSTEM})
+        IF( NOT "${found_}" STREQUAL "" )
+            SET(${found} ON PARENT_SCOPE)
+        ENDIF()
+    ENDIF()
+ENDFUNCTION()
+#-------------------------------------------------------------------------------
+FUNCTION( BOTG_CompilerAndSystemMatches lang compiler system found_both)
+    BOTG_CompilerMatches( ${lang} ${compiler} found_compiler )
+    MESSAGE(STATUS "[BootsOnTheGround] lang='${lang}' compiler='${compiler}' found='${found_compiler}'")
+    BOTG_SystemMatches( ${system} found_system )
+    MESSAGE(STATUS "[BootsOnTheGround] system='${system}' found='${found_system}'")
+    IF( found_system AND found_compiler )
+        SET(${found_both} ON PARENT_SCOPE )
+    ELSE()
+        SET(${found_both} OFF PARENT_SCOPE )
+    ENDIF()
+ENDFUNCTION()
+#-------------------------------------------------------------------------------
+MACRO( BOTG_AddCompilerFlags lang compiler system) #list of flags comes at end
+    BOTG_CompilerAndSystemMatches( "${lang}" "${compiler}" "${system}" found )
+    IF( found )
+        MESSAGE(STATUS "[BootsOnTheGround] adding package=${PACKAGE_NAME} ${lang} flags for compiler='${BOTG_${lang}_COMPILER}' on system='${BOTG_SYSTEM}'")
+        FOREACH( flag ${ARGN} )
+            #check if flag is already in list
+            STRING(FIND "${CMAKE_${lang}_FLAGS}" "${flag}" position)
+            IF( ${position} LESS 0 )
+                #create a special variable to store whether the flag works
+                STRING(REGEX REPLACE "[^0-9a-zA-Z]" "_" flagname ${flag})
+                BOTG_CheckCompilerFlag( ${lang} ${flag} BOTG_USE_${lang}_FLAG_${flagname})
+                IF( BOTG_USE_${lang}_FLAG_${flagname} )
+                    MESSAGE(STATUS "[BootsOnTheGround] enabled flag='${flag}'!")
+                    SET( CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS} ${flag}")
+                ELSE()
+                    MESSAGE(STATUS "[BootsOnTheGround] could not add invalid flag='${flag}'!")
+                ENDIF()
+            ELSE()
+                MESSAGE(STATUS "[BootsOnTheGround] flag='${flag}' has already been added.")
+            ENDIF()
+        ENDFOREACH()
+    ENDIF()
+ENDMACRO()
+#-------------------------------------------------------------------------------
 MACRO( BOTG_ConfigureProject project_root_dir )
-
     MESSAGE( STATUS "[BootsOnTheGround] initializing project with root directory=${project_root_dir} ...")
 
     # Clear the cache unless provided -D KEEP_CACHE:BOOL=ON.
@@ -307,6 +383,7 @@ MACRO( BOTG_ConfigureProject project_root_dir )
 
     # Enable the hunter gate for downloading/installing TPLs!
     PROJECT("" NONE) #hack to make HunterGate happy
+    SET(HUNTER_SKIP_LOCK ON)
     INCLUDE( "${BOTG_SOURCE_DIR}/cmake/HunterGate.cmake" )
 
     # Declare **project**.
@@ -320,6 +397,10 @@ MACRO( BOTG_ConfigureProject project_root_dir )
     # Just good practice.
     BOTG_PreventInSourceBuilds()
     GLOBAL_SET(${PROJECT_NAME}_ENABLE_TESTS ON CACHE BOOL "Enable all tests by default.")
+
+    # Set the operating system name so we can have system-dependent flags.
+    GLOBAL_SET( BOTG_SYSTEM ${CMAKE_SYSTEM_NAME} )
+    MESSAGE( STATUS "[BootsOnTheGround] BOTG_SYSTEM=${BOTG_SYSTEM}")
 
     # Process default flags for each language.
     BOTG_ProcessDefaultFlags( C )

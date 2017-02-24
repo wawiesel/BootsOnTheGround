@@ -1,6 +1,7 @@
-TRIBITS_SUBPACKAGE(_HDF5)
+TRIBITS_SUBPACKAGE(_SPDLOG)
+BOTG_UseCxxStandard( 11 )
 BOTG_AddCompilerFlags( CXX ANY "Linux"
-    "-Wl,--no-as-needed -ldl"
+    "-pthread"
 )
 TRIBITS_ADD_TEST_DIRECTORIES(test)
 TRIBITS_SUBPACKAGE_POSTPROCESS()
