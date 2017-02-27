@@ -6,7 +6,7 @@ SET(libs )
 SET(hunter_name nlohmann-json)
 SET(hunter_args )
 
-BOTG_HuntTPL(
+botgHuntTPL(
     "${tribits_name}"
     "${headers}"
     "${libs}"

@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-MACRO( BOTG_DefineTPLs )
+MACRO( botgDefineTPLs )
     GLOBAL_SET( BOTG_TPL_LIST ${ARGV} )
     SET(tpl_def )
     FOREACH( tpl_loc ${ARGV} )
@@ -10,7 +10,7 @@ MACRO( BOTG_DefineTPLs )
 ENDMACRO()
 #-------------------------------------------------------------------------------
 
-BOTG_DefineTPLs(
+botgDefineTPLs(
     GTEST
     BOOST/FILESYSTEM
     SPDLOG

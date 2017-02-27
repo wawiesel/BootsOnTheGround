@@ -1,4 +1,4 @@
-BOTG_AddCompilerFlags( CXX ANY "Linux"
+botgAddCompilerFlags( CXX ANY "Linux"
     "-pthread"
 )
 

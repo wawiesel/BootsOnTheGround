@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-MACRO( BOTG_DefineTPLSubPackages )
+MACRO( botgDefineTPLSubPackages )
 
     # clear TriBITS variables
     SET(SUBPACKAGES_DIRS_CLASSIFICATIONS_OPTREQS )
@@ -22,4 +22,4 @@ MACRO( BOTG_DefineTPLSubPackages )
 ENDMACRO()
 #-------------------------------------------------------------------------------
 
-BOTG_DefineTPLSubPackages()
+botgDefineTPLSubPackages()

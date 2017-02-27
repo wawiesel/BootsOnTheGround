@@ -1,4 +1,4 @@
-BOTG_DefineTPLDependencies(
+botgDefineTPLDependencies(
     "OPENSSL"                #LIB
     "GTEST"                  #TEST
 )

@@ -8,7 +8,7 @@ SET(libs
 SET(hunter_name gflags)
 SET(hunter_args )
 
-BOTG_HuntTPL(
+botgHuntTPL(
     "${tribits_name}"
     "${headers}"
     "${libs}"

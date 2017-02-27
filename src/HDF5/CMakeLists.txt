@@ -1,5 +1,5 @@
 TRIBITS_SUBPACKAGE(_HDF5)
-BOTG_AddCompilerFlags( CXX ANY "Linux"
+botgAddCompilerFlags( CXX ANY "Linux"
     "-Wl,--no-as-needed -ldl"
 )
 TRIBITS_ADD_TEST_DIRECTORIES(test)

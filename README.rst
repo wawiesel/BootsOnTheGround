@@ -18,11 +18,11 @@ for C/C++/Fortran code.
     TRIBITS_PACKAGE_DEFINE_DEPENDENCIES(
         LIB_REQUIRED_PACKAGES TheirPackage
     ) 
-    BOTG_AddTPL( LIB OPTIONAL CURL )    #Optional for building
-    BOTG_AddTPL( TEST REQUIRED GTEST )  #Required only for tests
+    botgAddTPL( LIB OPTIONAL CURL )    #Optional for building
+    botgAddTPL( TEST REQUIRED GTEST )  #Required only for tests
     TRIBITS_PACKAGE_POSTPROCESS()
 
-The available ``XXX`` allowed in ``BOTG_AddTPL( LIB|TEST OPTIONAL|REQUIRED XXX)``
+The available ``XXX`` allowed in ``botgAddTPL( LIB|TEST OPTIONAL|REQUIRED XXX)``
 are listed below.
 
 Current TPLs
@@ -66,17 +66,17 @@ Note, if you don't want to bootstrap BOTG to the directory ``external``, then yo
 ``BOTG_INCLUDE.cmake`` that references ``external/BootsOnTheGround.in`` . See Testing123_ for an example of bootstrapping BOTG.
 
 Then in your ``Dependencies.cmake`` file for any package you can use the
-``BOTG_AddTPL()`` macro **after** ``TRIBITS_PACKAGE_DEFINE_DEPENDENCIES``.
+``botgAddTPL()`` macro **after** ``TRIBITS_PACKAGE_DEFINE_DEPENDENCIES``.
 
 .. code-block:: cmake
 
         TRIBITS_PACKAGE_DEFINE_DEPENDENCIES(
             #do not list TPLs--only packages
         )
-        BOTG_AddTPL( LIB REQUIRED XYZ )
-        BOTG_AddTPL( TEST REQUIRED UVW )
-        BOTG_AddTPL( LIB OPTIONAL ABC )
-        BOTG_AddTPL( TEST OPTIONAL DEF )
+        botgAddTPL( LIB REQUIRED XYZ )
+        botgAddTPL( TEST REQUIRED UVW )
+        botgAddTPL( LIB OPTIONAL ABC )
+        botgAddTPL( TEST OPTIONAL DEF )
 
 Note the first argument is ``LIB`` for a main "library" dependency or ``TEST``
 for a test-only dependency and the second argument is either ``REQUIRED`` or
@@ -140,13 +140,13 @@ cmake/Dependencies.cmake file, you would need to specify:
 
 With BOTG_, you can use instead a *package* dependency
 on ``BootsOnTheGround_CURL`` available via a simple MACRO
-``BOTG_AddTPL``.
+``botgAddTPL``.
 
 .. code-block:: cmake
 
     TRIBITS_PACKAGE_DEFINE_DEPENDENCIES()
-    BOTG_AddTPL( LIB REQUIRED CURL )
-    BOTG_AddTPL( TEST REQUIRED GTEST )
+    botgAddTPL( LIB REQUIRED CURL )
+    botgAddTPL( TEST REQUIRED GTEST )
 
 Note, the other magic gained by using BOTG is
 that Hunter_ is used to download, build, and install any TPLs it
