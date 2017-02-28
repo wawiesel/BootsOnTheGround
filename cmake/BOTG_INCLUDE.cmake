@@ -11,8 +11,8 @@
 
 #This function needs to be here instead of in BOTG.cmake so it can be part of a
 #Bootstrapping operation.
-MACRO( botgDownloadExternalProjects external_projects )
-    FOREACH( ep ${external_projects} )
+MACRO( botgDownloadExternalProjects )
+    FOREACH( ep ${ARGN} )
         IF( NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${ep}" )
             MESSAGE( FATAL_ERROR "[BootsOnTheGround] cannot find external project download file=${ep}" )
         ENDIF()
