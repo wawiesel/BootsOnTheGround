@@ -22,7 +22,7 @@ FUNCTION( botgClearCMakeCache keep_cache )
 
 ENDFUNCTION()
 #-------------------------------------------------------------------------------
-MACRO(botgPrintAllVariables regex)
+MACRO(botgPrintVar regex)
     get_cmake_property(_variableNames VARIABLES)
 
     foreach (_variableName ${_variableNames})
@@ -384,7 +384,7 @@ MACRO( botgConfigureProject project_root_dir )
     # Enable the hunter gate for downloading/installing TPLs!
     PROJECT("" NONE) #hack to make HunterGate happy
     SET(HUNTER_SKIP_LOCK ON)
-    INCLUDE( "${BOTG_SOURCE_DIR}/cmake/HunterGate.cmake" )
+    INCLUDE( "${BOTG_ROOT_DIR}/cmake/HunterGate.cmake" )
 
     # Declare **project**.
     INCLUDE( "${project_root_dir}/ProjectName.cmake" )
@@ -392,7 +392,7 @@ MACRO( botgConfigureProject project_root_dir )
     PROJECT( ${PROJECT_NAME} C CXX Fortran )
 
     # Cannot use TriBITS commands until after this statement!
-    botgInitializeTriBITS( "${BOTG_SOURCE_DIR}/external/TriBITS/tribits" )
+    botgInitializeTriBITS( "${BOTG_ROOT_DIR}/external/TriBITS/tribits" )
 
     # Just good practice.
     botgPreventInSourceBuilds()
@@ -436,7 +436,6 @@ MACRO( botgDefineTPLDependencies lib_required_tpls test_required_tpls)
 ENDMACRO()
 #-------------------------------------------------------------------------------
 MACRO( botgAddTPL type need name )
-
     MESSAGE( STATUS "[BootsOnTheGround] adding TPL type=${type} need=${need} name=${name}...")
 
     #Make sure TPL name is correct.
@@ -447,8 +446,49 @@ MACRO( botgAddTPL type need name )
 
     #Add true TPL dependencies.
     SET(BOTG_APPEND_TPLS ON)
-    INCLUDE( "${BOTG_SOURCE_DIR}/src/${name}/cmake/Dependencies.cmake" )
+    INCLUDE( "${BOTG_ROOT_DIR}/src/${name}/cmake/Dependencies.cmake" )
     SET(BOTG_APPEND_TPLS)
 
+ENDMACRO()
+#-------------------------------------------------------------------------------
+MACRO( botgRegisterTPLS )
+    # expecting <LIST_NAME> <TPL_LOC> <TPL_STATUS>
+    SET( argn ${ARGN} )
+    LIST(GET argn 0 list)
+    LIST(REMOVE_AT argn 0)
+
+    #iterate by twos
+    LIST(LENGTH argn size)
+    MATH(EXPR size "${size}-1")
+    MESSAGE( STATUS "size=${size}" )
+    FOREACH( index RANGE 0 size 2 )
+        LIST( GET argn  ${index}   tpl_loc    )
+        MATH(EXPR indexp1 "${index}+1")
+        LIST( GET argn  ${indexp1} tpl_status )
+        FILE(GLOB tpl_cmake "${tpl_loc}/FindTPL*.cmake" )
+        IF( NOT EXISTS "${tpl_cmake}" )
+            MESSAGE( FATAL_ERROR "[BootsOnTheGround] at location='${tpl_loc}' one and only one FindTPL*.cmake must be found!" )
+        ENDIF()
+
+        GET_FILENAME_COMPONENT(tpl_name ${tpl_cmake} NAME_WE )
+        STRING(REPLACE "FindTPL" "" tpl_name ${tpl_name})
+
+        SET(found FALSE)
+        IF( DEFINED ${PROJECT_NAME}_TPLS )
+            FOREACH( tpl ${${PROJECT_NAME}_TPLS})
+                STRING( TOUPPER "${tpl}" tpl )
+                IF( tpl STREQUAL tpl_name )
+                    SET(found TRUE)
+                ENDIF()
+            ENDFOREACH()
+        ENDIF()
+
+        IF( found )
+            MESSAGE( STATUS "[BootsOnTheGround] skipping TPL=${tpl_name} as was already registered...")
+        ELSE()
+            LIST(APPEND ${list} ${tpl_name} "${tpl_loc}/FindTPL${tpl_name}.cmake" ${tpl_status} )
+            MESSAGE( STATUS "[BootsOnTheGround] registered TPL=${tpl_name} from loc='${tpl_loc}'" )
+        ENDIF()
+    ENDFOREACH()
 ENDMACRO()
 #-------------------------------------------------------------------------------

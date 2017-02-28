@@ -1,6 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0 FATAL_ERROR)
 
-# This sets BOTG_SOURCE_DIR which may be used later.
+# This sets BOTG_ROOT_DIR which may be used later.
 SET(BOTG_BOOTSTRAP OFF CACHE BOOL INTERNAL)
 INCLUDE( "${CMAKE_SOURCE_DIR}/cmake/BOTG_INCLUDE.cmake" )
 
@@ -15,5 +15,5 @@ TRIBITS_PROJECT_ENABLE_ALL()
 #                 print all the BootsOnTheGround variables.
 #
 IF( DEFINED MATCH_VARIABLE_REGEX )
-    botgPrintAllVariables("${MATCH_VARIABLE_REGEX}")
+    botgPrintVar("${MATCH_VARIABLE_REGEX}")
 ENDIF()
