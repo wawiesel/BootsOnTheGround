@@ -267,7 +267,7 @@ ENDMACRO()
 #-------------------------------------------------------------------------------
 FUNCTION( botgMinimumCompilerVersion lang compiler min_version )
     botgCompilerMatches( ${lang} ${compiler} found )
-    IF( ${found} )
+    IF( found )
         SET(version "${CMAKE_${lang}_COMPILER_VERSION}")
         IF( "${version}" STREQUAL "" )
             MESSAGE( WARNING "CMAKE_${lang}_COMPILER_VERSION could not be discovered!")
@@ -438,9 +438,6 @@ ENDMACRO()
 MACRO( botgAddTPL type need name )
     MESSAGE( STATUS "[BootsOnTheGround] adding TPL type=${type} need=${need} name=${name}...")
 
-    #Make sure TPL name is correct.
-    ASSERT_DEFINED(BootsOnTheGround_${name}_SOURCE_DIR)
-
     #Add dependency on BOTG version of TPL.
     APPEND_SET( ${type}_${need}_DEP_PACKAGES BootsOnTheGround_${name} )
 
@@ -448,7 +445,6 @@ MACRO( botgAddTPL type need name )
     SET(BOTG_APPEND_TPLS ON)
     INCLUDE( "${BOTG_ROOT_DIR}/src/${name}/cmake/Dependencies.cmake" )
     SET(BOTG_APPEND_TPLS)
-
 ENDMACRO()
 #-------------------------------------------------------------------------------
 MACRO( botgRegisterTPLS )
