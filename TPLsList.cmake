@@ -1,4 +1,4 @@
-INCLUDE(src/BOTG_TPLS.cmake)
+INCLUDE(${BOTG_ROOT_DIR}/src/BOTG_TPLS.cmake)
 
 SET(tpl_def )
 FOREACH( tpl_loc ${BOTG_TPLS} )
