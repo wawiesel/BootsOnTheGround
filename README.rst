@@ -6,7 +6,7 @@ This is BootsOnTheGround [BOTG_]! |build|
 
 CMake/TriBITS third-party-library linker for C++/Fortran
 
-.. image:: http://i.imgur.com/V2XfdTv.jpg
+.. image:: https://c1.staticflickr.com/3/2860/33135230166_b7890b6015_b.jpg
 
 BOTG_ provides a set of FindTPL*.cmake files to find and link Third Party
 Libraries (TPLs) to other packages using the CMake_ / TriBITS_ framework
