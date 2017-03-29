@@ -84,25 +84,6 @@ for a test-only dependency and the second argument is either ``REQUIRED`` or
 `Connection to TriBITS`_ for details. It is always upper case, with "_" used
 to separate words.
 
-Downloads
----------
-
-If you won't bootstrap, below are some links to zipped sources you could download and 
-unzip into your repository and gain all the benefits of TriBITS and BOTG. 
-However, think about using GIT subtrees instead.
-
-
-**Latest Versions**
-
-[`unstable (develop) <https://github.com/wawiesel/BootsOnTheGround/archive/develop.zip>`_]
-[`stable (master) <https://github.com/wawiesel/BootsOnTheGround/archive/master.zip>`_]
-[`release (v0.1.0) <https://github.com/wawiesel/BootsOnTheGround/archive/v0.1.0.zip>`_]
-
-**Previous Versions**
-
-[`release (v0.1-beta) <https://github.com/wawiesel/BootsOnTheGround/archive/v0.1-beta.zip>`_]
-
-
 Principles
 ----------
 
