@@ -1,0 +1,13 @@
+GLOBAL_SET( BOTG_TPLS
+    GTEST
+    BOOST/FILESYSTEM
+    SPDLOG
+    GFLAGS
+    FMT
+    NLJSON
+    OPENSSL
+    ZLIB
+    SZIP
+    HDF5
+    CURL
+)

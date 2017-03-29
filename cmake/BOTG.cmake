@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-FUNCTION( BOTG_ClearCMakeCache keep_cache )
+FUNCTION( botgClearCMakeCache keep_cache )
     #quick return if passed anything CMake TRUE
     IF( DEFINED(keep_cache) AND keep_cache )
         RETURN()
@@ -22,7 +22,7 @@ FUNCTION( BOTG_ClearCMakeCache keep_cache )
 
 ENDFUNCTION()
 #-------------------------------------------------------------------------------
-MACRO(BOTG_PrintAllVariables regex)
+MACRO(botgPrintVar regex)
     get_cmake_property(_variableNames VARIABLES)
 
     foreach (_variableName ${_variableNames})
@@ -43,7 +43,7 @@ MACRO(BOTG_PrintAllVariables regex)
 
 ENDMACRO()
 #---------------------------------------------------------------------------
-FUNCTION( BOTG_HuntTPL tribits_name headers libs hunter_name hunter_args )
+FUNCTION( botgHuntTPL tribits_name headers libs hunter_name hunter_args )
 
     SET(${tribits_name}_FORCE_HUNTER OFF
       CACHE BOOL "Force hunter download of TPL ${tribits_name}.")
@@ -117,7 +117,7 @@ FUNCTION( BOTG_HuntTPL tribits_name headers libs hunter_name hunter_args )
 
 ENDFUNCTION()
 #-------------------------------------------------------------------------------
-MACRO( BOTG_InitializeTriBITS TriBITS_dir )
+MACRO( botgInitializeTriBITS TriBITS_dir )
     MESSAGE( STATUS "[BootsOnTheGround] initializing TriBITS ..." )
 
     # Turn off some things here.
@@ -136,17 +136,17 @@ MACRO( BOTG_InitializeTriBITS TriBITS_dir )
 
 ENDMACRO()
 #-------------------------------------------------------------------------------
-FUNCTION(BOTG_PreventInSourceBuilds)
+FUNCTION(botgPreventInSourceBuilds)
   GET_FILENAME_COMPONENT(srcdir "${CMAKE_SOURCE_DIR}" REALPATH)
   GET_FILENAME_COMPONENT(bindir "${CMAKE_BINARY_DIR}" REALPATH)
 
   IF("${srcdir}" STREQUAL "${bindir}")
-    BOTG_ClearCMakeCache( FALSE )
+    botgClearCMakeCache( FALSE )
     MESSAGE(FATAL_ERROR "[BootsOnTheGround] in-source builds are not allowed!")
   ENDIF()
 ENDFUNCTION()
 #-------------------------------------------------------------------------------
-FUNCTION( BOTG_GetCompilerName lang compiler )
+FUNCTION( botgGetCompilerName lang compiler )
     SET( compiler_ "${CMAKE_${lang}_COMPILER}")
     GET_FILENAME_COMPONENT(compiler_ "${compiler_}" NAME_WE)
     SET( compiler_suite_ "${CMAKE_${lang}_COMPILER_ID}")
@@ -158,10 +158,10 @@ FUNCTION( BOTG_GetCompilerName lang compiler )
 ENDFUNCTION()
 #-------------------------------------------------------------------------------
 # Processes all the default flags for a single language.
-MACRO( BOTG_ProcessDefaultFlags lang )
+MACRO( botgProcessDefaultFlags lang )
 
     # Set the compiler name so we can have compiler-dependent flags.
-    BOTG_GetCompilerName( ${lang} compiler )
+    botgGetCompilerName( ${lang} compiler )
     GLOBAL_SET( BOTG_${lang}_COMPILER ${compiler} )
     MESSAGE( STATUS "[BootsOnTheGround] BOTG_${lang}_COMPILER=${BOTG_${lang}_COMPILER}")
 
@@ -169,7 +169,7 @@ ENDMACRO()
 #-------------------------------------------------------------------------------
 # Check if given Fortran source compiles and links into an executable
 #
-# BOTG_TryCompileFortran(<code> <var> [FAIL_REGEX <fail-regex>])
+# botgTryCompileFortran(<code> <var> [FAIL_REGEX <fail-regex>])
 #  <code>       - source code to try to compile, must define 'program'
 #  <var>        - variable to store whether the source code compiled
 #  <fail-regex> - fail if test output matches this regex
@@ -185,7 +185,7 @@ ENDMACRO()
 # William A. Wieselquist pulled into BOTG from the SCALE repository.
 # It had these commits.
 #
-MACRO( BOTG_TryCompileFortran source var )
+MACRO( botgTryCompileFortran source var )
     SET(_fail_regex)
     SET(_key)
 
@@ -218,7 +218,7 @@ MACRO( BOTG_TryCompileFortran source var )
     ENDIF()
 
     # Set temporary file.
-    SET(tempfile "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/BOTG_TryCompileFortran.f90")
+    SET(tempfile "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/botgTryCompileFortran.f90")
     FILE(WRITE "${tempfile}" "${source}\n")
 
     # Try to compile.
@@ -240,11 +240,11 @@ MACRO( BOTG_TryCompileFortran source var )
     ENDFOREACH()
 ENDMACRO()
 #-------------------------------------------------------------------------------
-MACRO( BOTG_CheckFortranFlag flag result)
+MACRO( botgCheckFortranFlag flag result)
    SET(save_defs "${CMAKE_REQUIRED_DEFINITIONS}")
    MESSAGE(STATUS "Performing Test ${flag}")
    SET(CMAKE_REQUIRED_DEFINITIONS "${flag}")
-   BOTG_TryCompileFortran("
+   botgTryCompileFortran("
      program main
           print *, \"Hello World\"
      end program main
@@ -265,9 +265,9 @@ MACRO( BOTG_CheckFortranFlag flag result)
    SET (CMAKE_REQUIRED_DEFINITIONS "${save_defs}")
 ENDMACRO()
 #-------------------------------------------------------------------------------
-FUNCTION( BOTG_MinimumCompilerVersion lang compiler min_version )
-    BOTG_CompilerMatches( ${lang} ${compiler} found )
-    IF( ${found} )
+FUNCTION( botgMinimumCompilerVersion lang compiler min_version )
+    botgCompilerMatches( ${lang} ${compiler} found )
+    IF( found )
         SET(version "${CMAKE_${lang}_COMPILER_VERSION}")
         IF( "${version}" STREQUAL "" )
             MESSAGE( WARNING "CMAKE_${lang}_COMPILER_VERSION could not be discovered!")
@@ -277,28 +277,28 @@ FUNCTION( BOTG_MinimumCompilerVersion lang compiler min_version )
     ENDIF()
 ENDFUNCTION()
 #-------------------------------------------------------------------------------
-MACRO( BOTG_UseCxxStandard version )
-    BOTG_AddCompilerFlags( CXX "GNU|Clang|Intel" ANY
+MACRO( botgUseCxxStandard version )
+    botgAddCompilerFlags( CXX "GNU|Clang|Intel" ANY
         "-std=c++${version}"
     )
 ENDMACRO()
 #-------------------------------------------------------------------------------
-MACRO( BOTG_EnableFortran )
+MACRO( botgEnableFortran )
     FOREACH( directive ${ARGN} )
         IF( directive STREQUAL "C_PREPROCESSOR" )
-            BOTG_AddCompilerFlags( Fortran "GNU|Clang" ANY "-cpp" )
+            botgAddCompilerFlags( Fortran "GNU|Clang" ANY "-cpp" )
         ELSEIF( directive STREQUAL "UNLIMITED_LINE_LENGTH" )
-            BOTG_AddCompilerFlags( Fortran "GNU|Clang" ANY "-ffree-line-length-none" )
+            botgAddCompilerFlags( Fortran "GNU|Clang" ANY "-ffree-line-length-none" )
         ELSE()
             MESSAGE(FATAL_ERROR "[BootsOnTheGround] EnableFortran directive=${directive} is unknown!")
         ENDIF()
     ENDFOREACH()
 ENDMACRO()
 #-------------------------------------------------------------------------------
-MACRO( BOTG_CheckCompilerFlag lang flag found )
+MACRO( botgCheckCompilerFlag lang flag found )
     IF( ${lang} STREQUAL "Fortran" )
         #CMake does not have a core one so we provide above.
-        BOTG_CheckFortranFlag( "${flag}" ${found} )
+        botgCheckFortranFlag( "${flag}" ${found} )
     ELSEIF( ${lang} STREQUAL "CXX" )
         INCLUDE(CheckCXXCompilerFlag)
         CHECK_CXX_COMPILER_FLAG("${flag}" ${found})
@@ -310,7 +310,7 @@ MACRO( BOTG_CheckCompilerFlag lang flag found )
     ENDIF()
 ENDMACRO()
 #-------------------------------------------------------------------------------
-FUNCTION( BOTG_CompilerMatches lang compiler found )
+FUNCTION( botgCompilerMatches lang compiler found )
     SET(${found} OFF PARENT_SCOPE)
     IF( ("${compiler}" STREQUAL "ANY") OR ("${compiler}" STREQUAL "") )
         SET(${found} ON PARENT_SCOPE )
@@ -322,7 +322,7 @@ FUNCTION( BOTG_CompilerMatches lang compiler found )
     ENDIF()
 ENDFUNCTION()
 #-------------------------------------------------------------------------------
-FUNCTION( BOTG_SystemMatches system found)
+FUNCTION( botgSystemMatches system found)
     SET(${found} OFF PARENT_SCOPE)
     IF( ("${system}" STREQUAL "ANY") OR ("${system}" STREQUAL "") )
         SET(${found} ON PARENT_SCOPE )
@@ -334,10 +334,10 @@ FUNCTION( BOTG_SystemMatches system found)
     ENDIF()
 ENDFUNCTION()
 #-------------------------------------------------------------------------------
-FUNCTION( BOTG_CompilerAndSystemMatches lang compiler system found_both)
-    BOTG_CompilerMatches( ${lang} ${compiler} found_compiler )
+FUNCTION( botgCompilerAndSystemMatches lang compiler system found_both)
+    botgCompilerMatches( ${lang} ${compiler} found_compiler )
     MESSAGE(STATUS "[BootsOnTheGround] lang='${lang}' compiler='${compiler}' found='${found_compiler}'")
-    BOTG_SystemMatches( ${system} found_system )
+    botgSystemMatches( ${system} found_system )
     MESSAGE(STATUS "[BootsOnTheGround] system='${system}' found='${found_system}'")
     IF( found_system AND found_compiler )
         SET(${found_both} ON PARENT_SCOPE )
@@ -346,8 +346,8 @@ FUNCTION( BOTG_CompilerAndSystemMatches lang compiler system found_both)
     ENDIF()
 ENDFUNCTION()
 #-------------------------------------------------------------------------------
-MACRO( BOTG_AddCompilerFlags lang compiler system) #list of flags comes at end
-    BOTG_CompilerAndSystemMatches( "${lang}" "${compiler}" "${system}" found )
+MACRO( botgAddCompilerFlags lang compiler system) #list of flags comes at end
+    botgCompilerAndSystemMatches( "${lang}" "${compiler}" "${system}" found )
     IF( found )
         MESSAGE(STATUS "[BootsOnTheGround] adding package=${PACKAGE_NAME} ${lang} flags for compiler='${BOTG_${lang}_COMPILER}' on system='${BOTG_SYSTEM}'")
         FOREACH( flag ${ARGN} )
@@ -356,7 +356,7 @@ MACRO( BOTG_AddCompilerFlags lang compiler system) #list of flags comes at end
             IF( ${position} LESS 0 )
                 #create a special variable to store whether the flag works
                 STRING(REGEX REPLACE "[^0-9a-zA-Z]" "_" flagname ${flag})
-                BOTG_CheckCompilerFlag( ${lang} ${flag} BOTG_USE_${lang}_FLAG_${flagname})
+                botgCheckCompilerFlag( ${lang} ${flag} BOTG_USE_${lang}_FLAG_${flagname})
                 IF( BOTG_USE_${lang}_FLAG_${flagname} )
                     MESSAGE(STATUS "[BootsOnTheGround] enabled flag='${flag}'!")
                     SET( CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS} ${flag}")
@@ -370,11 +370,11 @@ MACRO( BOTG_AddCompilerFlags lang compiler system) #list of flags comes at end
     ENDIF()
 ENDMACRO()
 #-------------------------------------------------------------------------------
-MACRO( BOTG_ConfigureProject project_root_dir )
+MACRO( botgConfigureProject project_root_dir )
     MESSAGE( STATUS "[BootsOnTheGround] initializing project with root directory=${project_root_dir} ...")
 
     # Clear the cache unless provided -D KEEP_CACHE:BOOL=ON.
-    BOTG_ClearCMakeCache("${KEEP_CACHE}")
+    botgClearCMakeCache("${KEEP_CACHE}")
 
     # Install locally by default.
     IF( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
@@ -384,7 +384,7 @@ MACRO( BOTG_ConfigureProject project_root_dir )
     # Enable the hunter gate for downloading/installing TPLs!
     PROJECT("" NONE) #hack to make HunterGate happy
     SET(HUNTER_SKIP_LOCK ON)
-    INCLUDE( "${BOTG_SOURCE_DIR}/cmake/HunterGate.cmake" )
+    INCLUDE( "${BOTG_ROOT_DIR}/cmake/HunterGate.cmake" )
 
     # Declare **project**.
     INCLUDE( "${project_root_dir}/ProjectName.cmake" )
@@ -392,10 +392,10 @@ MACRO( BOTG_ConfigureProject project_root_dir )
     PROJECT( ${PROJECT_NAME} C CXX Fortran )
 
     # Cannot use TriBITS commands until after this statement!
-    BOTG_InitializeTriBITS( "${BOTG_SOURCE_DIR}/external/TriBITS/tribits" )
+    botgInitializeTriBITS( "${BOTG_ROOT_DIR}/external/TriBITS/tribits" )
 
     # Just good practice.
-    BOTG_PreventInSourceBuilds()
+    botgPreventInSourceBuilds()
     GLOBAL_SET(${PROJECT_NAME}_ENABLE_TESTS ON CACHE BOOL "Enable all tests by default.")
 
     # Set the operating system name so we can have system-dependent flags.
@@ -403,15 +403,15 @@ MACRO( BOTG_ConfigureProject project_root_dir )
     MESSAGE( STATUS "[BootsOnTheGround] BOTG_SYSTEM=${BOTG_SYSTEM}")
 
     # Process default flags for each language.
-    BOTG_ProcessDefaultFlags( C )
-    BOTG_ProcessDefaultFlags( CXX )
-    BOTG_ProcessDefaultFlags( Fortran )
+    botgProcessDefaultFlags( C )
+    botgProcessDefaultFlags( CXX )
+    botgProcessDefaultFlags( Fortran )
 
 ENDMACRO()
 #-------------------------------------------------------------------------------
-MACRO( BOTG_DefineTPLDependencies lib_required_tpls test_required_tpls)
+MACRO( botgDefineTPLDependencies lib_required_tpls test_required_tpls)
 
-    #Append to existing if we are using BOTG_AddTPL.
+    #Append to existing if we are using botgAddTPL.
     IF( BOTG_APPEND_TPLS )
         #Make sure these are defined.
         APPEND_SET(REGRESSION_EMAIL_LIST)
@@ -435,20 +435,56 @@ MACRO( BOTG_DefineTPLDependencies lib_required_tpls test_required_tpls)
 
 ENDMACRO()
 #-------------------------------------------------------------------------------
-MACRO( BOTG_AddTPL type need name )
-
+MACRO( botgAddTPL type need name )
     MESSAGE( STATUS "[BootsOnTheGround] adding TPL type=${type} need=${need} name=${name}...")
-
-    #Make sure TPL name is correct.
-    ASSERT_DEFINED(BootsOnTheGround_${name}_SOURCE_DIR)
 
     #Add dependency on BOTG version of TPL.
     APPEND_SET( ${type}_${need}_DEP_PACKAGES BootsOnTheGround_${name} )
 
     #Add true TPL dependencies.
     SET(BOTG_APPEND_TPLS ON)
-    INCLUDE( "${BOTG_SOURCE_DIR}/src/${name}/cmake/Dependencies.cmake" )
+    INCLUDE( "${BOTG_ROOT_DIR}/src/${name}/cmake/Dependencies.cmake" )
     SET(BOTG_APPEND_TPLS)
+ENDMACRO()
+#-------------------------------------------------------------------------------
+MACRO( botgRegisterTPLS )
+    # expecting <LIST_NAME> <TPL_LOC> <TPL_STATUS>
+    SET( argn ${ARGN} )
+    LIST(GET argn 0 list)
+    LIST(REMOVE_AT argn 0)
 
+    #iterate by twos
+    LIST(LENGTH argn size)
+    MATH(EXPR size "${size}-1")
+    MESSAGE( STATUS "size=${size}" )
+    FOREACH( index RANGE 0 size 2 )
+        LIST( GET argn  ${index}   tpl_loc    )
+        MATH(EXPR indexp1 "${index}+1")
+        LIST( GET argn  ${indexp1} tpl_status )
+        FILE(GLOB tpl_cmake "${tpl_loc}/FindTPL*.cmake" )
+        IF( NOT EXISTS "${tpl_cmake}" )
+            MESSAGE( FATAL_ERROR "[BootsOnTheGround] at location='${tpl_loc}' one and only one FindTPL*.cmake must be found!" )
+        ENDIF()
+
+        GET_FILENAME_COMPONENT(tpl_name ${tpl_cmake} NAME_WE )
+        STRING(REPLACE "FindTPL" "" tpl_name ${tpl_name})
+
+        SET(found FALSE)
+        IF( DEFINED ${PROJECT_NAME}_TPLS )
+            FOREACH( tpl ${${PROJECT_NAME}_TPLS})
+                STRING( TOUPPER "${tpl}" tpl )
+                IF( tpl STREQUAL tpl_name )
+                    SET(found TRUE)
+                ENDIF()
+            ENDFOREACH()
+        ENDIF()
+
+        IF( found )
+            MESSAGE( STATUS "[BootsOnTheGround] skipping TPL=${tpl_name} as was already registered...")
+        ELSE()
+            LIST(APPEND ${list} ${tpl_name} "${tpl_loc}/FindTPL${tpl_name}.cmake" ${tpl_status} )
+            MESSAGE( STATUS "[BootsOnTheGround] registered TPL=${tpl_name} from loc='${tpl_loc}'" )
+        ENDIF()
+    ENDFOREACH()
 ENDMACRO()
 #-------------------------------------------------------------------------------

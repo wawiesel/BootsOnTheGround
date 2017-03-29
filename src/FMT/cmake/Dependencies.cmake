@@ -1,4 +1,4 @@
-BOTG_DefineTPLDependencies(
+botgDefineTPLDependencies(
     "FMT"                    #LIB
     "GTEST"                  #TEST
 )

@@ -12,7 +12,7 @@ SET(hunter_args
     system filesystem
 )
 
-BOTG_HuntTPL(
+botgHuntTPL(
     "${tribits_name}"
     "${headers}"
     "${libs}"

@@ -1,4 +1,4 @@
-BOTG_DefineTPLDependencies(
+botgDefineTPLDependencies(
     "CURL;OPENSSL;ZLIB"      #LIB
     "GTEST"                  #TEST
 )

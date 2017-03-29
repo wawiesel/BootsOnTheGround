@@ -1,4 +1,4 @@
-BOTG_DefineTPLDependencies(
+botgDefineTPLDependencies(
     "SPDLOG;FMT"             #LIB
     "GTEST"                  #TEST
 )

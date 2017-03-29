@@ -9,7 +9,7 @@ SET(libs
 SET(hunter_name GTest)
 SET(hunter_args )
 
-BOTG_HuntTPL(
+botgHuntTPL(
     "${tribits_name}"
     "${headers}"
     "${libs}"

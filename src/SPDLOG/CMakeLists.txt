@@ -1,6 +1,6 @@
 TRIBITS_SUBPACKAGE(_SPDLOG)
-BOTG_UseCxxStandard( 11 )
-BOTG_AddCompilerFlags( CXX ANY "Linux"
+botgUseCxxStandard( 11 )
+botgAddCompilerFlags( CXX ANY "Linux"
     "-pthread"
 )
 TRIBITS_ADD_TEST_DIRECTORIES(test)

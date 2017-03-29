@@ -1,4 +1,4 @@
-BOTG_DefineTPLDependencies(
+botgDefineTPLDependencies(
     "BOOST_FILESYSTEM"       #LIB
     "GTEST"                  #TEST
 )

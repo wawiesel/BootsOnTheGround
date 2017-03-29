@@ -1,4 +1,4 @@
-BOTG_DefineTPLDependencies(
+botgDefineTPLDependencies(
     "GFLAGS"                 #LIB
     "GTEST"                  #TEST
 )

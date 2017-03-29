@@ -1,4 +1,4 @@
-BOTG_DefineTPLDependencies(
+botgDefineTPLDependencies(
     "ZLIB"                   #LIB
     "GTEST"                  #TEST
 )

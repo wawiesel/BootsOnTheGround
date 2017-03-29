@@ -11,7 +11,7 @@ SET(libs
 SET(hunter_name fmt)
 SET(hunter_args )
 
-BOTG_HuntTPL(
+botgHuntTPL(
     "${tribits_name}"
     "${headers}"
     "${libs}"
