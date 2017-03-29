@@ -17,7 +17,7 @@ for C/C++/Fortran code.
     TRIBITS_PACKAGE( MyPackage )
     TRIBITS_PACKAGE_DEFINE_DEPENDENCIES(
         LIB_REQUIRED_PACKAGES TheirPackage
-    ) 
+    )
     botgAddTPL( LIB OPTIONAL CURL )    #Optional for building
     botgAddTPL( TEST REQUIRED GTEST )  #Required only for tests
     TRIBITS_PACKAGE_POSTPROCESS()
@@ -47,11 +47,11 @@ Take a look at Testing123_ for an example of how to use BOTG_.
 How do I use it?
 ----------------
 
-Bootstrapping is the recommended way of using BOTG (hence the name!). 
+Bootstrapping is the recommended way of using BOTG (hence the name!).
 You need to do four things to enable BOTG in your TriBITS C/C++/Fortran project.
 
-#. Copy ``cmake/BOTG_INCLUDE.cmake`` containing bootstrap commands to your project's root ``cmake`` directory. 
-#. Copy ``external/BootsOnTheGround.in`` containing repo link commands to your project's ``external`` directory. 
+#. Copy ``cmake/BOTG_INCLUDE.cmake`` containing bootstrap commands to your project's root ``cmake`` directory.
+#. Copy ``external/BootsOnTheGround.in`` containing repo link commands to your project's ``external`` directory.
 #. ``INCLUDE(cmake/BOTG_INCLUDE.cmake)`` first thing in your root ``CMakeLists.txt`` file to execute the bootstrap.
 #. Add BOTG to your TriBITS ``PackagesList.cmake`` file.
 
@@ -62,7 +62,7 @@ You need to do four things to enable BOTG in your TriBITS C/C++/Fortran project.
           ...
         )
 
-Note, if you don't want to bootstrap BOTG to the directory ``external``, then you're going to have to change the line in 
+Note, if you don't want to bootstrap BOTG to the directory ``external``, then you're going to have to change the line in
 ``BOTG_INCLUDE.cmake`` that references ``external/BootsOnTheGround.in`` . See Testing123_ for an example of bootstrapping BOTG.
 
 Then in your ``Dependencies.cmake`` file for any package you can use the
@@ -80,7 +80,7 @@ Then in your ``Dependencies.cmake`` file for any package you can use the
 
 Note the first argument is ``LIB`` for a main "library" dependency or ``TEST``
 for a test-only dependency and the second argument is either ``REQUIRED`` or
-``OPTIONAL``. The final is the TPL name from the `TPLs`_ list. See 
+``OPTIONAL``. The final is the TPL name from the `TPLs`_ list. See
 `Connection to TriBITS`_ for details. It is always upper case, with "_" used
 to separate words.
 
