@@ -1,4 +1,4 @@
 botgUseCxxStandard( 11 )
-botgAddLinkerFlags( CXX ANY "Linux"
+botgAddLinkerFlags( ANY_COMPILER "Linux"
     "-pthread"
 )
