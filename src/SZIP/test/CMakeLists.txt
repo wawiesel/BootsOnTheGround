@@ -1,7 +1,3 @@
-botgAddCompilerFlags( CXX ANY "Linux"
-    "-pthread"
-)
-
 TRIBITS_ADD_LIBRARY( BootsOnTheGround_SZIP_TestLib
   SOURCES
     TestLib.c

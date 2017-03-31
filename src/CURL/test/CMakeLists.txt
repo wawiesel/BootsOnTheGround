@@ -1,6 +1,3 @@
-botgAddCompilerFlags( CXX ANY "Linux"
-    "-pthread"
-)
 TRIBITS_ADD_LIBRARY( BootsOnTheGround_CURL_TestLib
   SOURCES
     TestLib.cc

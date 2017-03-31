@@ -441,9 +441,13 @@ MACRO( botgAddTPL type need name )
     #Add dependency on BOTG version of TPL.
     APPEND_SET( ${type}_${need}_DEP_PACKAGES BootsOnTheGround_${name} )
 
-    #Add true TPL dependencies.
+    #Add true TPL dependencies (not sure why we need this).
     SET(BOTG_APPEND_TPLS ON)
     INCLUDE( "${BOTG_ROOT_DIR}/src/${name}/cmake/Dependencies.cmake" )
+    SET( options_file "${BOTG_ROOT_DIR}/src/${name}/cmake/Options.cmake" )
+    IF( EXISTS options_file )
+        INCLUDE( "${options_file}" )
+    ENDIF()
     SET(BOTG_APPEND_TPLS)
 ENDMACRO()
 #-------------------------------------------------------------------------------

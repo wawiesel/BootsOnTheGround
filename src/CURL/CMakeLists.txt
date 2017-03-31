@@ -1,7 +1,5 @@
 TRIBITS_SUBPACKAGE(_CURL)
-botgAddCompilerFlags( CXX ANY "Linux"
-    "-Wl,--no-as-needed -ldl"
-)
+INCLUDE( cmake/Options.cmake )
 TRIBITS_ADD_TEST_DIRECTORIES(test)
 TRIBITS_SUBPACKAGE_POSTPROCESS()
 

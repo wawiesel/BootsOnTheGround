@@ -1,0 +1,1 @@
+botgUseCxxStandard( 11 )
