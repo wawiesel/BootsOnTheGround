@@ -1,3 +1,3 @@
-botgAddCompilerFlags( CXX ANY "Linux"
+botgAddLinkerFlags( CXX ANY "Linux"
     "-pthread"
 )
