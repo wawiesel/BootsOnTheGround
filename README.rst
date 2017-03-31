@@ -23,7 +23,8 @@ for C/C++/Fortran code.
     TRIBITS_PACKAGE_POSTPROCESS()
 
 The available ``XXX`` allowed in ``botgAddTPL( LIB|TEST OPTIONAL|REQUIRED XXX)``
-are listed below.
+are listed below. BOTG also provides some nice ways to add flags to the compiler
+and linker ``botgAddLinkerFlags`` and ``botgAddCompilerFlags``.
 
 Current TPLs
 ------------
