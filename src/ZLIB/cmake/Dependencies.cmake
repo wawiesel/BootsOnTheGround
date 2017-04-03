@@ -1,4 +1,4 @@
-botgDefineTPLDependencies(
-    "ZLIB"                   #LIB
-    "GTEST"                  #TEST
+TRIBITS_PACKAGE_DEFINE_DEPENDENCIES(
+  LIB_REQUIRED_TPLS ZLIB
 )
+botgAddTPL( TEST REQUIRED GTEST )

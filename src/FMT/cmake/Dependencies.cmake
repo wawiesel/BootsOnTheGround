@@ -1,4 +1,4 @@
-botgDefineTPLDependencies(
-    "FMT"                    #LIB
-    "GTEST"                  #TEST
+TRIBITS_PACKAGE_DEFINE_DEPENDENCIES(
+  LIB_REQUIRED_TPLS FMT
 )
+botgAddTPL( TEST REQUIRED GTEST )

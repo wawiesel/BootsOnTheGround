@@ -1,5 +1,5 @@
-botgDefineTPLDependencies(
-    "SPDLOG;FMT"             #LIB
-    "GTEST"                  #TEST
+TRIBITS_PACKAGE_DEFINE_DEPENDENCIES(
+  LIB_REQUIRED_TPLS SPDLOG
 )
+botgAddTpl( TEST REQUIRED GTEST )
 

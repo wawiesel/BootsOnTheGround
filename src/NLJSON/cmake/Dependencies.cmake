@@ -1,4 +1,5 @@
-botgDefineTPLDependencies(
-    "NLJSON"                 #LIB
-    "GTEST"                  #TEST
+TRIBITS_PACKAGE_DEFINE_DEPENDENCIES(
+  LIB_REQUIRED_TPLS NLJSON
 )
+botgAddTPL( TEST REQUIRED GTEST )
+

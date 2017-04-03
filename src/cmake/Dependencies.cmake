@@ -9,7 +9,7 @@ SET(LIB_OPTIONAL_DEP_TPLS)
 SET(TEST_REQUIRED_DEP_TPLS)
 SET(TEST_OPTIONAL_DEP_TPLS)
 
-# setup up the subpackages list
+# setup up the subpackages list using BOTG_TPLS.cmake
 FOREACH( tpl_loc ${BOTG_TPLS} )
     STRING(REPLACE "/" "_" tpl_name ${tpl_loc})
     LIST(APPEND SUBPACKAGES_DIRS_CLASSIFICATIONS_OPTREQS

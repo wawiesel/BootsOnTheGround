@@ -434,86 +434,32 @@ MACRO( botgConfigureProject project_root_dir )
 
 ENDMACRO()
 #-------------------------------------------------------------------------------
-MACRO( botgDefineTPLDependencies lib_required_tpls test_required_tpls)
-
-    #Append to existing if we are using botgAddTPL.
-    IF( BOTG_APPEND_TPLS )
-        #Make sure these are defined.
-        APPEND_SET(REGRESSION_EMAIL_LIST)
-        APPEND_SET(SUBPACKAGES_DIRS_CLASSIFICATIONS_OPTREQS)
-        APPEND_SET(LIB_REQUIRED_DEP_PACKAGES)
-        APPEND_SET(LIB_OPTIONAL_DEP_PACKAGES)
-        APPEND_SET(TEST_REQUIRED_DEP_PACKAGES)
-        APPEND_SET(TEST_OPTIONAL_DEP_PACKAGES)
-        APPEND_SET(LIB_OPTIONAL_DEP_TPLS)
-        APPEND_SET(TEST_OPTIONAL_DEP_TPLS)
-
-        #Actually set these.
-        APPEND_SET(  LIB_REQUIRED_DEP_TPLS  ${lib_required_tpls} )
-        APPEND_SET( TEST_REQUIRED_DEP_TPLS ${test_required_tpls} )
-    ELSE()
-        TRIBITS_PACKAGE_DEFINE_DEPENDENCIES(
-           LIB_REQUIRED_TPLS  ${lib_required_tpls}
-          TEST_REQUIRED_TPLS ${test_required_tpls}
-        )
-    ENDIF()
-
-ENDMACRO()
-#-------------------------------------------------------------------------------
 MACRO( botgAddTPL type need name )
-    MESSAGE( STATUS "[BootsOnTheGround] adding TPL type=${type} need=${need} name=${name}...")
+    MESSAGE( STATUS "[BootsOnTheGround] package=${PACKAGE_NAME} adding TPL type=${type} need=${need} name=${name}...")
 
-    #Add dependency on BOTG version of TPL.
+    #Add dependency on BOTG version of TPL and the TPL itself.
     APPEND_SET( ${type}_${need}_DEP_PACKAGES BootsOnTheGround_${name} )
-
-    #Add true TPL dependencies (not sure why we need this).
-    SET(BOTG_APPEND_TPLS ON)
-    INCLUDE( "${BOTG_ROOT_DIR}/src/${name}/cmake/Dependencies.cmake" )
-    SET( options_file "${BOTG_ROOT_DIR}/src/${name}/cmake/Options.cmake" )
-    IF( EXISTS options_file )
-        INCLUDE( "${options_file}" )
-    ENDIF()
-    SET(BOTG_APPEND_TPLS)
+    APPEND_SET( ${type}_${need}_DEP_TPLS ${name} )
 ENDMACRO()
-#-------------------------------------------------------------------------------
-MACRO( botgRegisterTPLS )
-    # expecting <LIST_NAME> <TPL_LOC> <TPL_STATUS>
-    SET( argn ${ARGN} )
-    LIST(GET argn 0 list)
-    LIST(REMOVE_AT argn 0)
-
-    #iterate by twos
-    LIST(LENGTH argn size)
-    MATH(EXPR size "${size}-1")
-    MESSAGE( STATUS "size=${size}" )
-    FOREACH( index RANGE 0 size 2 )
-        LIST( GET argn  ${index}   tpl_loc    )
-        MATH(EXPR indexp1 "${index}+1")
-        LIST( GET argn  ${indexp1} tpl_status )
-        FILE(GLOB tpl_cmake "${tpl_loc}/FindTPL*.cmake" )
-        IF( NOT EXISTS "${tpl_cmake}" )
-            MESSAGE( FATAL_ERROR "[BootsOnTheGround] at location='${tpl_loc}' one and only one FindTPL*.cmake must be found!" )
-        ENDIF()
-
-        GET_FILENAME_COMPONENT(tpl_name ${tpl_cmake} NAME_WE )
-        STRING(REPLACE "FindTPL" "" tpl_name ${tpl_name})
-
-        SET(found FALSE)
-        IF( DEFINED ${PROJECT_NAME}_TPLS )
-            FOREACH( tpl ${${PROJECT_NAME}_TPLS})
-                STRING( TOUPPER "${tpl}" tpl )
-                IF( tpl STREQUAL tpl_name )
-                    SET(found TRUE)
-                ENDIF()
-            ENDFOREACH()
-        ENDIF()
-
-        IF( found )
-            MESSAGE( STATUS "[BootsOnTheGround] skipping TPL=${tpl_name} as was already registered...")
-        ELSE()
-            LIST(APPEND ${list} ${tpl_name} "${tpl_loc}/FindTPL${tpl_name}.cmake" ${tpl_status} )
-            MESSAGE( STATUS "[BootsOnTheGround] registered TPL=${tpl_name} from loc='${tpl_loc}'" )
-        ENDIF()
+#------------------------------------------------------------------------------
+MACRO( botgProcessTPLS )
+    #Linker options always need to be loaded as far as I can tell. 
+    #Imagine we have true TPL C, and we create BootsOnTheGround wrapper B, and we
+    #depend on this package in a code A, A-->B-->C.
+    #We can include in the CMake for B the necessary linker options, but what about
+    #A? We should be able to "inherit" them from B but I have yet to figure it out
+    #without resorting to these types of files.
+    FOREACH( name ${${PACKAGE_NAME}_LIB_REQUIRED_DEP_TPLS}
+                  ${${PACKAGE_NAME}_LIB_OPTIONAL_DEP_TPLS}
+                  ${${PACKAGE_NAME}_TEST_REQUIRED_DEP_TPLS}
+                  ${${PACKAGE_NAME}_TEST_OPTIONAL_DEP_TPLS} )
+       IF( TPL_ENABLE_${name} )
+           SET( linker_file "${BOTG_ROOT_DIR}/src/${name}/cmake/LinkerFlags.cmake" )
+           IF( EXISTS "${linker_file}" )
+               MESSAGE( STATUS "[BootsOnTheGround] package=${PACKAGE_NAME} is adding TPL=${name} linker options from file='${linker_file}'")
+               INCLUDE( "${linker_file}" )
+           ENDIF() 
+       ENDIF()
     ENDFOREACH()
 ENDMACRO()
 #-------------------------------------------------------------------------------
