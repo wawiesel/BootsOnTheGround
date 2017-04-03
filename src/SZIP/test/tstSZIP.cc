@@ -22,7 +22,7 @@ TEST( SZip, Basic )
         {
             for( int j = 8; j <= 32; j += 2 )
             {
-                for( int n = 4; n <= 24; n++ )
+                for( int n = 4; n <= 12; n+=3 )
                 {
                     EXPECT_EQ( 1,
                                BOTG_SZip_TestRun( image_in,

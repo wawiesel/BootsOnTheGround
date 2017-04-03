@@ -1,4 +1,4 @@
-botgDefineTPLDependencies(
-    "OPENSSL"                #LIB
-    "GTEST"                  #TEST
+TRIBITS_PACKAGE_DEFINE_DEPENDENCIES(
+  LIB_REQUIRED_TPLS OPENSSL
 )
+botgAddTPL( TEST REQUIRED GTEST )

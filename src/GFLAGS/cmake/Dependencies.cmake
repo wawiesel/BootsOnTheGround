@@ -1,4 +1,5 @@
-botgDefineTPLDependencies(
-    "GFLAGS"                 #LIB
-    "GTEST"                  #TEST
+TRIBITS_PACKAGE_DEFINE_DEPENDENCIES(
+  LIB_REQUIRED_TPLS GFLAGS
 )
+botgAddTPL( TEST REQUIRED GTEST )
+
