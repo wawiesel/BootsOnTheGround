@@ -117,11 +117,10 @@ FUNCTION( botgHuntTPL tribits_name headers libs hunter_name hunter_args )
 
 ENDFUNCTION()
 #-------------------------------------------------------------------------------
-MACRO( botgInitializeTriBITS TriBITS_dir )
+# Process TriBITS and set .
+#
+MACRO( botgProcessTribits TriBITS_dir )
     MESSAGE( STATUS "[BootsOnTheGround] initializing TriBITS ..." )
-
-    # Turn off some things here.
-    SET(TPL_ENABLE_MPI OFF CACHE BOOL "Turn off MPI by default.")
 
     # Why TriBITS do you blow away my MODULE_PATH?
     SET(save_path ${CMAKE_MODULE_PATH})
@@ -136,7 +135,10 @@ MACRO( botgInitializeTriBITS TriBITS_dir )
 
 ENDMACRO()
 #-------------------------------------------------------------------------------
+# Prevent in-source builds.
+#
 FUNCTION(botgPreventInSourceBuilds)
+
   GET_FILENAME_COMPONENT(srcdir "${CMAKE_SOURCE_DIR}" REALPATH)
   GET_FILENAME_COMPONENT(bindir "${CMAKE_BINARY_DIR}" REALPATH)
 
@@ -144,9 +146,13 @@ FUNCTION(botgPreventInSourceBuilds)
     botgClearCMakeCache( FALSE )
     MESSAGE(FATAL_ERROR "[BootsOnTheGround] in-source builds are not allowed!")
   ENDIF()
+
 ENDFUNCTION()
 #-------------------------------------------------------------------------------
+# Return the compiler variable as "SUITE/COMPILER".
+#
 FUNCTION( botgGetCompilerName lang compiler )
+
     SET( compiler_ "${CMAKE_${lang}_COMPILER}")
     GET_FILENAME_COMPONENT(compiler_ "${compiler_}" NAME_WE)
     SET( compiler_suite_ "${CMAKE_${lang}_COMPILER_ID}")
@@ -157,14 +163,14 @@ FUNCTION( botgGetCompilerName lang compiler )
 
 ENDFUNCTION()
 #-------------------------------------------------------------------------------
-# Processes all the default flags for a single language.
-MACRO( botgProcessDefaultFlags lang )
+# Set the global compiler name BOTG_${lang}_COMPILER="SUITE/COMPILER".
+#
+MACRO( botgProcessCompiler lang )
 
-    # Set the compiler name so we can have compiler-dependent flags.
     botgGetCompilerName( ${lang} compiler )
     GLOBAL_SET( BOTG_${lang}_COMPILER ${compiler} )
-    MESSAGE( STATUS "[BootsOnTheGround] BOTG_${lang}_COMPILER=${BOTG_${lang}_COMPILER}")
 
+    MESSAGE( STATUS "[BootsOnTheGround] set lang=${lang} compiler global BOTG_${lang}_COMPILER=${BOTG_${lang}_COMPILER}")
 ENDMACRO()
 #-------------------------------------------------------------------------------
 # Check if given Fortran source compiles and links into an executable
@@ -395,8 +401,11 @@ MACRO( botgAddLinkerFlags compiler system) #list of flags comes at end
     ENDIF()
 ENDMACRO()
 #-------------------------------------------------------------------------------
-MACRO( botgConfigureProject project_root_dir )
-    MESSAGE( STATUS "[BootsOnTheGround] initializing project with root directory=${project_root_dir} ...")
+# Do most of the legwork setting up a CMakeLists.txt file for a project.
+#
+MACRO( botgProject name )
+    SET(project_root_dir "${CMAKE_SOURCE_DIR}")
+    MESSAGE( STATUS "[BootsOnTheGround] configuring project with root directory=${project_root_dir} ...")
 
     # Clear the cache unless provided -D KEEP_CACHE:BOOL=ON.
     botgClearCMakeCache("${KEEP_CACHE}")
@@ -411,39 +420,149 @@ MACRO( botgConfigureProject project_root_dir )
     SET(HUNTER_SKIP_LOCK ON)
     INCLUDE( "${BOTG_ROOT_DIR}/cmake/HunterGate.cmake" )
 
-    # Declare **project**.
-    INCLUDE( "${project_root_dir}/ProjectName.cmake" )
+    # Set project name.
+    SET(PROJECT_NAME ${name} CACHE STRING "global project name" FORCE )
     MESSAGE( STATUS "[BootsOnTheGround] declared PROJECT_NAME=${PROJECT_NAME} ...")
     PROJECT( ${PROJECT_NAME} C CXX Fortran )
 
+    # Turn off MPI by default.
+    SET(TPL_ENABLE_MPI OFF CACHE BOOL "Turn off MPI by default.")
+
     # Cannot use TriBITS commands until after this statement!
-    botgInitializeTriBITS( "${BOTG_ROOT_DIR}/external/TriBITS/tribits" )
+    botgProcessTribits( "${BOTG_ROOT_DIR}/external/TriBITS/tribits" )
 
     # Just good practice.
     botgPreventInSourceBuilds()
-    GLOBAL_SET(${PROJECT_NAME}_ENABLE_TESTS ON CACHE BOOL "Enable all tests by default.")
+
+    # Turn on tests by default.
+    GLOBAL_SET( ${PROJECT_NAME}_ENABLE_TESTS ON CACHE BOOL "Enable all tests by default.")
+    GLOBAL_SET( ${PROJECT_NAME}_ENABLE_SECONDARY_TESTED_CODE ON)
+
+    # These variables make sure we have matching botgEnd() for packages and projects.
+    GLOBAL_SET(BOTG_INSIDE_PROJECT_CMAKELISTS "${CMAKE_CURRENT_LIST_FILE}" )
+    GLOBAL_SET(BOTG_INSIDE_PACKAGE_CMAKELISTS "" )
+    GLOBAL_SET(BOTG_INSIDE_SUPERPACKAGE_CMAKELISTS "" )
 
     # Set the operating system name so we can have system-dependent flags.
     GLOBAL_SET( BOTG_SYSTEM ${CMAKE_SYSTEM_NAME} )
-    MESSAGE( STATUS "[BootsOnTheGround] BOTG_SYSTEM=${BOTG_SYSTEM}")
+    MESSAGE( STATUS "[BootsOnTheGround] set operating system global BOTG_SYSTEM=${BOTG_SYSTEM}")
 
-    # Process default flags for each language.
-    botgProcessDefaultFlags( C )
-    botgProcessDefaultFlags( CXX )
-    botgProcessDefaultFlags( Fortran )
+    # Process compiler for each language.
+    botgProcessCompiler( C )
+    botgProcessCompiler( CXX )
+    botgProcessCompiler( Fortran )
+
+ENDMACRO()
+#-------------------------------------------------------------------------------
+#  Initialize a super package (package with subpackages) CMakeLists.txt file.
+#
+MACRO( botgSuperPackage name )
+    GLOBAL_SET(BOTG_INSIDE_SUPERPACKAGE_CMAKELISTS "${CMAKE_CURRENT_LIST_FILE}" )
+    TRIBITS_PACKAGE_DECL( ${name} )
+    TRIBITS_PROCESS_SUBPACKAGES()
+    TRIBITS_PACKAGE_DEF()
+ENDMACRO()
+#-------------------------------------------------------------------------------
+#  Initialize a package CMakeLists.txt file.
+#
+MACRO( botgPackage name )
+    GLOBAL_SET(BOTG_INSIDE_PACKAGE_CMAKELISTS "${CMAKE_CURRENT_LIST_FILE}" )
+    STRING( COMPARE NOTEQUAL "${BOTG_INSIDE_SUPERPACKAGE_CMAKELISTS}" "" is_subpackage )
+    IF( ${is_subpackage} )
+        TRIBITS_SUBPACKAGE( ${name} )
+    ELSE()
+        TRIBITS_PACKAGE( ${name} )
+    ENDIF()
+ENDMACRO()
+#-------------------------------------------------------------------------------
+# Finalize a CMakeLists.txt file.
+#
+MACRO( botgEnd )
+    STRING( COMPARE NOTEQUAL "${BOTG_INSIDE_PACKAGE_CMAKELISTS}" "" is_package )
+    STRING( COMPARE NOTEQUAL "${BOTG_INSIDE_SUPERPACKAGE_CMAKELISTS}" "" is_superpackage )
+    STRING( COMPARE NOTEQUAL "${BOTG_INSIDE_PROJECT_CMAKELISTS}" "" has_project )
+    
+    IF( NOT ${has_project} )
+        MESSAGE( FATAL_ERROR "[BootsOnTheGround]  botgEnd has been used without a corresponding botgProject in ${CMAKE_CURRENT_LIST_FILE}!" )
+    ENDIF()
+
+    #Inside a package/subpackage.
+    IF( ${is_package} )
+        IF( NOT "${BOTG_INSIDE_PACKAGE_CMAKELISTS}" STREQUAL "${CMAKE_CURRENT_LIST_FILE}" )
+            MESSAGE( FATAL_ERROR "[BootsOnTheGround] botEnd has been used without botgPackage!" )
+        ENDIF()
+        
+        # Miscellaneous wrap-up.
+        botgProcessTPLS()
+        
+        # Add standard test directory.
+        IF( IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/test" )
+            TRIBITS_ADD_TEST_DIRECTORIES(test)
+        ENDIF()
+
+        #Inside a subpackage
+        IF( ${is_superpackage} )
+
+            ################################
+            TRIBITS_SUBPACKAGE_POSTPROCESS()
+            ################################
+
+        #Inside a plain package
+        ELSE()
+
+            #############################
+            TRIBITS_PACKAGE_POSTPROCESS()
+            #############################
+
+        ENDIF()
+
+        GLOBAL_SET(BOTG_INSIDE_PACKAGE_CMAKELISTS "")
+
+    #Inside a superpackage.
+    ELSEIF( ${is_superpackage} )
+        IF( NOT "${BOTG_INSIDE_SUPERPACKAGE_CMAKELISTS}" STREQUAL "${CMAKE_CURRENT_LIST_FILE}" )
+            MESSAGE( FATAL_ERROR "[BootsOnTheGround] botEnd has been used without botgSuperPackage in ${CMAKE_CURRENT_LIST_FILE}!" )
+        ENDIF()
+
+        #############################
+        TRIBITS_PACKAGE_POSTPROCESS()
+        #############################
+
+        GLOBAL_SET(BOTG_INSIDE_SUPERPACKAGE_CMAKELISTS "")
+
+    #Inside a project.
+    ELSE()
+
+        IF( ${is_package} )
+            MESSAGE( FATAL_ERROR "[BootsOnTheGround] package=${BOTG_INSIDE_PACKAGE_CMAKELISTS} did not have botgEnd()!" )
+        ELSEIF( ${is_superpackage} )
+            MESSAGE( FATAL_ERROR "[BootsOnTheGround] super package=${BOTG_INSIDE_SUPERPACKAGE_CMAKELISTS} did not have botgEnd()!" )
+        ENDIF()
+
+        ############################
+        TRIBITS_PROJECT_ENABLE_ALL()
+        ############################
+
+        # Final print of all the variables for inspection.
+        # For example: -D MATCH_VARIABLE_REGEX:STRING="" will print everything.
+        #              -D MATCH_VARIABLE_REGEX:STRING="^BootsOnTheGround" will
+        #                 print all the BootsOnTheGround variables.
+        #
+        IF( DEFINED MATCH_VARIABLE_REGEX )
+            botgPrintVar("${MATCH_VARIABLE_REGEX}")
+        ENDIF()
+
+    ENDIF()
 
 ENDMACRO()
 #-------------------------------------------------------------------------------
 MACRO( botgAddTPL type need name )
-    MESSAGE( STATUS "[BootsOnTheGround] package=${PACKAGE_NAME} adding TPL type=${type} need=${need} name=${name}...")
-
-    #Add dependency on BOTG version of TPL and the TPL itself.
     APPEND_SET( ${type}_${need}_DEP_PACKAGES BootsOnTheGround_${name} )
     APPEND_SET( ${type}_${need}_DEP_TPLS ${name} )
 ENDMACRO()
 #------------------------------------------------------------------------------
 MACRO( botgProcessTPLS )
-    #Linker options always need to be loaded as far as I can tell. 
+    #Linker options always need to be loaded as far as I can tell.
     #Imagine we have true TPL C, and we create BootsOnTheGround wrapper B, and we
     #depend on this package in a code A, A-->B-->C.
     #We can include in the CMake for B the necessary linker options, but what about
@@ -458,7 +577,7 @@ MACRO( botgProcessTPLS )
            IF( EXISTS "${linker_file}" )
                MESSAGE( STATUS "[BootsOnTheGround] package=${PACKAGE_NAME} is adding TPL=${name} linker options from file='${linker_file}'")
                INCLUDE( "${linker_file}" )
-           ENDIF() 
+           ENDIF()
        ENDIF()
     ENDFOREACH()
 ENDMACRO()
