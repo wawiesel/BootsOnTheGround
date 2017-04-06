@@ -401,6 +401,31 @@ MACRO( botgAddLinkerFlags compiler system) #list of flags comes at end
     ENDIF()
 ENDMACRO()
 #-------------------------------------------------------------------------------
+# Return the current git hash
+#
+FUNCTION( botgGitHash hash )
+    EXECUTE_PROCESS(
+      COMMAND git log -1 --format=%h
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      OUTPUT_VARIABLE hash_
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    SET( ${hash} ${hash_} PARENT_SCOPE )
+ENDFUNCTION()
+#-------------------------------------------------------------------------------
+# Resolve version number from user, hash, or set to UNKNOWN
+#
+FUNCTION( botgResolveVersion )
+    IF( NOT "${user}" STREQUAL "" )
+        SET( version_ ${user} )
+    ELSE( NOT "${hash}" STREQUAL "" )
+        SET( version_ "${hash}" )
+    ELSE()
+        SET( version_ "UNKNOWN" )
+    ENDIF()
+    SET( ${version} "${version_}" PARENT_SCOPE )
+ENDFUNCTION()
+#-------------------------------------------------------------------------------
 # Do most of the legwork setting up a CMakeLists.txt file for a project.
 #
 MACRO( botgProject name )
@@ -422,8 +447,12 @@ MACRO( botgProject name )
 
     # Set project name.
     SET(PROJECT_NAME ${name} CACHE STRING "global project name" FORCE )
-    MESSAGE( STATUS "[BootsOnTheGround] declared PROJECT_NAME=${PROJECT_NAME} ...")
-    PROJECT( ${PROJECT_NAME} C CXX Fortran )
+    botgGitHash( hash )
+    botgResolveVersion( "${ARGN}" "${hash}" version )
+    PROJECT( ${PROJECT_NAME}
+        VERSION ${version}
+        LANGUAGES C CXX Fortran )
+    MESSAGE( STATUS "[BootsOnTheGround] declared PROJECT_NAME=${PROJECT_NAME} version=${version}...")
 
     # Turn off MPI by default.
     SET(TPL_ENABLE_MPI OFF CACHE BOOL "Turn off MPI by default.")
@@ -437,6 +466,13 @@ MACRO( botgProject name )
     # Turn on tests by default.
     GLOBAL_SET( ${PROJECT_NAME}_ENABLE_TESTS ON CACHE BOOL "Enable all tests by default.")
     GLOBAL_SET( ${PROJECT_NAME}_ENABLE_SECONDARY_TESTED_CODE ON)
+
+    # Set version number.
+    GLOBAL_SET( ${REPOSITORY_NAME}_GIT_HASH "${hash}" )
+
+    # Set repository name.
+    GLOBAL_SET( REPOSITORY_NAME ${PROJECT_NAME} )
+    GLOBAL_SET( ${REPOSITORY_NAME}_VERSION "${version}" )
 
     # These variables make sure we have matching botgEnd() for packages and projects.
     GLOBAL_SET(BOTG_INSIDE_PROJECT_CMAKELISTS "${CMAKE_CURRENT_LIST_FILE}" )
@@ -458,6 +494,7 @@ ENDMACRO()
 #
 MACRO( botgSuperPackage name )
     GLOBAL_SET(BOTG_INSIDE_SUPERPACKAGE_CMAKELISTS "${CMAKE_CURRENT_LIST_FILE}" )
+    GLOBAL_SET( BOTG_${PACKAGE_NAME}_VERSION "${ARGN}" )
     TRIBITS_PACKAGE_DECL( ${name} )
     TRIBITS_PROCESS_SUBPACKAGES()
     TRIBITS_PACKAGE_DEF()
@@ -471,6 +508,7 @@ MACRO( botgPackage name )
     IF( ${is_subpackage} )
         TRIBITS_SUBPACKAGE( ${name} )
     ELSE()
+        GLOBAL_SET( BOTG_${PACKAGE_NAME}_VERSION "${ARGN}" )
         TRIBITS_PACKAGE( ${name} )
     ENDIF()
 ENDMACRO()
@@ -492,6 +530,17 @@ MACRO( botgEnd )
             MESSAGE( FATAL_ERROR "[BootsOnTheGround] botEnd has been used without botgPackage!" )
         ENDIF()
 
+        # Set version number.
+        SET(pre "${BOTG_${PACKAGE_NAME}_VERSION}" )
+        IF( "${pre}" STREQUAL "" )
+            SET( pre "UNKNOWN" )
+        ENDIF()
+        SET(final "")
+        IF( "${${REPOSITORY_NAME}_ENABLE_DEVELOPMENT_MODE}" )
+            SET(final "-dev")
+        ENDIF()
+        GLOBAL_SET( BOTG_${PACKAGE_NAME}_VERSION "${pre}${final}" )
+
         # Miscellaneous wrap-up.
         botgProcessTPLS()
 
@@ -506,6 +555,7 @@ MACRO( botgEnd )
             ################################
             TRIBITS_SUBPACKAGE_POSTPROCESS()
             ################################
+            MESSAGE( STATUS "[BootsOnTheGround] finished configuring subpackage=${PACKAGE_NAME}!")
 
         #Inside a plain package
         ELSE()
@@ -513,6 +563,7 @@ MACRO( botgEnd )
             #############################
             TRIBITS_PACKAGE_POSTPROCESS()
             #############################
+            MESSAGE( STATUS "[BootsOnTheGround] finished configuring package=${PACKAGE_NAME} version=${BOTG_${PACKAGE_NAME}_VERSION}!")
 
         ENDIF()
 
@@ -527,6 +578,7 @@ MACRO( botgEnd )
         #############################
         TRIBITS_PACKAGE_POSTPROCESS()
         #############################
+        MESSAGE( STATUS "[BootsOnTheGround] finished configuring superpackage=${PACKAGE_NAME} version=${BOTG_${PACKAGE_NAME}_VERSION}!")
 
         GLOBAL_SET(BOTG_INSIDE_SUPERPACKAGE_CMAKELISTS "")
 
