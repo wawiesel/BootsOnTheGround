@@ -301,7 +301,6 @@ MACRO( botgProject )
     ENDIF()
     PROJECT( "${PROJECT_NAME}"
         VERSION "${PROJECT_VERSION}"
-        LANGUAGES C Fortran CXX
     )
 
     # Set variable version strings for TriBITS.
@@ -321,7 +320,7 @@ MACRO( botgProject )
     GLOBAL_SET( ${PROJECT_NAME}_ENABLE_TESTS ON CACHE BOOL "Enable all tests by default.")
 
     # Turn secondary tested code on by default.
-    GLOBAL_SET( ${PROJECT_NAME}_ENABLE_SECONDARY_TESTED_CODE ON CACHE BOOL "Enable secondary tested code by default.")
+    SET( ${PROJECT_NAME}_ENABLE_SECONDARY_TESTED_CODE ON)
 
     # Set repository names if not set.
     GLOBAL_SET( REPOSITORY_NAME ${PROJECT_NAME} )
