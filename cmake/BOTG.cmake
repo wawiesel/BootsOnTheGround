@@ -146,8 +146,6 @@ MACRO( botgAddCompilerFlags lang compiler system) #list of flags comes at end
                 ELSE()
                     MESSAGE(STATUS "[BootsOnTheGround] package=${PACKAGE_NAME} could not add invalid flag='${flag}'!")
                 ENDIF()
-            ELSE()
-                MESSAGE(WARNING "[BootsOnTheGround] package=${PACKAGE_NAME} re-added flag='${flag}'!")
             ENDIF()
         ENDFOREACH()
     ENDIF()
@@ -173,8 +171,7 @@ MACRO( botgLibrary name )
     SET( sources )
     FOREACH( source ${library_SOURCES} )
         STRING( REGEX REPLACE ".in$" "" replaced "${source}" )
-        MESSAGE( STATUS "s[] ${replaced}" )
-        IF( NOT "${replaced}" STREQUAL "" )
+        IF( NOT "${source}" STREQUAL "${replaced}" )
             CONFIGURE_FILE( "${source}" "${CMAKE_CURRENT_BINARY_DIR}/${replaced}" )
             SET( source "${CMAKE_CURRENT_BINARY_DIR}/${replaced}" )
         ENDIF()
@@ -185,8 +182,7 @@ MACRO( botgLibrary name )
     SET( headers )
     FOREACH( header ${library_HEADERS} )
         STRING( REGEX REPLACE ".in$" "" replaced "${header}" )
-        MESSAGE( STATUS "h[] ${replaced}" )
-        IF( NOT "${replaced}" STREQUAL "" )
+        IF( NOT "${header}" STREQUAL "${replaced}" )
             CONFIGURE_FILE( "${header}" "${CMAKE_CURRENT_BINARY_DIR}/${replaced}" )
             SET( header "${CMAKE_CURRENT_BINARY_DIR}/${replaced}" )
         ENDIF()
@@ -196,9 +192,6 @@ MACRO( botgLibrary name )
     ENDFOREACH()
 
     #call TriBITS to add a library
-    MESSAGE( STATUS "[] ${name}")
-    MESSAGE( STATUS "[] ${headers}" )
-    MESSAGE( STATUS "[] ${sources}" )
     TRIBITS_ADD_LIBRARY( ${name}
         SOURCES
             "${sources}"
@@ -212,10 +205,9 @@ MACRO( botgLibrary name )
     ENDFOREACH()
 
     #set include directories
-    TARGET_INCLUDE_DIRECTORIES( ${name} PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>  #For C++
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>  #For fortran modules/configured files
-        $<INSTALL_INTERFACE:include>
+    INCLUDE_DIRECTORIES(
+        ${CMAKE_CURRENT_SOURCE_DIR}  #For C++
+        ${CMAKE_CURRENT_BINARY_DIR}  #For fortran modules/configured files
     )
 
 ENDMACRO()
@@ -262,6 +254,13 @@ FUNCTION( botgGitHash hash )
 ENDFUNCTION()
 #-------------------------------------------------------------------------------
 # PUBLIC
+# Add test directory
+#
+MACRO( botgTestDir )
+    TRIBITS_ADD_TEST_DIRECTORIES( ${ARGN} )
+ENDMACRO()
+#-------------------------------------------------------------------------------
+# PUBLIC
 # Resolve version number.
 #
 MACRO( botgResolveVersion )
@@ -298,15 +297,21 @@ MACRO( botgProject )
 
     # Load some fundamental identification data.
     INCLUDE( "${CMAKE_SOURCE_DIR}/ProjectName.cmake" )
+    IF( NOT DEFINED PROJECT_NAME )
+        SET(PROJECT_NAME "MY_PROJECT")
+    ENDIF()
     INCLUDE( "${CMAKE_SOURCE_DIR}/Version.cmake" )
+    IF( NOT DEFINED PROJECT_VERSION )
+        SET(PROJECT_VERSION "0.0.0")
+    ENDIF()
     PROJECT( "${PROJECT_NAME}"
         VERSION "${PROJECT_VERSION}"
         LANGUAGES C Fortran CXX
     )
 
     # Set variable version strings for TriBITS.
-    STRING(REPLACE "." ";" vlist ${PROJECT_VERSION})
-    LIST(GET vlist 0 ${PROJECT_NAME}_MAJOR_VERSION )
+    STRING(REPLACE "." ";" vlist "${PROJECT_VERSION}")
+    LIST(GET vlist 0 "${PROJECT_NAME}_MAJOR_VERSION" )
 
     # Turn off MPI by default.
     SET(TPL_ENABLE_MPI OFF CACHE BOOL "Turn off MPI by default.")
@@ -382,11 +387,6 @@ MACRO( botgEnd )
 
         # Miscellaneous wrap-up.
         botgProcessTPLS()
-
-        # Add standard test directory.
-        IF( IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/test" )
-            TRIBITS_ADD_TEST_DIRECTORIES(test)
-        ENDIF()
 
         #Inside a subpackage
         IF( ${is_superpackage} )
