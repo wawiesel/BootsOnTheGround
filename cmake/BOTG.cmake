@@ -153,10 +153,12 @@ ENDMACRO()
 #-------------------------------------------------------------------------------
 # PUBLIC
 # Define a library (including headers) to build.
-# botgLibrary( Testing123
-#    SOURCE
+# botgLibrary( <name>
+#    SOURCES
 #        ..
 #    HEADERS
+#        ..
+#    LINK_TO
 #        ..
 # )
 #
@@ -215,7 +217,7 @@ ENDMACRO()
 # PUBLIC
 # Add flags to the linker.
 #
-MACRO( botgAddLinkerFlags compiler system) #list of flags comes at end
+MACRO( botgAddLinkerFlags compiler system ) #list of flags comes at end
     #Use CXX to check the validity of flags
     botgCompilerAndSystemMatches( CXX "${compiler}" "${system}" found )
     IF( found )
@@ -233,8 +235,6 @@ MACRO( botgAddLinkerFlags compiler system) #list of flags comes at end
                 ELSE()
                     MESSAGE(STATUS "[BootsOnTheGround] could not add invalid linker flag='${flag}'!")
                 ENDIF()
-            ELSE()
-                MESSAGE(STATUS "[BootsOnTheGround] linker flag='${flag}' has already been added.")
             ENDIF()
         ENDFOREACH()
     ENDIF()
@@ -270,12 +270,7 @@ MACRO( botgResolveVersion )
         ASSERT_DEFINED( VERSION )
         SET(version "${VERSION}")
     ENDIF()
-    SET(final "")
-    IF( "${${REPOSITORY_NAME}_ENABLE_DEVELOPMENT_MODE}" )
-        SET(final "-dev")
-    ENDIF()
-    GLOBAL_SET( ${PACKAGE_NAME}_VERSION "${version}${final}")
-    MESSAGE( STATUS "[BootsOnTheGround] configuring package=${PACKAGE_NAME} version=${${PACKAGE_NAME}_VERSION}")
+    GLOBAL_SET( ${PACKAGE_NAME}_VERSION "${version}")
 ENDMACRO()
 #-------------------------------------------------------------------------------
 # PUBLIC
@@ -324,7 +319,9 @@ MACRO( botgProject )
 
     # Turn on tests by default.
     GLOBAL_SET( ${PROJECT_NAME}_ENABLE_TESTS ON CACHE BOOL "Enable all tests by default.")
-    GLOBAL_SET( ${PROJECT_NAME}_ENABLE_SECONDARY_TESTED_CODE ON)
+
+    # Turn secondary tested code on by default.
+    GLOBAL_SET( ${PROJECT_NAME}_ENABLE_SECONDARY_TESTED_CODE ON CACHE BOOL "Enable secondary tested code by default.")
 
     # Set repository names if not set.
     GLOBAL_SET( REPOSITORY_NAME ${PROJECT_NAME} )
@@ -402,7 +399,7 @@ MACRO( botgEnd )
             #############################
             TRIBITS_PACKAGE_POSTPROCESS()
             #############################
-            MESSAGE( STATUS "[BootsOnTheGround] finished configuring package=${PACKAGE_NAME} version=${BOTG_${PACKAGE_NAME}_VERSION}!")
+            MESSAGE( STATUS "[BootsOnTheGround] finished configuring package=${PACKAGE_NAME} version=${${PACKAGE_NAME}_VERSION}!")
 
         ENDIF()
 
@@ -417,7 +414,7 @@ MACRO( botgEnd )
         #############################
         TRIBITS_PACKAGE_POSTPROCESS()
         #############################
-        MESSAGE( STATUS "[BootsOnTheGround] finished configuring superpackage=${PACKAGE_NAME} version=${BOTG_${PACKAGE_NAME}_VERSION}!")
+        MESSAGE( STATUS "[BootsOnTheGround] finished configuring superpackage=${PACKAGE_NAME} version=${${PACKAGE_NAME}_VERSION}!")
 
         GLOBAL_SET(BOTG_INSIDE_SUPERPACKAGE_CMAKELISTS "")
 
