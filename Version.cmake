@@ -1,2 +1,3 @@
-MESSAGE( STATUS "[BootsOnTheGround] project BOTG_VERSION=${BOTG_VERSION}")
+INCLUDE( "${CMAKE_SOURCE_DIR}/src/Version.cmake" )
+SET( PROJECT_VERSION ${VERSION} )
 

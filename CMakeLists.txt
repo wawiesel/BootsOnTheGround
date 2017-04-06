@@ -6,6 +6,11 @@ SET(BOTG_BOOTSTRAP OFF CACHE BOOL INTERNAL)
 # Initialize BOTG.
 INCLUDE( "${CMAKE_SOURCE_DIR}/cmake/BOTG_INCLUDE.cmake" )
 
-# Setup this project.
-botgProject( BOTG )
+botgProject()
+
+PROJECT( "${PROJECT_NAME}"
+    VERSION "${PROJECT_VERSION}"
+    LANGUAGES C CXX Fortran
+)
+
 botgEnd()

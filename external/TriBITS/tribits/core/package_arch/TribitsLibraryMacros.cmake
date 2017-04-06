@@ -237,7 +237,7 @@ ENDFUNCTION()
 #     Required base name of the library.  The name of the actual libray name
 #     will be prefixed by ``${${PROJECT_NAME}_LIBRARY_NAME_PREFIX}`` to
 #     produce::
-#     
+#
 #       <libTargetName> = ${${PROJECT_NAME}_LIBRARY_NAME_PREFIX}<libBaseName>
 #
 #     This is the name passed to ``ADD_LIBRARY(<libTargetName> ...)``.  The

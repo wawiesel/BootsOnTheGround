@@ -1,4 +1,13 @@
 #-------------------------------------------------------------------------------
+# Set BOTG_DIR
+#
+GET_FILENAME_COMPONENT( parent_dir "${CMAKE_CURRENT_LIST_DIR}" DIRECTORY )
+SET(BOTG_ROOT_DIR "${parent_dir}" CACHE PATH INTERNAL)
+MESSAGE( STATUS "[BootsOnTheGround] using BOTG_ROOT_DIR=${BOTG_ROOT_DIR}")
+#-------------------------------------------------------------------------------
+# PUBLIC
+# Clear the CMake cache variables.
+#
 FUNCTION( botgClearCMakeCache keep_cache )
     #quick return if passed anything CMake TRUE
     IF( DEFINED(keep_cache) AND keep_cache )
@@ -22,27 +31,466 @@ FUNCTION( botgClearCMakeCache keep_cache )
 
 ENDFUNCTION()
 #-------------------------------------------------------------------------------
+# PUBLIC
+# Print variables according to a regular expression.
+#
 MACRO(botgPrintVar regex)
-    get_cmake_property(_variableNames VARIABLES)
+    GET_CMAKE_PROPERTY(_variableNames VARIABLES)
 
-    foreach (_variableName ${_variableNames})
+    FOREACH(_variableName ${_variableNames})
 
-        if( _variableName MATCHES "^_")
+        IF( _variableName MATCHES "^_")
             CONTINUE()
-        endif()
+        ENDIF()
 
-        if( NOT "${regex}" STREQUAL "" )
-            if( NOT _variableName MATCHES "${regex}" )
+        IF( NOT "${regex}" STREQUAL "" )
+            IF( NOT _variableName MATCHES "${regex}" )
                 CONTINUE()
-            endif()
-        endif()
+            ENDIF()
+        ENDIF()
 
-        message(STATUS "[BootsOnTheGround] ${_variableName}=${${_variableName}}")
+        MESSAGE(STATUS "[BootsOnTheGround] ${_variableName}=${${_variableName}}")
 
-    endforeach()
+    ENDFOREACH()
+ENDMACRO()
+#-------------------------------------------------------------------------------
+# PUBLIC
+# Prevent in-source builds.
+#
+FUNCTION(botgPreventInSourceBuilds)
+
+  GET_FILENAME_COMPONENT(srcdir "${CMAKE_SOURCE_DIR}" REALPATH)
+  GET_FILENAME_COMPONENT(bindir "${CMAKE_BINARY_DIR}" REALPATH)
+
+  IF("${srcdir}" STREQUAL "${bindir}")
+    botgClearCMakeCache( FALSE )
+    MESSAGE(FATAL_ERROR "[BootsOnTheGround] in-source builds are not allowed!")
+  ENDIF()
+
+ENDFUNCTION()
+#-------------------------------------------------------------------------------
+# PUBLIC
+# Enforce the minimum compiler version.
+#
+FUNCTION( botgMinimumCompilerVersion lang compiler min_version )
+    botgCompilerMatches( ${lang} ${compiler} found )
+    IF( found )
+        SET(version "${CMAKE_${lang}_COMPILER_VERSION}")
+        IF( "${version}" STREQUAL "" )
+            MESSAGE( WARNING "CMAKE_${lang}_COMPILER_VERSION could not be discovered!")
+        ELSEIF( CMAKE_${lang}_COMPILER_VERSION VERSION_LESS ${min_version} )
+            MESSAGE( FATAL_ERROR "compiler=${compiler} for lang=${lang} is required to have minimum version=${min_version} but found ${version}!")
+        ENDIF()
+    ENDIF()
+ENDFUNCTION()
+#-------------------------------------------------------------------------------
+# PUBLIC
+# Use a particular version of the C++ standard.
+#
+MACRO( botgUseCxxStandard version )
+    botgAddCompilerFlags( CXX "GNU|Clang|Intel" ANY_SYSTEM
+        "-std=c++${version}"
+    )
+ENDMACRO()
+#-------------------------------------------------------------------------------
+# PUBLIC
+# Enable some useful Fortran features.
+#
+MACRO( botgEnableFortran )
+    FOREACH( directive ${ARGN} )
+        IF( directive STREQUAL "C_PREPROCESSOR" )
+            botgAddCompilerFlags( Fortran "GNU|Clang" ANY_SYSTEM "-cpp" )
+        ELSEIF( directive STREQUAL "UNLIMITED_LINE_LENGTH" )
+            botgAddCompilerFlags( Fortran "GNU|Clang" ANY_SYSTEM "-ffree-line-length-none" )
+        ELSE()
+            MESSAGE(FATAL_ERROR "[BootsOnTheGround] EnableFortran directive=${directive} is unknown!")
+        ENDIF()
+    ENDFOREACH()
+ENDMACRO()
+#-------------------------------------------------------------------------------
+# PUBLIC
+# Check a flag for a particular language.
+#
+MACRO( botgCheckFlag lang flag found )
+    IF( ${lang} STREQUAL "Fortran" )
+        #CMake does not have a core one so we provide above.
+        botgCheckFlag_Fortran( "${flag}" ${found} )
+    ELSEIF( ${lang} STREQUAL "CXX" )
+        INCLUDE(CheckCXXCompilerFlag)
+        CHECK_CXX_COMPILER_FLAG("${flag}" ${found})
+    ELSEIF( ${lang} STREQUAL "C" )
+        INCLUDE(CheckCCompilerFlag)
+        CHECK_C_COMPILER_FLAG("${flag}" ${found})
+    ELSE()
+        MESSAGE(FATAL_ERROR "[BootsOnTheGround] lang=${lang} is not known!" )
+    ENDIF()
+ENDMACRO()
+#-------------------------------------------------------------------------------
+# PUBLIC
+# Add flags to the compiler.
+#
+MACRO( botgAddCompilerFlags lang compiler system) #list of flags comes at end
+    botgCompilerAndSystemMatches( "${lang}" "${compiler}" "${system}" found )
+    IF( found )
+        #MESSAGE(STATUS "[BootsOnTheGround] adding package=${PACKAGE_NAME} ${lang} flags for compiler='${BOTG_${lang}_COMPILER}' on system='${BOTG_SYSTEM}'")
+        FOREACH( flag ${ARGN} )
+            #check if flag is already in list
+            STRING(FIND "${CMAKE_${lang}_FLAGS}" "${flag}" position)
+            IF( ${position} LESS 0 )
+                #create a special variable to store whether the flag works
+                STRING(REGEX REPLACE "[^0-9a-zA-Z]" "_" flagname ${flag})
+                botgCheckFlag( ${lang} ${flag} BOTG_USE_${lang}_FLAG_${flagname})
+                IF( BOTG_USE_${lang}_FLAG_${flagname} )
+                    MESSAGE(STATUS "[BootsOnTheGround] package=${PACKAGE_NAME} added flag='${flag}' for lang=${lang} for compiler='${BOTG_${lang}_COMPILER}' on system='${BOTG_SYSTEM}'!")
+                    SET( CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS} ${flag}")
+                ELSE()
+                    MESSAGE(STATUS "[BootsOnTheGround] package=${PACKAGE_NAME} could not add invalid flag='${flag}'!")
+                ENDIF()
+            ELSE()
+                MESSAGE(WARNING "[BootsOnTheGround] package=${PACKAGE_NAME} re-added flag='${flag}'!")
+            ENDIF()
+        ENDFOREACH()
+    ENDIF()
+ENDMACRO()
+#-------------------------------------------------------------------------------
+# PUBLIC
+# Define a library (including headers) to build.
+# botgLibrary( Testing123
+#    SOURCE
+#        ..
+#    HEADERS
+#        ..
+# )
+#
+MACRO( botgLibrary name )
+    # parse arguments
+    SET(options)
+    SET(one_value_args)
+    SET(multi_value_args LINK_TO SOURCES HEADERS )
+    CMAKE_PARSE_ARGUMENTS(library "${options}" "${one_value_args}" "${multi_value_args}" ${ARGN} )
+
+    #create list of sources
+    SET( sources )
+    FOREACH( source ${library_SOURCES} )
+        STRING( REGEX REPLACE ".in$" "" replaced "${source}" )
+        MESSAGE( STATUS "s[] ${replaced}" )
+        IF( NOT "${replaced}" STREQUAL "" )
+            CONFIGURE_FILE( "${source}" "${CMAKE_CURRENT_BINARY_DIR}/${replaced}" )
+            SET( source "${CMAKE_CURRENT_BINARY_DIR}/${replaced}" )
+        ENDIF()
+        LIST(APPEND sources "${source}" )
+    ENDFOREACH()
+
+    #create list of headers and install directives
+    SET( headers )
+    FOREACH( header ${library_HEADERS} )
+        STRING( REGEX REPLACE ".in$" "" replaced "${header}" )
+        MESSAGE( STATUS "h[] ${replaced}" )
+        IF( NOT "${replaced}" STREQUAL "" )
+            CONFIGURE_FILE( "${header}" "${CMAKE_CURRENT_BINARY_DIR}/${replaced}" )
+            SET( header "${CMAKE_CURRENT_BINARY_DIR}/${replaced}" )
+        ENDIF()
+        GET_FILENAME_COMPONENT( dir "${header}" DIRECTORY )
+        INSTALL(FILES "${header}" DESTINATION "include/${dir}")
+        LIST(APPEND headers "${header}" )
+    ENDFOREACH()
+
+    #call TriBITS to add a library
+    MESSAGE( STATUS "[] ${name}")
+    MESSAGE( STATUS "[] ${headers}" )
+    MESSAGE( STATUS "[] ${sources}" )
+    TRIBITS_ADD_LIBRARY( ${name}
+        SOURCES
+            "${sources}"
+        NOINSTALLHEADERS
+            "${headers}"
+    )
+
+    #do linking
+    FOREACH( link_to ${library_LINK_TO} )
+        TARGET_LINK_LIBRARIES( ${name} ${link_to} )
+    ENDFOREACH()
+
+    #set include directories
+    TARGET_INCLUDE_DIRECTORIES( ${name} PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>  #For C++
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>  #For fortran modules/configured files
+        $<INSTALL_INTERFACE:include>
+    )
 
 ENDMACRO()
+#-------------------------------------------------------------------------------
+# PUBLIC
+# Add flags to the linker.
+#
+MACRO( botgAddLinkerFlags compiler system) #list of flags comes at end
+    #Use CXX to check the validity of flags
+    botgCompilerAndSystemMatches( CXX "${compiler}" "${system}" found )
+    IF( found )
+        #MESSAGE(STATUS "[BootsOnTheGround] adding package=${PACKAGE_NAME} flags for linker on system='${BOTG_SYSTEM}'")
+        FOREACH( flag ${ARGN} )
+            #check if flag is already in list
+            STRING(FIND "${CMAKE_EXE_LINKER_FLAGS}" "${flag}" position)
+            IF( ${position} LESS 0 )
+                #create a special variable to store whether the flag works
+                STRING(REGEX REPLACE "[^0-9a-zA-Z]" "_" flagname ${flag})
+                botgCheckFlag( CXX ${flag} BOTG_USE_EXE_LINKER_FLAG_${flagname})
+                IF( BOTG_USE_EXE_LINKER_FLAG_${flagname} )
+                    MESSAGE(STATUS "[BootsOnTheGround] enabled linker flag='${flag}' for compiler=${compiler} on system='${BOTG_SYSTEM}'!")
+                    SET( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${flag}")
+                ELSE()
+                    MESSAGE(STATUS "[BootsOnTheGround] could not add invalid linker flag='${flag}'!")
+                ENDIF()
+            ELSE()
+                MESSAGE(STATUS "[BootsOnTheGround] linker flag='${flag}' has already been added.")
+            ENDIF()
+        ENDFOREACH()
+    ENDIF()
+ENDMACRO()
+#-------------------------------------------------------------------------------
+# PUBLIC
+# Return the current git hash
+#
+FUNCTION( botgGitHash hash )
+    EXECUTE_PROCESS(
+      COMMAND git log -1 --format=%h
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      OUTPUT_VARIABLE hash_
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    SET( ${hash} ${hash_} PARENT_SCOPE )
+ENDFUNCTION()
+#-------------------------------------------------------------------------------
+# PUBLIC
+# Resolve version number.
+#
+MACRO( botgResolveVersion )
+    SET(version "UNKNOWN")
+    IF( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/Version.cmake" )
+        INCLUDE( "${CMAKE_CURRENT_SOURCE_DIR}/Version.cmake" )
+        ASSERT_DEFINED( VERSION )
+        SET(version "${VERSION}")
+    ENDIF()
+    SET(final "")
+    IF( "${${REPOSITORY_NAME}_ENABLE_DEVELOPMENT_MODE}" )
+        SET(final "-dev")
+    ENDIF()
+    GLOBAL_SET( ${PACKAGE_NAME}_VERSION "${version}${final}")
+    MESSAGE( STATUS "[BootsOnTheGround] configuring package=${PACKAGE_NAME} version=${${PACKAGE_NAME}_VERSION}")
+ENDMACRO()
+#-------------------------------------------------------------------------------
+# PUBLIC
+# Do most of the legwork setting up a CMakeLists.txt file for a project.
+#
+MACRO( botgProject )
+    # Clear the cache unless provided -D KEEP_CACHE:BOOL=ON.
+    botgClearCMakeCache("${KEEP_CACHE}")
+
+    # Install locally by default.
+    IF( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+        SET( CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/INSTALL" CACHE PATH "default install path" FORCE )
+    ENDIF()
+
+    # Enable the hunter gate for downloading/installing TPLs!
+    SET(HUNTER_SKIP_LOCK ON)
+    PROJECT( "" NONE )
+    INCLUDE( "${BOTG_ROOT_DIR}/cmake/HunterGate.cmake" )
+
+    # Load some fundamental identification data.
+    INCLUDE( "${CMAKE_SOURCE_DIR}/ProjectName.cmake" )
+    INCLUDE( "${CMAKE_SOURCE_DIR}/Version.cmake" )
+    PROJECT( "${PROJECT_NAME}"
+        VERSION "${PROJECT_VERSION}"
+        LANGUAGES C Fortran CXX
+    )
+
+    # Set variable version strings for TriBITS.
+    STRING(REPLACE "." ";" vlist ${PROJECT_VERSION})
+    LIST(GET vlist 0 ${PROJECT_NAME}_MAJOR_VERSION )
+
+    # Turn off MPI by default.
+    SET(TPL_ENABLE_MPI OFF CACHE BOOL "Turn off MPI by default.")
+
+    # Cannot use TriBITS commands until after this statement!
+    botgProcessTribits( "${BOTG_ROOT_DIR}/external/TriBITS/tribits" )
+
+    # Just good practice.
+    botgPreventInSourceBuilds()
+
+    # Turn on tests by default.
+    GLOBAL_SET( ${PROJECT_NAME}_ENABLE_TESTS ON CACHE BOOL "Enable all tests by default.")
+    GLOBAL_SET( ${PROJECT_NAME}_ENABLE_SECONDARY_TESTED_CODE ON)
+
+    # Set repository names if not set.
+    GLOBAL_SET( REPOSITORY_NAME ${PROJECT_NAME} )
+    GLOBAL_SET( ${REPOSITORY_NAME}_VERSION "${version}" )
+
+    # These variables make sure we have matching botgEnd() for packages and projects.
+    GLOBAL_SET(BOTG_INSIDE_PROJECT_CMAKELISTS "${CMAKE_CURRENT_LIST_FILE}" )
+    GLOBAL_SET(BOTG_INSIDE_PACKAGE_CMAKELISTS "" )
+    GLOBAL_SET(BOTG_INSIDE_SUPERPACKAGE_CMAKELISTS "" )
+
+    # Set the operating system name so we can have system-dependent flags.
+    GLOBAL_SET( BOTG_SYSTEM ${CMAKE_SYSTEM_NAME} )
+    MESSAGE( STATUS "[BootsOnTheGround] set operating system global BOTG_SYSTEM=${BOTG_SYSTEM}")
+
+ENDMACRO()
+#-------------------------------------------------------------------------------
+# PUBLIC
+# Initialize a super package (package with subpackages) CMakeLists.txt file.
+#
+MACRO( botgSuperPackage name )
+    GLOBAL_SET(BOTG_INSIDE_SUPERPACKAGE_CMAKELISTS "${CMAKE_CURRENT_LIST_FILE}" )
+    botgResolveVersion() #macro to resolve the version
+    TRIBITS_PACKAGE_DECL( ${name} )
+    TRIBITS_PROCESS_SUBPACKAGES()
+    TRIBITS_PACKAGE_DEF()
+ENDMACRO()
+#-------------------------------------------------------------------------------
+# PUBLIC
+# Initialize a package CMakeLists.txt file.
+#
+MACRO( botgPackage name )
+    GLOBAL_SET(BOTG_INSIDE_PACKAGE_CMAKELISTS "${CMAKE_CURRENT_LIST_FILE}" )
+    STRING( COMPARE NOTEQUAL "${BOTG_INSIDE_SUPERPACKAGE_CMAKELISTS}" "" is_subpackage )
+    IF( ${is_subpackage} )
+        #note, subpackages cannot have their own versions
+        TRIBITS_SUBPACKAGE( ${name} )
+    ELSE()
+        botgResolveVersion() #macro to resolve the version
+        TRIBITS_PACKAGE( ${name} )
+    ENDIF()
+ENDMACRO()
+#-------------------------------------------------------------------------------
+# PUBLIC
+# Finalize a CMakeLists.txt file.
+#
+MACRO( botgEnd )
+    STRING( COMPARE NOTEQUAL "${BOTG_INSIDE_PACKAGE_CMAKELISTS}" "" is_package )
+    STRING( COMPARE NOTEQUAL "${BOTG_INSIDE_SUPERPACKAGE_CMAKELISTS}" "" is_superpackage )
+    STRING( COMPARE NOTEQUAL "${BOTG_INSIDE_PROJECT_CMAKELISTS}" "" has_project )
+
+    IF( NOT ${has_project} )
+        MESSAGE( FATAL_ERROR "[BootsOnTheGround] botgEnd has been used without a corresponding botgProject in ${CMAKE_CURRENT_LIST_FILE}!" )
+    ENDIF()
+
+    #Inside a package/subpackage.
+    IF( ${is_package} )
+        IF( NOT "${BOTG_INSIDE_PACKAGE_CMAKELISTS}" STREQUAL "${CMAKE_CURRENT_LIST_FILE}" )
+            MESSAGE( FATAL_ERROR "[BootsOnTheGround] botEnd has been used without botgPackage!" )
+        ENDIF()
+
+        # Miscellaneous wrap-up.
+        botgProcessTPLS()
+
+        # Add standard test directory.
+        IF( IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/test" )
+            TRIBITS_ADD_TEST_DIRECTORIES(test)
+        ENDIF()
+
+        #Inside a subpackage
+        IF( ${is_superpackage} )
+
+            ################################
+            TRIBITS_SUBPACKAGE_POSTPROCESS()
+            ################################
+            MESSAGE( STATUS "[BootsOnTheGround] finished configuring subpackage=${PACKAGE_NAME}!")
+
+        #Inside a plain package
+        ELSE()
+
+            #############################
+            TRIBITS_PACKAGE_POSTPROCESS()
+            #############################
+            MESSAGE( STATUS "[BootsOnTheGround] finished configuring package=${PACKAGE_NAME} version=${BOTG_${PACKAGE_NAME}_VERSION}!")
+
+        ENDIF()
+
+        GLOBAL_SET(BOTG_INSIDE_PACKAGE_CMAKELISTS "")
+
+    #Inside a superpackage.
+    ELSEIF( ${is_superpackage} )
+        IF( NOT "${BOTG_INSIDE_SUPERPACKAGE_CMAKELISTS}" STREQUAL "${CMAKE_CURRENT_LIST_FILE}" )
+            MESSAGE( FATAL_ERROR "[BootsOnTheGround] botEnd has been used without botgSuperPackage in ${CMAKE_CURRENT_LIST_FILE}!" )
+        ENDIF()
+
+        #############################
+        TRIBITS_PACKAGE_POSTPROCESS()
+        #############################
+        MESSAGE( STATUS "[BootsOnTheGround] finished configuring superpackage=${PACKAGE_NAME} version=${BOTG_${PACKAGE_NAME}_VERSION}!")
+
+        GLOBAL_SET(BOTG_INSIDE_SUPERPACKAGE_CMAKELISTS "")
+
+    #Inside a project.
+    ELSE()
+
+        # Process compiler for each language.
+        botgProcessCompiler( C )
+        botgProcessCompiler( CXX )
+        botgProcessCompiler( Fortran )
+
+        IF( ${is_package} )
+            MESSAGE( FATAL_ERROR "[BootsOnTheGround] package=${BOTG_INSIDE_PACKAGE_CMAKELISTS} did not have botgEnd()!" )
+        ELSEIF( ${is_superpackage} )
+            MESSAGE( FATAL_ERROR "[BootsOnTheGround] super package=${BOTG_INSIDE_SUPERPACKAGE_CMAKELISTS} did not have botgEnd()!" )
+        ENDIF()
+
+        ############################
+        TRIBITS_PROJECT_ENABLE_ALL()
+        ############################
+
+        # Final print of all the variables for inspection.
+        # For example: -D MATCH_VARIABLE_REGEX:STRING="" will print everything.
+        #              -D MATCH_VARIABLE_REGEX:STRING="^BootsOnTheGround" will
+        #                 print all the BootsOnTheGround variables.
+        #
+        IF( DEFINED MATCH_VARIABLE_REGEX )
+            botgPrintVar("${MATCH_VARIABLE_REGEX}")
+        ENDIF()
+
+    ENDIF()
+
+ENDMACRO()
+#-------------------------------------------------------------------------------
+# PUBLIC
+# Add a third-party-library (TPL).
+#
+MACRO( botgAddTPL type need name )
+    APPEND_SET( ${type}_${need}_DEP_PACKAGES BootsOnTheGround_${name} )
+    APPEND_SET( ${type}_${need}_DEP_TPLS ${name} )
+ENDMACRO()
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+# PRIVATE
+# Process third-party-library (TPL).
+#
+MACRO( botgProcessTPLS )
+    #Linker options always need to be loaded as far as I can tell.
+    #Imagine we have true TPL C, and we create BootsOnTheGround wrapper B, and we
+    #depend on this package in a code A, A-->B-->C.
+    #We can include in the CMake for B the necessary linker options, but what about
+    #A? We should be able to "inherit" them from B but I have yet to figure it out
+    #without resorting to these types of files.
+    FOREACH( name ${${PACKAGE_NAME}_LIB_REQUIRED_DEP_TPLS}
+                  ${${PACKAGE_NAME}_LIB_OPTIONAL_DEP_TPLS}
+                  ${${PACKAGE_NAME}_TEST_REQUIRED_DEP_TPLS}
+                  ${${PACKAGE_NAME}_TEST_OPTIONAL_DEP_TPLS} )
+       IF( TPL_ENABLE_${name} )
+           SET( linker_file "${BOTG_ROOT_DIR}/src/${name}/cmake/LinkerFlags.cmake" )
+           IF( EXISTS "${linker_file}" )
+               MESSAGE( STATUS "[BootsOnTheGround] package=${PACKAGE_NAME} added TPL=${name} LinkerFlags.cmake")
+               INCLUDE( "${linker_file}" )
+           ENDIF()
+       ENDIF()
+    ENDFOREACH()
+ENDMACRO()
+#-------------------------------------------------------------------------------
 #---------------------------------------------------------------------------
+# PRIVATE
+# Hunt down a TPL using hunter.
+#
 FUNCTION( botgHuntTPL tribits_name headers libs hunter_name hunter_args )
 
     SET(${tribits_name}_FORCE_HUNTER OFF
@@ -117,7 +565,8 @@ FUNCTION( botgHuntTPL tribits_name headers libs hunter_name hunter_args )
 
 ENDFUNCTION()
 #-------------------------------------------------------------------------------
-# Process TriBITS and set .
+# PRIVATE
+# Process TriBITS and set TRIBITS_DIR.
 #
 MACRO( botgProcessTribits TriBITS_dir )
     MESSAGE( STATUS "[BootsOnTheGround] initializing TriBITS ..." )
@@ -135,20 +584,7 @@ MACRO( botgProcessTribits TriBITS_dir )
 
 ENDMACRO()
 #-------------------------------------------------------------------------------
-# Prevent in-source builds.
-#
-FUNCTION(botgPreventInSourceBuilds)
-
-  GET_FILENAME_COMPONENT(srcdir "${CMAKE_SOURCE_DIR}" REALPATH)
-  GET_FILENAME_COMPONENT(bindir "${CMAKE_BINARY_DIR}" REALPATH)
-
-  IF("${srcdir}" STREQUAL "${bindir}")
-    botgClearCMakeCache( FALSE )
-    MESSAGE(FATAL_ERROR "[BootsOnTheGround] in-source builds are not allowed!")
-  ENDIF()
-
-ENDFUNCTION()
-#-------------------------------------------------------------------------------
+# PRIVATE
 # Return the compiler variable as "SUITE/COMPILER".
 #
 FUNCTION( botgGetCompilerName lang compiler )
@@ -163,6 +599,7 @@ FUNCTION( botgGetCompilerName lang compiler )
 
 ENDFUNCTION()
 #-------------------------------------------------------------------------------
+# PRIVATE
 # Set the global compiler name BOTG_${lang}_COMPILER="SUITE/COMPILER".
 #
 MACRO( botgProcessCompiler lang )
@@ -173,6 +610,7 @@ MACRO( botgProcessCompiler lang )
     MESSAGE( STATUS "[BootsOnTheGround] set lang=${lang} compiler global BOTG_${lang}_COMPILER=${BOTG_${lang}_COMPILER}")
 ENDMACRO()
 #-------------------------------------------------------------------------------
+# PRIVATE
 # Check if given Fortran source compiles and links into an executable
 #
 # botgTryCompileFortran(<code> <var> [FAIL_REGEX <fail-regex>])
@@ -246,6 +684,9 @@ MACRO( botgTryCompileFortran source var )
     ENDFOREACH()
 ENDMACRO()
 #-------------------------------------------------------------------------------
+# PRIVATE
+# Check a Fortran flag to see if it works.
+#
 MACRO( botgCheckFlag_Fortran flag result)
    SET(save_defs "${CMAKE_REQUIRED_DEFINITIONS}")
    MESSAGE(STATUS "Performing Test ${flag}")
@@ -271,51 +712,9 @@ MACRO( botgCheckFlag_Fortran flag result)
    SET (CMAKE_REQUIRED_DEFINITIONS "${save_defs}")
 ENDMACRO()
 #-------------------------------------------------------------------------------
-FUNCTION( botgMinimumCompilerVersion lang compiler min_version )
-    botgCompilerMatches( ${lang} ${compiler} found )
-    IF( found )
-        SET(version "${CMAKE_${lang}_COMPILER_VERSION}")
-        IF( "${version}" STREQUAL "" )
-            MESSAGE( WARNING "CMAKE_${lang}_COMPILER_VERSION could not be discovered!")
-        ELSEIF( CMAKE_${lang}_COMPILER_VERSION VERSION_LESS ${min_version} )
-            MESSAGE( FATAL_ERROR "compiler=${compiler} for lang=${lang} is required to have minimum version=${min_version} but found ${version}!")
-        ENDIF()
-    ENDIF()
-ENDFUNCTION()
-#-------------------------------------------------------------------------------
-MACRO( botgUseCxxStandard version )
-    botgAddCompilerFlags( CXX "GNU|Clang|Intel" ANY_SYSTEM
-        "-std=c++${version}"
-    )
-ENDMACRO()
-#-------------------------------------------------------------------------------
-MACRO( botgEnableFortran )
-    FOREACH( directive ${ARGN} )
-        IF( directive STREQUAL "C_PREPROCESSOR" )
-            botgAddCompilerFlags( Fortran "GNU|Clang" ANY_SYSTEM "-cpp" )
-        ELSEIF( directive STREQUAL "UNLIMITED_LINE_LENGTH" )
-            botgAddCompilerFlags( Fortran "GNU|Clang" ANY_SYSTEM "-ffree-line-length-none" )
-        ELSE()
-            MESSAGE(FATAL_ERROR "[BootsOnTheGround] EnableFortran directive=${directive} is unknown!")
-        ENDIF()
-    ENDFOREACH()
-ENDMACRO()
-#-------------------------------------------------------------------------------
-MACRO( botgCheckFlag lang flag found )
-    IF( ${lang} STREQUAL "Fortran" )
-        #CMake does not have a core one so we provide above.
-        botgCheckFlag_Fortran( "${flag}" ${found} )
-    ELSEIF( ${lang} STREQUAL "CXX" )
-        INCLUDE(CheckCXXCompilerFlag)
-        CHECK_CXX_COMPILER_FLAG("${flag}" ${found})
-    ELSEIF( ${lang} STREQUAL "C" )
-        INCLUDE(CheckCCompilerFlag)
-        CHECK_C_COMPILER_FLAG("${flag}" ${found})
-    ELSE()
-        MESSAGE(FATAL_ERROR "[BootsOnTheGround] lang=${lang} is not known!" )
-    ENDIF()
-ENDMACRO()
-#-------------------------------------------------------------------------------
+# PRIVATE
+# Check if the compiler matches. (Used to selectively enable flags.)
+#
 FUNCTION( botgCompilerMatches lang compiler found )
     SET(${found} OFF PARENT_SCOPE)
     IF( ("${compiler}" STREQUAL "ANY_COMPILER") OR ("${compiler}" STREQUAL "") )
@@ -328,6 +727,9 @@ FUNCTION( botgCompilerMatches lang compiler found )
     ENDIF()
 ENDFUNCTION()
 #-------------------------------------------------------------------------------
+# PRIVATE
+# Check if the system matches. (Used to selectively enable flags.)
+#
 FUNCTION( botgSystemMatches system found)
     SET(${found} OFF PARENT_SCOPE)
     IF( ("${system}" STREQUAL "ANY_SYSTEM") OR ("${system}" STREQUAL "") )
@@ -340,6 +742,9 @@ FUNCTION( botgSystemMatches system found)
     ENDIF()
 ENDFUNCTION()
 #-------------------------------------------------------------------------------
+# PRIVATE
+# Check both compiler and system matches. (Used to selectively enable flags.)
+#
 FUNCTION( botgCompilerAndSystemMatches lang compiler system found_both)
     botgCompilerMatches( ${lang} ${compiler} found_compiler )
     #MESSAGE(STATUS "[BootsOnTheGround] lang='${lang}' compiler='${compiler}' found='${found_compiler}'")
@@ -351,286 +756,3 @@ FUNCTION( botgCompilerAndSystemMatches lang compiler system found_both)
         SET(${found_both} OFF PARENT_SCOPE )
     ENDIF()
 ENDFUNCTION()
-#-------------------------------------------------------------------------------
-MACRO( botgAddCompilerFlags lang compiler system) #list of flags comes at end
-    botgCompilerAndSystemMatches( "${lang}" "${compiler}" "${system}" found )
-    IF( found )
-        #MESSAGE(STATUS "[BootsOnTheGround] adding package=${PACKAGE_NAME} ${lang} flags for compiler='${BOTG_${lang}_COMPILER}' on system='${BOTG_SYSTEM}'")
-        FOREACH( flag ${ARGN} )
-            #check if flag is already in list
-            STRING(FIND "${CMAKE_${lang}_FLAGS}" "${flag}" position)
-            IF( ${position} LESS 0 )
-                #create a special variable to store whether the flag works
-                STRING(REGEX REPLACE "[^0-9a-zA-Z]" "_" flagname ${flag})
-                botgCheckFlag( ${lang} ${flag} BOTG_USE_${lang}_FLAG_${flagname})
-                IF( BOTG_USE_${lang}_FLAG_${flagname} )
-                    MESSAGE(STATUS "[BootsOnTheGround] package=${PACKAGE_NAME} added flag='${flag}' for lang=${lang} for compiler='${BOTG_${lang}_COMPILER}' on system='${BOTG_SYSTEM}'!")
-                    SET( CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS} ${flag}")
-                ELSE()
-                    MESSAGE(STATUS "[BootsOnTheGround] package=${PACKAGE_NAME} could not add invalid flag='${flag}'!")
-                ENDIF()
-            ELSE()
-                MESSAGE(WARNING "[BootsOnTheGround] package=${PACKAGE_NAME} re-added flag='${flag}'!")
-            ENDIF()
-        ENDFOREACH()
-    ENDIF()
-ENDMACRO()
-#-------------------------------------------------------------------------------
-MACRO( botgAddLinkerFlags compiler system) #list of flags comes at end
-    #Use CXX to check the validity of flags
-    botgCompilerAndSystemMatches( CXX "${compiler}" "${system}" found )
-    IF( found )
-        #MESSAGE(STATUS "[BootsOnTheGround] adding package=${PACKAGE_NAME} flags for linker on system='${BOTG_SYSTEM}'")
-        FOREACH( flag ${ARGN} )
-            #check if flag is already in list
-            STRING(FIND "${CMAKE_EXE_LINKER_FLAGS}" "${flag}" position)
-            IF( ${position} LESS 0 )
-                #create a special variable to store whether the flag works
-                STRING(REGEX REPLACE "[^0-9a-zA-Z]" "_" flagname ${flag})
-                botgCheckFlag( CXX ${flag} BOTG_USE_EXE_LINKER_FLAG_${flagname})
-                IF( BOTG_USE_EXE_LINKER_FLAG_${flagname} )
-                    MESSAGE(STATUS "[BootsOnTheGround] enabled linker flag='${flag}' for compiler=${compiler} on system='${BOTG_SYSTEM}'!")
-                    SET( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${flag}")
-                ELSE()
-                    MESSAGE(STATUS "[BootsOnTheGround] could not add invalid linker flag='${flag}'!")
-                ENDIF()
-            ELSE()
-                MESSAGE(STATUS "[BootsOnTheGround] linker flag='${flag}' has already been added.")
-            ENDIF()
-        ENDFOREACH()
-    ENDIF()
-ENDMACRO()
-#-------------------------------------------------------------------------------
-# Return the current git hash
-#
-FUNCTION( botgGitHash hash )
-    EXECUTE_PROCESS(
-      COMMAND git log -1 --format=%h
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-      OUTPUT_VARIABLE hash_
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-    SET( ${hash} ${hash_} PARENT_SCOPE )
-ENDFUNCTION()
-#-------------------------------------------------------------------------------
-# Resolve version number from user, hash, or set to UNKNOWN
-#
-FUNCTION( botgResolveVersion )
-    IF( NOT "${user}" STREQUAL "" )
-        SET( version_ ${user} )
-    ELSE( NOT "${hash}" STREQUAL "" )
-        SET( version_ "${hash}" )
-    ELSE()
-        SET( version_ "UNKNOWN" )
-    ENDIF()
-    SET( ${version} "${version_}" PARENT_SCOPE )
-ENDFUNCTION()
-#-------------------------------------------------------------------------------
-# Do most of the legwork setting up a CMakeLists.txt file for a project.
-#
-MACRO( botgProject name )
-    SET(project_root_dir "${CMAKE_SOURCE_DIR}")
-    MESSAGE( STATUS "[BootsOnTheGround] configuring project with root directory=${project_root_dir} ...")
-
-    # Clear the cache unless provided -D KEEP_CACHE:BOOL=ON.
-    botgClearCMakeCache("${KEEP_CACHE}")
-
-    # Install locally by default.
-    IF( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-        SET( CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/INSTALL" CACHE PATH "default install path" FORCE )
-    ENDIF()
-
-    # Enable the hunter gate for downloading/installing TPLs!
-    PROJECT("" NONE) #hack to make HunterGate happy
-    SET(HUNTER_SKIP_LOCK ON)
-    INCLUDE( "${BOTG_ROOT_DIR}/cmake/HunterGate.cmake" )
-
-    # Set project name.
-    SET(PROJECT_NAME ${name} CACHE STRING "global project name" FORCE )
-    botgGitHash( hash )
-    botgResolveVersion( "${ARGN}" "${hash}" version )
-    PROJECT( ${PROJECT_NAME}
-        VERSION ${version}
-        LANGUAGES C CXX Fortran )
-    MESSAGE( STATUS "[BootsOnTheGround] declared PROJECT_NAME=${PROJECT_NAME} version=${version}...")
-
-    # Turn off MPI by default.
-    SET(TPL_ENABLE_MPI OFF CACHE BOOL "Turn off MPI by default.")
-
-    # Cannot use TriBITS commands until after this statement!
-    botgProcessTribits( "${BOTG_ROOT_DIR}/external/TriBITS/tribits" )
-
-    # Just good practice.
-    botgPreventInSourceBuilds()
-
-    # Turn on tests by default.
-    GLOBAL_SET( ${PROJECT_NAME}_ENABLE_TESTS ON CACHE BOOL "Enable all tests by default.")
-    GLOBAL_SET( ${PROJECT_NAME}_ENABLE_SECONDARY_TESTED_CODE ON)
-
-    # Set version number.
-    GLOBAL_SET( ${REPOSITORY_NAME}_GIT_HASH "${hash}" )
-
-    # Set repository name.
-    GLOBAL_SET( REPOSITORY_NAME ${PROJECT_NAME} )
-    GLOBAL_SET( ${REPOSITORY_NAME}_VERSION "${version}" )
-
-    # These variables make sure we have matching botgEnd() for packages and projects.
-    GLOBAL_SET(BOTG_INSIDE_PROJECT_CMAKELISTS "${CMAKE_CURRENT_LIST_FILE}" )
-    GLOBAL_SET(BOTG_INSIDE_PACKAGE_CMAKELISTS "" )
-    GLOBAL_SET(BOTG_INSIDE_SUPERPACKAGE_CMAKELISTS "" )
-
-    # Set the operating system name so we can have system-dependent flags.
-    GLOBAL_SET( BOTG_SYSTEM ${CMAKE_SYSTEM_NAME} )
-    MESSAGE( STATUS "[BootsOnTheGround] set operating system global BOTG_SYSTEM=${BOTG_SYSTEM}")
-
-    # Process compiler for each language.
-    botgProcessCompiler( C )
-    botgProcessCompiler( CXX )
-    botgProcessCompiler( Fortran )
-
-ENDMACRO()
-#-------------------------------------------------------------------------------
-#  Initialize a super package (package with subpackages) CMakeLists.txt file.
-#
-MACRO( botgSuperPackage name )
-    GLOBAL_SET(BOTG_INSIDE_SUPERPACKAGE_CMAKELISTS "${CMAKE_CURRENT_LIST_FILE}" )
-    GLOBAL_SET( BOTG_${PACKAGE_NAME}_VERSION "${ARGN}" )
-    TRIBITS_PACKAGE_DECL( ${name} )
-    TRIBITS_PROCESS_SUBPACKAGES()
-    TRIBITS_PACKAGE_DEF()
-ENDMACRO()
-#-------------------------------------------------------------------------------
-#  Initialize a package CMakeLists.txt file.
-#
-MACRO( botgPackage name )
-    GLOBAL_SET(BOTG_INSIDE_PACKAGE_CMAKELISTS "${CMAKE_CURRENT_LIST_FILE}" )
-    STRING( COMPARE NOTEQUAL "${BOTG_INSIDE_SUPERPACKAGE_CMAKELISTS}" "" is_subpackage )
-    IF( ${is_subpackage} )
-        TRIBITS_SUBPACKAGE( ${name} )
-    ELSE()
-        GLOBAL_SET( BOTG_${PACKAGE_NAME}_VERSION "${ARGN}" )
-        TRIBITS_PACKAGE( ${name} )
-    ENDIF()
-ENDMACRO()
-#-------------------------------------------------------------------------------
-# Finalize a CMakeLists.txt file.
-#
-MACRO( botgEnd )
-    STRING( COMPARE NOTEQUAL "${BOTG_INSIDE_PACKAGE_CMAKELISTS}" "" is_package )
-    STRING( COMPARE NOTEQUAL "${BOTG_INSIDE_SUPERPACKAGE_CMAKELISTS}" "" is_superpackage )
-    STRING( COMPARE NOTEQUAL "${BOTG_INSIDE_PROJECT_CMAKELISTS}" "" has_project )
-
-    IF( NOT ${has_project} )
-        MESSAGE( FATAL_ERROR "[BootsOnTheGround]  botgEnd has been used without a corresponding botgProject in ${CMAKE_CURRENT_LIST_FILE}!" )
-    ENDIF()
-
-    #Inside a package/subpackage.
-    IF( ${is_package} )
-        IF( NOT "${BOTG_INSIDE_PACKAGE_CMAKELISTS}" STREQUAL "${CMAKE_CURRENT_LIST_FILE}" )
-            MESSAGE( FATAL_ERROR "[BootsOnTheGround] botEnd has been used without botgPackage!" )
-        ENDIF()
-
-        # Set version number.
-        SET(pre "${BOTG_${PACKAGE_NAME}_VERSION}" )
-        IF( "${pre}" STREQUAL "" )
-            SET( pre "UNKNOWN" )
-        ENDIF()
-        SET(final "")
-        IF( "${${REPOSITORY_NAME}_ENABLE_DEVELOPMENT_MODE}" )
-            SET(final "-dev")
-        ENDIF()
-        GLOBAL_SET( BOTG_${PACKAGE_NAME}_VERSION "${pre}${final}" )
-
-        # Miscellaneous wrap-up.
-        botgProcessTPLS()
-
-        # Add standard test directory.
-        IF( IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/test" )
-            TRIBITS_ADD_TEST_DIRECTORIES(test)
-        ENDIF()
-
-        #Inside a subpackage
-        IF( ${is_superpackage} )
-
-            ################################
-            TRIBITS_SUBPACKAGE_POSTPROCESS()
-            ################################
-            MESSAGE( STATUS "[BootsOnTheGround] finished configuring subpackage=${PACKAGE_NAME}!")
-
-        #Inside a plain package
-        ELSE()
-
-            #############################
-            TRIBITS_PACKAGE_POSTPROCESS()
-            #############################
-            MESSAGE( STATUS "[BootsOnTheGround] finished configuring package=${PACKAGE_NAME} version=${BOTG_${PACKAGE_NAME}_VERSION}!")
-
-        ENDIF()
-
-        GLOBAL_SET(BOTG_INSIDE_PACKAGE_CMAKELISTS "")
-
-    #Inside a superpackage.
-    ELSEIF( ${is_superpackage} )
-        IF( NOT "${BOTG_INSIDE_SUPERPACKAGE_CMAKELISTS}" STREQUAL "${CMAKE_CURRENT_LIST_FILE}" )
-            MESSAGE( FATAL_ERROR "[BootsOnTheGround] botEnd has been used without botgSuperPackage in ${CMAKE_CURRENT_LIST_FILE}!" )
-        ENDIF()
-
-        #############################
-        TRIBITS_PACKAGE_POSTPROCESS()
-        #############################
-        MESSAGE( STATUS "[BootsOnTheGround] finished configuring superpackage=${PACKAGE_NAME} version=${BOTG_${PACKAGE_NAME}_VERSION}!")
-
-        GLOBAL_SET(BOTG_INSIDE_SUPERPACKAGE_CMAKELISTS "")
-
-    #Inside a project.
-    ELSE()
-
-        IF( ${is_package} )
-            MESSAGE( FATAL_ERROR "[BootsOnTheGround] package=${BOTG_INSIDE_PACKAGE_CMAKELISTS} did not have botgEnd()!" )
-        ELSEIF( ${is_superpackage} )
-            MESSAGE( FATAL_ERROR "[BootsOnTheGround] super package=${BOTG_INSIDE_SUPERPACKAGE_CMAKELISTS} did not have botgEnd()!" )
-        ENDIF()
-
-        ############################
-        TRIBITS_PROJECT_ENABLE_ALL()
-        ############################
-
-        # Final print of all the variables for inspection.
-        # For example: -D MATCH_VARIABLE_REGEX:STRING="" will print everything.
-        #              -D MATCH_VARIABLE_REGEX:STRING="^BootsOnTheGround" will
-        #                 print all the BootsOnTheGround variables.
-        #
-        IF( DEFINED MATCH_VARIABLE_REGEX )
-            botgPrintVar("${MATCH_VARIABLE_REGEX}")
-        ENDIF()
-
-    ENDIF()
-
-ENDMACRO()
-#-------------------------------------------------------------------------------
-MACRO( botgAddTPL type need name )
-    APPEND_SET( ${type}_${need}_DEP_PACKAGES BootsOnTheGround_${name} )
-    APPEND_SET( ${type}_${need}_DEP_TPLS ${name} )
-ENDMACRO()
-#------------------------------------------------------------------------------
-MACRO( botgProcessTPLS )
-    #Linker options always need to be loaded as far as I can tell.
-    #Imagine we have true TPL C, and we create BootsOnTheGround wrapper B, and we
-    #depend on this package in a code A, A-->B-->C.
-    #We can include in the CMake for B the necessary linker options, but what about
-    #A? We should be able to "inherit" them from B but I have yet to figure it out
-    #without resorting to these types of files.
-    FOREACH( name ${${PACKAGE_NAME}_LIB_REQUIRED_DEP_TPLS}
-                  ${${PACKAGE_NAME}_LIB_OPTIONAL_DEP_TPLS}
-                  ${${PACKAGE_NAME}_TEST_REQUIRED_DEP_TPLS}
-                  ${${PACKAGE_NAME}_TEST_OPTIONAL_DEP_TPLS} )
-       IF( TPL_ENABLE_${name} )
-           SET( linker_file "${BOTG_ROOT_DIR}/src/${name}/cmake/LinkerFlags.cmake" )
-           IF( EXISTS "${linker_file}" )
-               MESSAGE( STATUS "[BootsOnTheGround] package=${PACKAGE_NAME} added TPL=${name} LinkerFlags.cmake")
-               INCLUDE( "${linker_file}" )
-           ENDIF()
-       ENDIF()
-    ENDFOREACH()
-ENDMACRO()
-#-------------------------------------------------------------------------------
