@@ -10,7 +10,7 @@ botgProject()
 
 PROJECT( "${PROJECT_NAME}"
     VERSION "${PROJECT_VERSION}"
-    LANGUAGES C CXX Fortran
+    LANGUAGES Fortran CXX C
 )
 
 botgEnd()

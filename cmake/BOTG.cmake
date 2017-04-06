@@ -301,6 +301,7 @@ MACRO( botgProject )
     ENDIF()
     PROJECT( "${PROJECT_NAME}"
         VERSION "${PROJECT_VERSION}"
+        LANGUAGES NONE
     )
 
     # Set variable version strings for TriBITS.
@@ -324,7 +325,6 @@ MACRO( botgProject )
 
     # Set repository names if not set.
     GLOBAL_SET( REPOSITORY_NAME ${PROJECT_NAME} )
-    GLOBAL_SET( ${REPOSITORY_NAME}_VERSION "${version}" )
 
     # These variables make sure we have matching botgEnd() for packages and projects.
     GLOBAL_SET(BOTG_INSIDE_PROJECT_CMAKELISTS "${CMAKE_CURRENT_LIST_FILE}" )
@@ -584,7 +584,6 @@ ENDMACRO()
 # Return the compiler variable as "SUITE/COMPILER".
 #
 FUNCTION( botgGetCompilerName lang compiler )
-
     SET( compiler_ "${CMAKE_${lang}_COMPILER}")
     GET_FILENAME_COMPONENT(compiler_ "${compiler_}" NAME_WE)
     SET( compiler_suite_ "${CMAKE_${lang}_COMPILER_ID}")
@@ -592,18 +591,23 @@ FUNCTION( botgGetCompilerName lang compiler )
         SET(compiler_suite_ "Clang" )
     ENDIF()
     SET( ${compiler} "${compiler_suite_}/${compiler_}" PARENT_SCOPE )
-
 ENDFUNCTION()
 #-------------------------------------------------------------------------------
 # PRIVATE
 # Set the global compiler name BOTG_${lang}_COMPILER="SUITE/COMPILER".
 #
 MACRO( botgProcessCompiler lang )
-
-    botgGetCompilerName( ${lang} compiler )
-    GLOBAL_SET( BOTG_${lang}_COMPILER ${compiler} )
-
-    MESSAGE( STATUS "[BootsOnTheGround] set lang=${lang} compiler global BOTG_${lang}_COMPILER=${BOTG_${lang}_COMPILER}")
+    GET_PROPERTY(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
+    SET( result OFF )
+    IF( ";${languages};" MATCHES ";${lang};" )
+        botgGetCompilerName( ${lang} compiler )
+        GLOBAL_SET( BOTG_${lang}_COMPILER ${compiler} )
+        SET( result ON )
+        MESSAGE( STATUS "[BootsOnTheGround] set lang=${lang} compiler global BOTG_${lang}_COMPILER=${BOTG_${lang}_COMPILER}")
+    ELSE()
+        GLOBAL_SET( BOTG_${lang}_COMPILER "" )
+    ENDIF()
+    GLOBAL_SET( ${PROJECT_NAME}_ENABLE_${lang} ${result} CACHE BOOL "Language=${lang} enabled?")
 ENDMACRO()
 #-------------------------------------------------------------------------------
 # PRIVATE
