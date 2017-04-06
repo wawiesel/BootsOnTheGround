@@ -165,52 +165,70 @@ ENDMACRO()
 MACRO( botgLibrary name )
     # parse arguments
     SET(options)
-    SET(one_value_args)
+    SET(one_value_args LANGUAGE )
     SET(multi_value_args LINK_TO SOURCES HEADERS )
     CMAKE_PARSE_ARGUMENTS(library "${options}" "${one_value_args}" "${multi_value_args}" ${ARGN} )
 
-    #create list of sources
-    SET( sources )
-    FOREACH( source ${library_SOURCES} )
-        STRING( REGEX REPLACE ".in$" "" replaced "${source}" )
-        IF( NOT "${source}" STREQUAL "${replaced}" )
-            CONFIGURE_FILE( "${source}" "${CMAKE_CURRENT_BINARY_DIR}/${replaced}" )
-            SET( source "${CMAKE_CURRENT_BINARY_DIR}/${replaced}" )
+    #determine if language is enabled
+    SET(enabled ON)
+    IF( NOT "${library_LANGUAGE}" STREQUAL "" )
+        IF( "${library_LANGUAGE}" STREQUAL Fortran )
+            SET(enabled "${${PROJECT_NAME}_ENABLE_Fortran}" )
+        ELSEIF(  "${library_LANGUAGE}" STREQUAL CXX )
+            SET(enabled "${${PROJECT_NAME}_ENABLE_CXX}" )
+        ELSEIF(  "${library_LANGUAGE}" STREQUAL C )
+            SET(enabled "${${PROJECT_NAME}_ENABLE_C}" )
+        ELSE()
+            MESSAGE( FATAL_ERROR "[BootsOnTheGround] botgLibrary LANGUAGE ${libraryLanguage} is unknown (Fortran|C|CXX)")
         ENDIF()
-        LIST(APPEND sources "${source}" )
-    ENDFOREACH()
+    ENDIF()
 
-    #create list of headers and install directives
-    SET( headers )
-    FOREACH( header ${library_HEADERS} )
-        STRING( REGEX REPLACE ".in$" "" replaced "${header}" )
-        IF( NOT "${header}" STREQUAL "${replaced}" )
-            CONFIGURE_FILE( "${header}" "${CMAKE_CURRENT_BINARY_DIR}/${replaced}" )
-            SET( header "${CMAKE_CURRENT_BINARY_DIR}/${replaced}" )
-        ENDIF()
-        GET_FILENAME_COMPONENT( dir "${header}" DIRECTORY )
-        INSTALL(FILES "${header}" DESTINATION "include/${dir}")
-        LIST(APPEND headers "${header}" )
-    ENDFOREACH()
+    IF( enabled )
 
-    #call TriBITS to add a library
-    TRIBITS_ADD_LIBRARY( ${name}
-        SOURCES
-            "${sources}"
-        NOINSTALLHEADERS
-            "${headers}"
-    )
+        #create list of sources
+        SET( sources )
+        FOREACH( source ${library_SOURCES} )
+            STRING( REGEX REPLACE ".in$" "" replaced "${source}" )
+            IF( NOT "${source}" STREQUAL "${replaced}" )
+                CONFIGURE_FILE( "${source}" "${CMAKE_CURRENT_BINARY_DIR}/${replaced}" )
+                SET( source "${CMAKE_CURRENT_BINARY_DIR}/${replaced}" )
+            ENDIF()
+            LIST(APPEND sources "${source}" )
+        ENDFOREACH()
 
-    #do linking
-    FOREACH( link_to ${library_LINK_TO} )
-        TARGET_LINK_LIBRARIES( ${name} ${link_to} )
-    ENDFOREACH()
+        #create list of headers and install directives
+        SET( headers )
+        FOREACH( header ${library_HEADERS} )
+            STRING( REGEX REPLACE ".in$" "" replaced "${header}" )
+            IF( NOT "${header}" STREQUAL "${replaced}" )
+                CONFIGURE_FILE( "${header}" "${CMAKE_CURRENT_BINARY_DIR}/${replaced}" )
+                SET( header "${CMAKE_CURRENT_BINARY_DIR}/${replaced}" )
+            ENDIF()
+            GET_FILENAME_COMPONENT( dir "${header}" DIRECTORY )
+            INSTALL(FILES "${header}" DESTINATION "include/${dir}")
+            LIST(APPEND headers "${header}" )
+        ENDFOREACH()
 
-    #set include directories
-    INCLUDE_DIRECTORIES(
-        ${CMAKE_CURRENT_SOURCE_DIR}  #For C++
-        ${CMAKE_CURRENT_BINARY_DIR}  #For fortran modules/configured files
-    )
+        #call TriBITS to add a library
+        TRIBITS_ADD_LIBRARY( ${name}
+            SOURCES
+                "${sources}"
+            NOINSTALLHEADERS
+                "${headers}"
+        )
+
+        #do linking
+        FOREACH( link_to ${library_LINK_TO} )
+            TARGET_LINK_LIBRARIES( ${name} ${link_to} )
+        ENDFOREACH()
+
+        #set include directories
+        INCLUDE_DIRECTORIES(
+            ${CMAKE_CURRENT_SOURCE_DIR}  #For C++
+            ${CMAKE_CURRENT_BINARY_DIR}  #For fortran modules/configured files
+        )
+
+    ENDIF()
 
 ENDMACRO()
 #-------------------------------------------------------------------------------
@@ -607,7 +625,7 @@ MACRO( botgProcessCompiler lang )
     ELSE()
         GLOBAL_SET( BOTG_${lang}_COMPILER "" )
     ENDIF()
-    GLOBAL_SET( ${PROJECT_NAME}_ENABLE_${lang} ${result} CACHE BOOL "Language=${lang} enabled?")
+    GLOBAL_SET( ${PROJECT_NAME}_ENABLE_${lang} ${result} )
 ENDMACRO()
 #-------------------------------------------------------------------------------
 # PRIVATE
@@ -720,7 +738,7 @@ FUNCTION( botgCompilerMatches lang compiler found )
     IF( ("${compiler}" STREQUAL "ANY_COMPILER") OR ("${compiler}" STREQUAL "") )
         SET(${found} ON PARENT_SCOPE )
     ELSE()
-        STRING(REGEX MATCH "${compiler}" found_ ${BOTG_${lang}_COMPILER})
+        STRING(REGEX MATCH "${compiler}" found_ "${BOTG_${lang}_COMPILER}")
         IF( NOT "${found_}" STREQUAL "" )
             SET(${found} ON PARENT_SCOPE)
         ENDIF()
@@ -735,7 +753,7 @@ FUNCTION( botgSystemMatches system found)
     IF( ("${system}" STREQUAL "ANY_SYSTEM") OR ("${system}" STREQUAL "") )
         SET(${found} ON PARENT_SCOPE )
     ELSE()
-        STRING(REGEX MATCH "${system}" found_ ${BOTG_SYSTEM})
+        STRING(REGEX MATCH "${system}" found_ "${BOTG_SYSTEM}")
         IF( NOT "${found_}" STREQUAL "" )
             SET(${found} ON PARENT_SCOPE)
         ENDIF()
