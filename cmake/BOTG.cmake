@@ -338,9 +338,6 @@ MACRO( botgProject )
     # Turn on tests by default.
     GLOBAL_SET( ${PROJECT_NAME}_ENABLE_TESTS ON CACHE BOOL "Enable all tests by default.")
 
-    # Turn secondary tested code on by default.
-    SET( ${PROJECT_NAME}_ENABLE_SECONDARY_TESTED_CODE ON)
-
     # Set repository names if not set.
     GLOBAL_SET( REPOSITORY_NAME ${PROJECT_NAME} )
 
