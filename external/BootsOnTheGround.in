@@ -18,7 +18,7 @@ ExternalProject_Add( download-external-BootsOnTheGround
   GIT_REPOSITORY
     https://github.com/wawiesel/BootsOnTheGround.git
   GIT_TAG
-    develop
+    master
   SOURCE_DIR
     "${BOTG_EXTERNAL_SOURCE_DIR_BootsOnTheGround}"
   CONFIGURE_COMMAND ""
