@@ -338,9 +338,6 @@ MACRO( botgProject )
     # Turn on tests by default.
     GLOBAL_SET( ${PROJECT_NAME}_ENABLE_TESTS ON CACHE BOOL "Enable all tests by default.")
 
-    # Turn secondary tested code on by default.
-    SET( ${PROJECT_NAME}_ENABLE_SECONDARY_TESTED_CODE ON)
-
     # Set repository names if not set.
     GLOBAL_SET( REPOSITORY_NAME ${PROJECT_NAME} )
 
@@ -379,6 +376,7 @@ MACRO( botgPackage name )
         botgResolveVersion() #macro to resolve the version
         TRIBITS_PACKAGE( ${name} )
     ENDIF()
+    botgProcessTPLS()
 ENDMACRO()
 #-------------------------------------------------------------------------------
 # PUBLIC
@@ -398,9 +396,6 @@ MACRO( botgEnd )
         IF( NOT "${BOTG_INSIDE_PACKAGE_CMAKELISTS}" STREQUAL "${CMAKE_CURRENT_LIST_FILE}" )
             MESSAGE( FATAL_ERROR "[BootsOnTheGround] botEnd has been used without botgPackage!" )
         ENDIF()
-
-        # Miscellaneous wrap-up.
-        botgProcessTPLS()
 
         #Inside a subpackage
         IF( ${is_superpackage} )
@@ -492,9 +487,10 @@ MACRO( botgProcessTPLS )
                   ${${PACKAGE_NAME}_TEST_REQUIRED_DEP_TPLS}
                   ${${PACKAGE_NAME}_TEST_OPTIONAL_DEP_TPLS} )
        IF( TPL_ENABLE_${name} )
-           SET( linker_file "${BOTG_ROOT_DIR}/src/${name}/cmake/LinkerFlags.cmake" )
+           STRING(REPLACE "_" "/" path ${name}) #convert name with _ to path with /
+           SET( linker_file "${BOTG_ROOT_DIR}/src/${path}/cmake/LinkerFlags.cmake" )
            IF( EXISTS "${linker_file}" )
-               MESSAGE( STATUS "[BootsOnTheGround] package=${PACKAGE_NAME} added TPL=${name} LinkerFlags.cmake")
+               MESSAGE( STATUS "[BootsOnTheGround] package=${PACKAGE_NAME} added TPL=${name} file='${linker_file}'")
                INCLUDE( "${linker_file}" )
            ENDIF()
        ENDIF()
