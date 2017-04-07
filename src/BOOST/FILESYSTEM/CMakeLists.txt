@@ -1,5 +1,4 @@
-TRIBITS_SUBPACKAGE(_BOOST_FILESYSTEM)
+botgPackage( _BOOST_FILESYSTEM )
 botgUseCxxStandard( 11 )
-botgProcessTPLS()
-TRIBITS_ADD_TEST_DIRECTORIES(test)
-TRIBITS_SUBPACKAGE_POSTPROCESS()
+botgTestDir( test )
+botgEnd()

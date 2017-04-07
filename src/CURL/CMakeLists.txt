@@ -1,5 +1,4 @@
-TRIBITS_SUBPACKAGE(_CURL)
-botgProcessTPLS()
-TRIBITS_ADD_TEST_DIRECTORIES(test)
-TRIBITS_SUBPACKAGE_POSTPROCESS()
+botgPackage( _CURL )
+botgTestDir( test )
+botgEnd()
 

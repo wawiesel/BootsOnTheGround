@@ -1,4 +1,3 @@
-TRIBITS_SUBPACKAGE(_GFLAGS)
-botgProcessTPLS()
-TRIBITS_ADD_TEST_DIRECTORIES(test)
-TRIBITS_SUBPACKAGE_POSTPROCESS()
+botgPackage( _GFLAGS )
+botgTestDir( test )
+botgEnd()

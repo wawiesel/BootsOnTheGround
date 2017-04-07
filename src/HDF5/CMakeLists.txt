@@ -1,4 +1,3 @@
-TRIBITS_SUBPACKAGE(_HDF5)
-botgProcessTPLS()
-TRIBITS_ADD_TEST_DIRECTORIES(test)
-TRIBITS_SUBPACKAGE_POSTPROCESS()
+botgPackage( _HDF5 )
+botgTestDir( test )
+botgEnd()

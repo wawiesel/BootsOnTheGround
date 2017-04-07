@@ -1,5 +1,4 @@
-TRIBITS_SUBPACKAGE(_NLJSON)
+botgPackage( _NLJSON )
 botgUseCxxStandard( 11 )
-botgProcessTPLS()
-TRIBITS_ADD_TEST_DIRECTORIES(test)
-TRIBITS_SUBPACKAGE_POSTPROCESS()
+botgTestDir( test )
+botgEnd()

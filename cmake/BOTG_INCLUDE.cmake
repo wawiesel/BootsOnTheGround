@@ -35,22 +35,26 @@ SET(BOTG_BOOTSTRAP ON CACHE BOOL INTERNAL)
 
 # If we bootstrap, then set the source directory and update the projects.
 IF( BOTG_BOOTSTRAP )
-    SET(BOTG_ROOT_DIR "${CMAKE_SOURCE_DIR}/external/BootsOnTheGround" CACHE PATH INTERNAL)
     botgDownloadExternalProjects(
         external/BootsOnTheGround.in
     )
+    INCLUDE( "external/BootsOnTheGround/cmake/BOTG.cmake" )
+
 # If we are building BootsOnTheGround itself, it's easy.
-ELSEIF( EXISTS "${CMAKE_SOURCE_DIR}/cmake/BOTG_INCLUDE.cmake" )
-    SET(BOTG_ROOT_DIR "${CMAKE_SOURCE_DIR}" CACHE PATH INTERNAL)
-# Otherwise we need to set the BOTG_ROOT_DIR based on it's location
-# from this file.
+ELSEIF( EXISTS "${CMAKE_SOURCE_DIR}/cmake/BOTG.cmake" )
+    INCLUDE( "${CMAKE_SOURCE_DIR}/cmake/BOTG.cmake" )
+
+# Otherwise we search for BOTG.cmake.
 ELSE()
-    SET(BOTG_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/.." CACHE PATH INTERNAL)
+    FIND_PATH( dir BOTG.cmake
+        PATHS "${CMAKE_CURRENT_LIST_DIR}"
+        NO_DEFAULT_PATH
+    )
+    IF( NOT "${dir}" STREQUAL "dir-NOTFOUND" )
+        INCLUDE( "${dir}/BOTG.cmake" )
+    ELSE()
+        MESSAGE( FATAL_ERROR "[BootsOnTheGround] could not find BOTG.cmake!" )
+    ENDIF()
 ENDIF()
-
-MESSAGE( STATUS "[BootsOnTheGround] using BOTG_ROOT_DIR=${BOTG_ROOT_DIR}")
-
-# Includes all the "BootsOnTheGround" (BOTG) functions.
-INCLUDE( "${BOTG_ROOT_DIR}/cmake/BOTG.cmake" )
 
 
