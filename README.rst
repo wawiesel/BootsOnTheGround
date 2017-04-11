@@ -4,27 +4,30 @@ This is BootsOnTheGround [BOTG_]! |build|
 .. |build| image:: https://travis-ci.org/wawiesel/BootsOnTheGround.svg?branch=master
     :target: https://travis-ci.org/wawiesel/BootsOnTheGround
 
-CMake/TriBITS third-party-library linker for C++/Fortran
+CMake macros for easy projects with TPLS C/C++/Fortran
 
 .. image:: https://c1.staticflickr.com/3/2860/33135230166_b7890b6015_b.jpg
 
-BOTG_ provides a set of FindTPL*.cmake files to find and link Third Party
-Libraries (TPLs) to other packages using the CMake_ / TriBITS_ framework
-for C/C++/Fortran code.
+First and foremost, BOTG_ provides a set of FindTPL*.cmake files to find and
+link Third Party Libraries (TPLs) to other packages using the
+CMake_ / TriBITS_ framework for C/C++/Fortran code.
 
 .. code-block:: cmake
 
-    TRIBITS_PACKAGE( MyPackage )
+    #Inside MyPackage/cmake/Dependencies.cmake
     TRIBITS_PACKAGE_DEFINE_DEPENDENCIES(
         LIB_REQUIRED_PACKAGES TheirPackage
     )
-    botgAddTPL( LIB OPTIONAL CURL )    #Optional for building
-    botgAddTPL( TEST REQUIRED GTEST )  #Required only for tests
-    TRIBITS_PACKAGE_POSTPROCESS()
+    botgAddTPL( LIB_OPTIONAL CURL )    #Optional for building
+    botgAddTPL( TEST_REQUIRED GTEST )  #Required only for tests
 
-The available ``XXX`` allowed in ``botgAddTPL( LIB|TEST OPTIONAL|REQUIRED XXX)``
-are listed below. BOTG also provides some nice ways to add flags to the compiler
-and linker ``botgAddLinkerFlags`` and ``botgAddCompilerFlags``.
+In order to use this command, you need to add BootsOnTheGround as a package
+to your ``PackagesList.cmake`` file in your project. The amazing thing about
+the ``botgAddTPL`` command is that it unifies the normal way of finding a TPL
+on your system with the Hunter_ system for downloading and building TPLS
+on the fly!
+
+The available ``XXX`` allowed in ``botgAddTPL( ... XXX)`` are listed below.
 
 Current TPLs
 ------------
@@ -43,59 +46,133 @@ Currently we have the following TPLs wrapped up nice and purdy:
 - SPDLOG_ - fast, versatile logging [C++]
 - ZLIB_ - compession/decompression algorithm [C++]
 
+Once the interface of BOTG clarifies, the only changes will be adding new TPLS,
+and adding versioning support for finding those TPLS.
+
+BOTG Macros
+-----------
+
+But BOTG also provides a system for building projects from a pool of packages,
+with support for package versioning (eventually) with easy-to-use macros for
+all the relevant components of the CMake_/TriBITS_ process. These macros are
+all contained in the ``BOTG.cmake`` file which can be bootstrapped into any
+project build!
+
+- ``botgProject()`` - declare a project (inside root CMakeLists.txt)
+- ``botgPackage( <name> )`` - declare a package (inside subdir CMakeLists.txt)
+- ``botgEnd()`` - wrap-up processing a Project or Package
+- ``botgAddCompilerFlags( <lang> <compiler> <os> <flags> )`` - add compiler
+    flags only for a particular language/compiler/os combination
+- ``botgAddLinkerFlags( <compiler> <os> <flags> )`` - add linker flags only for
+    a particular compiler/os combination
+- ``botgLibrary( <name> ... )`` - declare and define a library using current
+    compiler and linker flags
+- ``botgTestDir( <dir> )`` - declare a unit test directory
+- ``botgProjectContents( ... )`` - declare the packages and subdirs in a project
+- ``botgPackageDependencies( ... )`` - declare the dependencies of a package
+- ``botgDownloadExternalProjects( ... )`` - download an external project at
+    configure time (used to bootstrap BootsOnTheGround)
+
 Take a look at Testing123_ for an example of how to use BOTG_.
 
-How do I use it?
-----------------
+How do I get started?
+---------------------
 
 Bootstrapping is the recommended way of using BOTG (hence the name!).
 You need to do four things to enable BOTG in your TriBITS C/C++/Fortran project.
 
-#. Copy ``cmake/BOTG_INCLUDE.cmake`` containing bootstrap commands to your project's root ``cmake`` directory.
-#. Copy ``external/BootsOnTheGround.in`` containing repo link commands to your project's ``external`` directory.
-#. ``INCLUDE(cmake/BOTG_INCLUDE.cmake)`` first thing in your root ``CMakeLists.txt`` file to execute the bootstrap.
+#. Copy ``cmake/BOTG_INCLUDE.cmake`` containing bootstrap commands to your
+   project's root ``cmake`` directory.
+#. Copy ``external/BootsOnTheGround.in`` containing repo link commands to
+   your project's ``external`` directory.
+#. ``INCLUDE(cmake/BOTG_INCLUDE.cmake)`` first thing in your root
+   ``CMakeLists.txt`` file to execute the bootstrap.
 #. Add BOTG to your TriBITS ``PackagesList.cmake`` file.
 
 .. code-block:: cmake
 
-        TRIBITS_REPOSITORY_DEFINE_PACKAGES(
-          BootsOnTheGround external/BootsOnTheGround/src     ST
-          ...
+        botgProjectContents(
+            BootsOnTheGround external/BootsOnTheGround/src     ST
+            ...
         )
 
-Note, if you don't want to bootstrap BOTG to the directory ``external``, then you're going to have to change the line in
-``BOTG_INCLUDE.cmake`` that references ``external/BootsOnTheGround.in`` . See Testing123_ for an example of bootstrapping BOTG.
+Note, if you don't want to bootstrap BOTG to the directory ``external``, then
+you're going to have to change the line in ``BOTG_INCLUDE.cmake`` that
+references ``external/BootsOnTheGround.in`` . See Testing123_ for an example
+of bootstrapping BOTG.
 
 Then in your ``Dependencies.cmake`` file for any package you can use the
-``botgAddTPL()`` macro **after** ``TRIBITS_PACKAGE_DEFINE_DEPENDENCIES``.
+``botgPackageDependencies()`` macro.
 
 .. code-block:: cmake
 
-        TRIBITS_PACKAGE_DEFINE_DEPENDENCIES(
-            #do not list TPLs--only packages
+        botgPackageDependencies(
+            LIB_REQUIRED_PACKAGES
+               BootsOnTheGround_SPDLOG
+            TEST_REQUIRED_PACKAGES
+               BootsOnTheGround_GTEST
         )
-        botgAddTPL( LIB REQUIRED XYZ )
-        botgAddTPL( TEST REQUIRED UVW )
-        botgAddTPL( LIB OPTIONAL ABC )
-        botgAddTPL( TEST OPTIONAL DEF )
 
-Note the first argument is ``LIB`` for a main "library" dependency or ``TEST``
-for a test-only dependency and the second argument is either ``REQUIRED`` or
-``OPTIONAL``. The final is the TPL name from the `TPLs`_ list. See
-`Connection to TriBITS`_ for details. It is always upper case, with "_" used
-to separate words.
+Note that we are now linking to *packages* instead of *TPLS* through BOTG_.
+Behind the scenes, the ``botgPackageDependencies`` macro adds the relevant actual TPL
+links and calls ``TRIBITS_PACKAGE_DEFINE_DEPENDENCIES``.
 
-Principles
-----------
 
-- All BOTG TPLs **must** be linkable with ``mkdir build && cd build && cmake ..`` on
-  - Windows, Mac, and Linux operating systems with
-  - Intel, GNU, and Clang compilers
-  and perform correctly. This implies that we need a way to download and install
-  packages (we use Hunter_).
-- All BOTG TPLs **should** use `semantic versioning <http://semver.org>`_ with the ability
-  to link to a particular version, either ``MAJOR.MINOR`` or ``MAJOR`` (in which case
-  the latest ``MINOR`` is chosen).
+Why?
+----
+
+Every software package needs to answer the question of why does it exist.
+This package could be seen as another layer on top of an already precarious
+cake (CMake bottom layer, TriBITS on top). And there is a really good reason
+*not* to create another CMake macro system, namely maintainability. CMake is a
+popular solution to an important problem (building C++ code), which means there
+are many people out there who pick up CMake as a skill. But how many people
+know your macros? So you limit who can help with what we believe is the worst
+part of software development: configuration.
+
+But we did it anyway!? We did it because we are targeting people without any
+CMake skill. These are generally scientists and engineers who:
+
+#. do not have a dedicated build guy,
+#. do not have time or want CMake as a skill,
+#. use or depend on a mix of C++ and Fortran,
+#. are using TriBITS_ anyway, and/or
+#. who hate writing configuration code.
+
+For this people, the goals are simple.
+
+Create and deploy software that solves a new *scientific* problem--*NOT*
+a software engineering one. So our (yes, we are those guys) requirements are
+something like:
+
+#. easily use existing TPLs with versioning,
+#. easily use each other's packages with versioning, and
+#. easily manage combinations of Fortran, C, and C++ code.
+
+Yes *easy* is the key word. The versioning part is also important because we
+need reproducability. Once we are combining these various packages in new and
+interesting ways, knowing exactly what we have at any given time is really
+important.
+
+So we've mentioned TriBITS_ and there is a section describing the role of
+TriBITS. But TriBITS does not really handle versioning of TPLS and packages,
+which we need. It also does not intend to provide a set of standard
+FindTPL*.cmake files, which we think needs to exist. (That's where this
+project started. :)) Finally, TriBITS is still a little tricky to use, and
+results in a decent amount of boilerplate and a mix of TriBITS and CMake
+where it's a little difficult to see exactly what's going on. The BOTG
+interface to define the software package is very simple. We don't really see
+it changing. As TriBITS and CMake evolve, the best practices that are used
+under the hood for defining the libraries and executables may change, but
+the interface is straightforward:
+
+#. Define a project as a collection of external and internal packages.
+#. Define for each internal package:
+  #. dependency on external packages and TPLs;
+  #. headers, libraries, and executables to deploy;
+  #. unit tests; and the minimal
+  #. compiler/linker flags or C++ standard *needed* to build.
+
 
 Connection to TriBITS
 ---------------------
@@ -120,19 +197,20 @@ cmake/Dependencies.cmake file, you would need to specify:
         GTEST
     )
 
-With BOTG_, you can use instead a *package* dependency
-on ``BootsOnTheGround_CURL`` available via a simple MACRO
-``botgAddTPL``.
+With BOTG_, you can use instead a *package* dependencies. This will give us
+much more fine grain control over meeting requirements like specific versions.
 
 .. code-block:: cmake
 
-    TRIBITS_PACKAGE_DEFINE_DEPENDENCIES()
-    botgAddTPL( LIB REQUIRED CURL )
-    botgAddTPL( TEST REQUIRED GTEST )
+    botgPackageDependencies(
+        LIB_REQUIRED_PACKAGES
+            BootsOnTheGround_CURL
+        TEST_REQUIRED_PACKAGES
+            BootsOnTheGround_GTEST
+    )
 
-Note, the other magic gained by using BOTG is
-that Hunter_ is used to download, build, and install any TPLs it
-cannot find!
+Note, the other magic gained by using BOTG is that Hunter_ is used to download,
+build, and install any TPLs it cannot find!
 
 Connection to Hunter
 --------------------
@@ -142,7 +220,19 @@ requirements. However, when it does not, BOTG uses Hunter_, a CMake-based
 package manager. We looked at using `spack<https://spack.io/>`_ but it is
 not clear if they will ever have Windows support.
 
------------------------------------------------------------------------------
+Some Principles
+---------------
+
+- If your project has much more than ``100 + number of source files`` lines of
+  CMake, you're doing it wrong.
+- Every project should build and pass all tests with a simple
+  ``mkdir build && cd build && cmake .. && make && ctest`` on
+  - Windows, Mac, and Linux operating systems with
+  - reasonably recent Intel, GNU, and Clang compilers.
+  It may not be an *optimal* build, but it should work.
+- Use `semantic versioning <http://semver.org>`_ for your packages.
+
+-------------------------------------------------------------------------------
 
 
 Repository Structure
