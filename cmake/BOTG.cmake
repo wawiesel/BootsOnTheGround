@@ -1,10 +1,10 @@
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # Set BOTG_DIR
 #
 GET_FILENAME_COMPONENT( parent_dir "${CMAKE_CURRENT_LIST_DIR}" DIRECTORY )
 SET(BOTG_ROOT_DIR "${parent_dir}" CACHE PATH INTERNAL)
 MESSAGE( STATUS "[BootsOnTheGround] using BOTG_ROOT_DIR=${BOTG_ROOT_DIR}")
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # PUBLIC
 # Clear the CMake cache variables.
 #
@@ -30,7 +30,7 @@ FUNCTION( botgClearCMakeCache keep_cache )
     ENDFOREACH()
 
 ENDFUNCTION()
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # PUBLIC
 # Print variables according to a regular expression.
 #
@@ -53,7 +53,7 @@ MACRO(botgPrintVar regex)
 
     ENDFOREACH()
 ENDMACRO()
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # PUBLIC
 # Prevent in-source builds.
 #
@@ -68,7 +68,7 @@ FUNCTION(botgPreventInSourceBuilds)
   ENDIF()
 
 ENDFUNCTION()
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # PUBLIC
 # Enforce the minimum compiler version.
 #
@@ -83,7 +83,7 @@ FUNCTION( botgMinimumCompilerVersion lang compiler min_version )
         ENDIF()
     ENDIF()
 ENDFUNCTION()
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # PUBLIC
 # Use a particular version of the C++ standard.
 #
@@ -92,7 +92,7 @@ MACRO( botgUseCxxStandard version )
         "-std=c++${version}"
     )
 ENDMACRO()
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # PUBLIC
 # Enable some useful Fortran features.
 #
@@ -107,7 +107,7 @@ MACRO( botgEnableFortran )
         ENDIF()
     ENDFOREACH()
 ENDMACRO()
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # PUBLIC
 # Check a flag for a particular language.
 #
@@ -125,7 +125,7 @@ MACRO( botgCheckFlag lang flag found )
         MESSAGE(FATAL_ERROR "[BootsOnTheGround] lang=${lang} is not known!" )
     ENDIF()
 ENDMACRO()
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # PUBLIC
 # Add flags to the compiler.
 #
@@ -150,7 +150,7 @@ MACRO( botgAddCompilerFlags lang compiler system) #list of flags comes at end
         ENDFOREACH()
     ENDIF()
 ENDMACRO()
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # PUBLIC
 # Define a library (including headers) to build.
 # botgLibrary( <name>
@@ -231,7 +231,7 @@ MACRO( botgLibrary name )
     ENDIF()
 
 ENDMACRO()
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # PUBLIC
 # Add flags to the linker.
 #
@@ -257,7 +257,7 @@ MACRO( botgAddLinkerFlags compiler system ) #list of flags comes at end
         ENDFOREACH()
     ENDIF()
 ENDMACRO()
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # PUBLIC
 # Return the current git hash
 #
@@ -270,14 +270,14 @@ FUNCTION( botgGitHash hash )
     )
     SET( ${hash} ${hash_} PARENT_SCOPE )
 ENDFUNCTION()
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # PUBLIC
 # Add test directory
 #
 MACRO( botgTestDir )
     TRIBITS_ADD_TEST_DIRECTORIES( ${ARGN} )
 ENDMACRO()
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # PUBLIC
 # Resolve version number.
 #
@@ -290,7 +290,102 @@ MACRO( botgResolveVersion )
     ENDIF()
     GLOBAL_SET( ${PACKAGE_NAME}_VERSION "${version}")
 ENDMACRO()
+#------------------------------------------------------------------------------
+# PUBLIC
+# Set contents of a project/repo. (Eventually will process version numbers of
+# packages too)
+#
+# botgProjectContents(
+#   PACKAGE_NAME   PACKAGE_LOCATION   PACKAGE_TEST_LEVEL
+# )
+MACRO( botgProjectContents )
+    TRIBITS_REPOSITORY_DEFINE_PACKAGES(
+      ${ARGN}
+    )
+ENDMACRO()
+#------------------------------------------------------------------------------
+# PUBLIC
+# Set contents of a super package.
+#
+# botgSuperPackageContents(
+#   PACKAGE_NAME   PACKAGE_LOCATION   PACKAGE_TEST_LEVEL   OPTIONAL|REQUIRED
+# )
+MACRO( botgSuperPackageContents )
+    # clear TriBITS variables
+    SET(LIB_REQUIRED_DEP_PACKAGES)
+    SET(LIB_OPTIONAL_DEP_PACKAGES)
+    SET(TEST_REQUIRED_DEP_PACKAGES)
+    SET(TEST_OPTIONAL_DEP_PACKAGES)
+    SET(LIB_REQUIRED_DEP_TPLS)
+    SET(LIB_OPTIONAL_DEP_TPLS)
+    SET(TEST_REQUIRED_DEP_TPLS)
+    SET(TEST_OPTIONAL_DEP_TPLS)
+    # set final
+    SET(SUBPACKAGES_DIRS_CLASSIFICATIONS_OPTREQS ${ARGN})
+ENDMACRO()
+#------------------------------------------------------------------------------
+# PUBLIC
+# Set dependencies. (Eventually will process version numbers of packages too)
+#
+# botgPackageDependencies(
+#   LIB_REQUIRED_PACKAGES ...
+#   LIB_OPTIONAL_PACKAGES ...
+#   LIB_REQUIRED_TPLS ...
+#   LIB_OPTIONAL_TPLS ...
+#   TEST_REQUIRED_PACKAGES ...
+#   TEST_OPTIONAL_PACKAGES ...
+#   TEST_REQUIRED_TPLS ...
+#   TEST_OPTIONAL_TPLS ...
+# )
+MACRO( botgPackageDependencies )
+    # parse arguments
+    SET(options)
+    SET(one_value_args)
+    SET(multi_value_args
+        LIB_REQUIRED_PACKAGES
+        LIB_OPTIONAL_PACKAGES
+        TEST_REQUIRED_PACKAGES
+        TEST_OPTIONAL_PACKAGES
+        LIB_REQUIRED_TPLS
+        LIB_OPTIONAL_TPLS
+        TEST_REQUIRED_TPLS
+        TEST_OPTIONAL_TPLS
+    )
+    CMAKE_PARSE_ARGUMENTS(depend "${options}" "${one_value_args}" "${multi_value_args}" ${ARGN} )
+    #add package
+    TRIBITS_PACKAGE_DEFINE_DEPENDENCIES(
+        LIB_REQUIRED_PACKAGES    ${depend_LIB_REQUIRED_PACKAGES}
+        LIB_OPTIONAL_PACKAGES    ${depend_LIB_OPTIONAL_PACKAGES}
+        TEST_REQUIRED_PACKAGES   ${depend_TEST_REQUIRED_PACKAGES}
+        TEST_OPTIONAL_PACKAGES   ${depend_TEST_OPTIONAL_PACKAGES}
+        LIB_REQUIRED_TPLS        ${depend_LIB_REQUIRED_TPLS}
+        LIB_OPTIONAL_TPLS        ${depend_LIB_OPTIONAL_TPLS}
+        TEST_REQUIRED_TPLS       ${depend_TEST_REQUIRED_TPLS}
+        TEST_OPTIONAL_TPLS       ${depend_TEST_OPTIONAL_TPLS}
+    )
+    #check if we have a special BootsOnTheGround_ package that also means to
+    #add a TPL
+    FOREACH( type LIB TEST )
+        FOREACH( need REQUIRED OPTIONAL )
+            FOREACH( package ${depend_${type}_${need}_PACKAGES} )
+                IF( ${package} MATCHES "^BootsOnTheGround_" )
+                    STRING(REGEX REPLACE "^BootsOnTheGround_" "" tpl ${package} )
+                    APPEND_SET( ${type}_${need}_DEP_TPLS ${tpl} )
+                ENDIF()
+            ENDFOREACH()
+        ENDFOREACH()
+    ENDFOREACH()
+ENDMACRO()
 #-------------------------------------------------------------------------------
+# PUBLIC
+# Add a BOTG third-party-library (TPL).
+#
+MACRO( botgAddTPL type_need name )
+    APPEND_SET( ${type_need}_DEP_PACKAGES BootsOnTheGround_${name} )
+    APPEND_SET( ${type_need}_DEP_TPLS ${name} )
+ENDMACRO()
+
+#------------------------------------------------------------------------------
 # PUBLIC
 # Do most of the legwork setting up a CMakeLists.txt file for a project.
 #
@@ -351,7 +446,7 @@ MACRO( botgProject )
     MESSAGE( STATUS "[BootsOnTheGround] set operating system global BOTG_SYSTEM=${BOTG_SYSTEM}")
 
 ENDMACRO()
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # PUBLIC
 # Initialize a super package (package with subpackages) CMakeLists.txt file.
 #
@@ -362,7 +457,7 @@ MACRO( botgSuperPackage name )
     TRIBITS_PROCESS_SUBPACKAGES()
     TRIBITS_PACKAGE_DEF()
 ENDMACRO()
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # PUBLIC
 # Initialize a package CMakeLists.txt file.
 #
@@ -378,7 +473,7 @@ MACRO( botgPackage name )
     ENDIF()
     botgProcessTPLS()
 ENDMACRO()
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # PUBLIC
 # Finalize a CMakeLists.txt file.
 #
@@ -460,14 +555,6 @@ MACRO( botgEnd )
     ENDIF()
 
 ENDMACRO()
-#-------------------------------------------------------------------------------
-# PUBLIC
-# Add a third-party-library (TPL).
-#
-MACRO( botgAddTPL type need name )
-    APPEND_SET( ${type}_${need}_DEP_PACKAGES BootsOnTheGround_${name} )
-    APPEND_SET( ${type}_${need}_DEP_TPLS ${name} )
-ENDMACRO()
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
@@ -496,7 +583,7 @@ MACRO( botgProcessTPLS )
        ENDIF()
     ENDFOREACH()
 ENDMACRO()
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 #---------------------------------------------------------------------------
 # PRIVATE
 # Hunt down a TPL using hunter.
@@ -574,7 +661,7 @@ FUNCTION( botgHuntTPL tribits_name headers libs hunter_name hunter_args )
     MESSAGE( STATUS "[BootsOnTheGround] FINAL result of TPL ${tribits_name}_FOUND=${${tribits_name}_FOUND}")
 
 ENDFUNCTION()
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # PRIVATE
 # Process TriBITS and set TRIBITS_DIR.
 #
@@ -593,7 +680,7 @@ MACRO( botgProcessTribits TriBITS_dir )
     SET(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${save_path}")
 
 ENDMACRO()
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # PRIVATE
 # Return the compiler variable as "SUITE/COMPILER".
 #
@@ -606,7 +693,7 @@ FUNCTION( botgGetCompilerName lang compiler )
     ENDIF()
     SET( ${compiler} "${compiler_suite_}/${compiler_}" PARENT_SCOPE )
 ENDFUNCTION()
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # PRIVATE
 # Set the global compiler name BOTG_${lang}_COMPILER="SUITE/COMPILER".
 #
@@ -623,7 +710,7 @@ MACRO( botgProcessCompiler lang )
     ENDIF()
     GLOBAL_SET( ${PROJECT_NAME}_ENABLE_${lang} ${result} )
 ENDMACRO()
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # PRIVATE
 # Check if given Fortran source compiles and links into an executable
 #
@@ -697,7 +784,7 @@ MACRO( botgTryCompileFortran source var )
         ENDIF()
     ENDFOREACH()
 ENDMACRO()
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # PRIVATE
 # Check a Fortran flag to see if it works.
 #
@@ -725,7 +812,7 @@ MACRO( botgCheckFlag_Fortran flag result)
    ENDIF()
    SET (CMAKE_REQUIRED_DEFINITIONS "${save_defs}")
 ENDMACRO()
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # PRIVATE
 # Check if the compiler matches. (Used to selectively enable flags.)
 #
@@ -740,7 +827,7 @@ FUNCTION( botgCompilerMatches lang compiler found )
         ENDIF()
     ENDIF()
 ENDFUNCTION()
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # PRIVATE
 # Check if the system matches. (Used to selectively enable flags.)
 #
@@ -755,7 +842,7 @@ FUNCTION( botgSystemMatches system found)
         ENDIF()
     ENDIF()
 ENDFUNCTION()
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # PRIVATE
 # Check both compiler and system matches. (Used to selectively enable flags.)
 #
