@@ -59,19 +59,15 @@ all contained in the ``BOTG.cmake`` file which can be bootstrapped into any
 project build!
 
 - ``botgProject()`` - declare a project (inside root CMakeLists.txt)
-- ``botgPackage( <name> )`` - declare a package (inside subdir CMakeLists.txt)
+- ``botgPackage( name )`` - declare a package (inside subdir CMakeLists.txt)
 - ``botgEnd()`` - wrap-up processing a Project or Package
-- ``botgAddCompilerFlags( <lang> <compiler> <os> <flags> )`` - add compiler
-    flags only for a particular language/compiler/os combination
-- ``botgAddLinkerFlags( <compiler> <os> <flags> )`` - add linker flags only for
-    a particular compiler/os combination
-- ``botgLibrary( <name> ... )`` - declare and define a library using current
-    compiler and linker flags
-- ``botgTestDir( <dir> )`` - declare a unit test directory
+- ``botgAddCompilerFlags( lang compiler os flags )`` - add compiler flags only for a particular language/compiler/os combination
+- ``botgAddLinkerFlags( compiler os flags )`` - add linker flags only for a particular compiler/os combination
+- ``botgLibrary( name ... )`` - declare and define a library using current compiler and linker flags
+- ``botgTestDir( dir )`` - declare a unit test directory
 - ``botgProjectContents( ... )`` - declare the packages and subdirs in a project
 - ``botgPackageDependencies( ... )`` - declare the dependencies of a package
-- ``botgDownloadExternalProjects( ... )`` - download an external project at
-    configure time (used to bootstrap BootsOnTheGround)
+- ``botgDownloadExternalProjects( ... )`` - download an external project at configure time (used to bootstrap BootsOnTheGround)
 
 Take a look at Testing123_ for an example of how to use BOTG_.
 
@@ -81,12 +77,9 @@ How do I get started?
 Bootstrapping is the recommended way of using BOTG (hence the name!).
 You need to do four things to enable BOTG in your TriBITS C/C++/Fortran project.
 
-#. Copy ``cmake/BOTG_INCLUDE.cmake`` containing bootstrap commands to your
-   project's root ``cmake`` directory.
-#. Copy ``external/BootsOnTheGround.in`` containing repo link commands to
-   your project's ``external`` directory.
-#. ``INCLUDE(cmake/BOTG_INCLUDE.cmake)`` first thing in your root
-   ``CMakeLists.txt`` file to execute the bootstrap.
+#. Copy ``cmake/BOTG_INCLUDE.cmake`` containing bootstrap commands to your project's root ``cmake`` directory.
+#. Copy ``external/BootsOnTheGround.in`` containing repo link commands to your project's ``external`` directory.
+#. ``INCLUDE(cmake/BOTG_INCLUDE.cmake)`` first thing in your root ``CMakeLists.txt`` file to execute the bootstrap.
 #. Add BOTG to your TriBITS ``PackagesList.cmake`` file.
 
 .. code-block:: cmake
@@ -168,10 +161,11 @@ the interface is straightforward:
 
 #. Define a project as a collection of external and internal packages.
 #. Define for each internal package:
-  #. dependency on external packages and TPLs;
-  #. headers, libraries, and executables to deploy;
-  #. unit tests; and the minimal
-  #. compiler/linker flags or C++ standard *needed* to build.
+
+   #. dependency on external packages and TPLs;
+   #. headers, libraries, and executables to deploy;
+   #. unit tests; and the minimal
+   #. compiler/linker flags or C++ standard *needed* to build.
 
 
 Connection to TriBITS
