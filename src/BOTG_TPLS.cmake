@@ -10,4 +10,6 @@ SET( BOTG_TPLS_LIST
     SZIP
     HDF5
     CURL
+    BLAS
+    LAPACK
 )

@@ -8,26 +8,28 @@ CMake macros for easy projects with TPLS C/C++/Fortran
 
 .. image:: https://c1.staticflickr.com/3/2860/33135230166_b7890b6015_b.jpg
 
-First and foremost, BOTG_ provides a set of FindTPL*.cmake files to find and
-link Third Party Libraries (TPLs) to other packages using the
-CMake_ / TriBITS_ framework for C/C++/Fortran code.
+BOTG_ provides macros for easy project/package setup and a set 
+of FindTPL*.cmake files to find and link Third Party Libraries (TPLs) 
+to other packages using the CMake_ / TriBITS_ framework for C/C++/Fortran code.
 
 .. code-block:: cmake
 
     #Inside MyPackage/cmake/Dependencies.cmake
-    TRIBITS_PACKAGE_DEFINE_DEPENDENCIES(
-        LIB_REQUIRED_PACKAGES TheirPackage
+    botgPackageDependencies(
+        LIB_REQUIRED_PACKAGES
+            TheirPackage
+            BootsOnTheGround_CURL
+        TEST_REQUIRED_PACKAGES
+            BootsOnTheGround_GTEST
     )
-    botgAddTPL( LIB_OPTIONAL CURL )    #Optional for building
-    botgAddTPL( TEST_REQUIRED GTEST )  #Required only for tests
-
+    
 In order to use this command, you need to add BootsOnTheGround as a package
 to your ``PackagesList.cmake`` file in your project. The amazing thing about
-the ``botgAddTPL`` command is that it unifies the normal way of finding a TPL
-on your system with the Hunter_ system for downloading and building TPLS
-on the fly!
+the ``BootsOnTheGround_XXX`` dependencies are that they unify the normal way 
+of finding a TPL on your system with the Hunter_ system for downloading and 
+building TPLS on the fly!
 
-The available ``XXX`` allowed in ``botgAddTPL( ... XXX)`` are listed below.
+The available ``XXX`` allowed are listed below.
 
 Current TPLs
 ------------
@@ -46,17 +48,16 @@ Currently we have the following TPLs wrapped up nice and purdy:
 - SPDLOG_ - fast, versatile logging [C++]
 - ZLIB_ - compession/decompression algorithm [C++]
 
-Once the interface of BOTG clarifies, the only changes will be adding new TPLS,
+Once the interface of BOTG crystalizes, the only changes will be adding new TPLS,
 and adding versioning support for finding those TPLS.
 
 BOTG Macros
 -----------
 
-But BOTG also provides a system for building projects from a pool of packages,
-with support for package versioning (eventually) with easy-to-use macros for
-all the relevant components of the CMake_/TriBITS_ process. These macros are
+BOTG provides a small set of macros for building projects from a pool of packages,
+*eventually* with support for package versioning. These macros are
 all contained in the ``BOTG.cmake`` file which can be bootstrapped into any
-project build!
+project build.
 
 - ``botgProject()`` - declare a project (inside root CMakeLists.txt)
 - ``botgPackage( name )`` - declare a package (inside subdir CMakeLists.txt)
@@ -116,9 +117,9 @@ Why?
 
 Every software package needs to answer the question of why does it exist.
 This package could be seen as another layer on top of an already precarious
-cake (CMake bottom layer, TriBITS on top). And there is a really good reason
+cake (CMake bottom layer, TriBITS middle layer). And there is a really good reason
 *not* to create another CMake macro system, namely maintainability. CMake is a
-popular solution to an important problem (building C++ code), which means there
+popular solution to a persistent problem (cross-platform C++ builds), which means there
 are many people out there who pick up CMake as a skill. But how many people
 know your macros? So you limit who can help with what we believe is the worst
 part of software development: configuration.
@@ -132,7 +133,7 @@ CMake skill. These are generally scientists and engineers who:
 #. are using TriBITS_ anyway, and/or
 #. who hate writing configuration code.
 
-For this people, the goals are simple.
+For these people, the goal are simple.
 
 Create and deploy software that solves a new *scientific* problem--*NOT*
 a software engineering one. So our (yes, we are those guys) requirements are
