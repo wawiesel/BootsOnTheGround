@@ -11,4 +11,5 @@ SET( BOTG_TPLS_LIST
     HDF5
     CURL
     BLAS
+    LAPACK
 )
