@@ -94,6 +94,15 @@ MACRO( botgUseCxxStandard version )
 ENDMACRO()
 #------------------------------------------------------------------------------
 # PUBLIC
+# Use a particular version of the C standard.
+#
+MACRO( botgUseCStandard version )
+    botgAddCompilerFlags( C "GNU|Clang|Intel" ANY_SYSTEM
+        "-std=c${version}"
+    )
+ENDMACRO()
+#------------------------------------------------------------------------------
+# PUBLIC
 # Enable some useful Fortran features.
 #
 MACRO( botgEnableFortran )
