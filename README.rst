@@ -47,6 +47,8 @@ Currently we have the following TPLs wrapped up nice and purdy:
 - SZIP_ - scientific zip algorithm [C++]
 - SPDLOG_ - fast, versatile logging [C++]
 - ZLIB_ - compession/decompression algorithm [C++]
+- BLAS_ - basic linear algebra subprograms [Fortran]
+- LAPACK_ - linear algebra package [Fortran]
 
 Once the interface of BOTG crystalizes, the only changes will be adding new TPLS,
 and adding versioning support for finding those TPLS.
@@ -272,4 +274,6 @@ followed the steps on `Cees-Jan Kiewiet's Blog Post
 .. _OPENSSL: https://www.openssl.org/
 .. _CURL: https://curl.haxx.se/libcurl/
 .. _HDF5: https://support.hdfgroup.org/HDF5/
+.. _BLAS: https://www.wikiwand.com/en/Basic_Linear_Algebra_Subprograms
+.. _LAPACK: http://www.netlib.org/lapack/
 
