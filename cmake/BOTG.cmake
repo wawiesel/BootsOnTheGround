@@ -94,6 +94,15 @@ MACRO( botgUseCxxStandard version )
 ENDMACRO()
 #------------------------------------------------------------------------------
 # PUBLIC
+# Use a particular version of the C standard.
+#
+MACRO( botgUseCStandard version )
+    botgAddCompilerFlags( C "GNU|Clang|Intel" ANY_SYSTEM
+        "-std=c${version}"
+    )
+ENDMACRO()
+#------------------------------------------------------------------------------
+# PUBLIC
 # Enable some useful Fortran features.
 #
 MACRO( botgEnableFortran )
@@ -603,28 +612,22 @@ FUNCTION( botgHuntTPL tribits_name headers libs hunter_name hunter_args )
 
     IF( ${tribits_name}_ALLOW_PREFIND OR ${tribits_name}_FORCE_HUNTER )
 
-      #vanilla find
-      IF( NOT ${tribits_name}_FORCE_HUNTER )
-          MESSAGE( STATUS "[BootsOnTheGround] Calling FIND_PACKAGE(${tribits_name} CONFIG) ...")
-          FIND_PACKAGE( ${tribits_name} CONFIG QUIET )
-          #says it found it but it didn't populate any variables we need
-          IF( ${tribits_name}_FOUND )
-	      IF( "${${tribits_name}_LIBRARY_DIRS}" STREQUAL "" AND
-                  "${${tribits_name}_INCLUDE_DIRS}" STREQUAL "" )
-                  SET( ${tribits_name}_FOUND OFF )
-              ENDIF()
-          ENDIF()
-          MESSAGE( STATUS "[BootsOnTheGround] Calling FIND_PACKAGE(${tribits_name} CONFIG) ... ${tribits_name}_FOUND=${${tribits_name}_FOUND}")
+      #config find
+      MESSAGE( STATUS "[BootsOnTheGround] Calling FIND_PACKAGE(${tribits_name} CONFIG) ...")
+      FIND_PACKAGE( ${tribits_name} CONFIG QUIET )
+      #says it found it but it didn't populate any variables we need
+      IF( ${tribits_name}_FOUND )
+        IF( "${${tribits_name}_LIBRARY_DIRS}" STREQUAL "" AND
+            "${${tribits_name}_INCLUDE_DIRS}" STREQUAL "" )
+            SET( ${tribits_name}_FOUND OFF )
+        ENDIF()
       ENDIF()
+      MESSAGE( STATUS "[BootsOnTheGround] Calling FIND_PACKAGE(${tribits_name} CONFIG) ... ${tribits_name}_FOUND=${${tribits_name}_FOUND}")
 
       #use hunter!
       IF( NOT ${tribits_name}_FOUND AND NOT (hunter_name STREQUAL "") )
         SET( hunter_argx "" )
-        IF( hunter_name STREQUAL "" )
-            LIST(APPEND hunter_argx ${tribits_name})
-        ELSE()
-            LIST(APPEND hunter_argx ${hunter_name})
-        ENDIF()
+        LIST(APPEND hunter_argx ${hunter_name})
         LIST(APPEND hunter_argx ${hunter_args} )
 
         MESSAGE(STATUS "[BootsOnTheGround] Calling hunter_add_package( ${hunter_argx} )...")
@@ -637,19 +640,30 @@ FUNCTION( botgHuntTPL tribits_name headers libs hunter_name hunter_args )
         FIND_PACKAGE( ${hunter_argx} )
         CMAKE_POLICY(POP)
 
-        #no choice but to be successful with hunter
-        GLOBAL_SET(${tribits_name}_FOUND TRUE)
-
         #set global information about where the stuff is, converting names
         #from hunter to tribits.
-        FOREACH( type INCLUDE_DIRS LIBRARY_DIRS)
+        IF( ${hunter_name}_FOUND )
+	  FOREACH( type INCLUDE_DIRS LIBRARY_DIRS)
             GLOBAL_SET(${tribits_name}_${type} ${${hunter_name}_${type}})
-        ENDFOREACH()
+          ENDFOREACH()
+          GLOBAL_SET(${tribits_name}_FOUND TRUE)
+        ENDIF()
 
       ENDIF()
 
       MESSAGE( STATUS "[BootsOnTheGround] PREFIND result of TPL ${tribits_name}_FOUND=${${tribits_name}_FOUND}")
 
+    ENDIF()
+
+    #Last chance!
+    IF( NOT ${tribits_name}_FOUND )
+      MESSAGE( STATUS "[BootsOnTheGround] Last chance module mode: FIND_PACKAGE(${tribits_name}) ...")
+      FIND_PACKAGE( ${tribits_name} QUIET )
+      IF( ${tribits_name}_FOUND )
+        GLOBAL_SET(TPL_${tribits_name}_LIBRARIES "${${tribits_name}_LIBRARIES}")
+        GLOBAL_SET(TPL_${tribits_name}_INCLUDE_DIRS "")
+        GLOBAL_SET(TPL_${tribits_name}_LIBRARY_DIRS "")
+      ENDIF()
     ENDIF()
 
     # Third, call TRIBITS_TPL_FIND_INCLUDE_DIRS_AND_LIBRARIES()
