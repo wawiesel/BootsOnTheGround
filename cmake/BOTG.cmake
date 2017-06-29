@@ -194,6 +194,12 @@ MACRO( botgLibrary name )
 
     IF( enabled )
 
+        #set include directories
+        TRIBITS_INCLUDE_DIRECTORIES(
+            ${CMAKE_CURRENT_SOURCE_DIR}  #For C++
+            ${CMAKE_CURRENT_BINARY_DIR}  #For fortran modules/configured files
+        )
+
         #create list of sources
         SET( sources )
         FOREACH( source ${library_SOURCES} )
@@ -222,6 +228,8 @@ MACRO( botgLibrary name )
         TRIBITS_ADD_LIBRARY( ${name}
             SOURCES
                 "${sources}"
+            HEADERS
+                "${headers}"
             NOINSTALLHEADERS
                 "${headers}"
         )
@@ -231,11 +239,6 @@ MACRO( botgLibrary name )
             TARGET_LINK_LIBRARIES( ${name} ${link_to} )
         ENDFOREACH()
 
-        #set include directories
-        INCLUDE_DIRECTORIES(
-            ${CMAKE_CURRENT_SOURCE_DIR}  #For C++
-            ${CMAKE_CURRENT_BINARY_DIR}  #For fortran modules/configured files
-        )
 
     ENDIF()
 
