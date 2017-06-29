@@ -25,14 +25,14 @@ addons:
             - openssl
             - libssl-dev
             - libcurl4-openssl-dev
+            - libblas-dev
+            - liblapack-dev
             - cmake
             - cmake-data
             - gcc-4.9
             - g++-4.9
             - gfortran-4.9
             - clang-3.7
-            - libblas-dev
-            - liblapack-dev
 
 before_install:
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
