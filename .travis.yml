@@ -61,8 +61,7 @@ before_script:
 script:
     - mkdir build
     - cd build
-      #limits screen output
-    - travis_wait 30 cmake .. 2>&1 | grep 'BootsOnTheGround\| TPL'
+    - cmake .. 2>&1
     - cmake --build .
     - ctest
 # enable cache
