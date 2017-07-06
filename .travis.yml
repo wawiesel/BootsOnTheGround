@@ -46,6 +46,7 @@ before_install:
           brew install ccache;
           export PATH="/usr/local/opt/ccache/libexec:$PATH";
           rvm get stable --auto-dot-files;
+          rvm reset;
       fi
 
 cache: ccache
