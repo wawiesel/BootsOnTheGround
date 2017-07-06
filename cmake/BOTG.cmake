@@ -163,13 +163,26 @@ ENDMACRO()
 # PUBLIC
 # Define a library (including headers) to build.
 # botgLibrary( <name>
+#    LANGUAGE <lang>
 #    SOURCES
-#        ..
+#        <src1>
+#        <src2>
+#        ...
 #    HEADERS
-#        ..
+#        <hdr1>
+#        <hdr2>
+#        ...
 #    LINK_TO
-#        ..
+#        <lib-target1> <lib-target2>
 # )
+#
+# FLAGS
+# - HEADERS - listing of header files to follow
+# - SOURCES - listing of source files to follow
+# - LANGUAGE - optional language specification <lang>=C|CXX|Fortran
+#              For header-only libraries (i.e. empty SOURCES), it is required.
+#              If provided, does SET_TARGET_PROPERTIES( <name> PROPERTIES LINKER_LANGUAGE <lang> )
+# - LINK_TO - list of library names to apply TARGET_LINK_LIBRARIES
 #
 MACRO( botgLibrary name )
     # parse arguments
@@ -190,6 +203,7 @@ MACRO( botgLibrary name )
         ELSE()
             MESSAGE( FATAL_ERROR "[BootsOnTheGround] botgLibrary LANGUAGE ${libraryLanguage} is unknown (Fortran|C|CXX)")
         ENDIF()
+        SET_TARGET_PROPERTIES( "${name}" PROPERTIES LINKER_LANGUAGE "${library_LANGUAGE}" )
     ENDIF()
 
     IF( enabled )
