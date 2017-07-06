@@ -43,7 +43,11 @@ before_install:
           fi;
       elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
           travis_wait brew install gcc && brew install libidn && export FC="gfortran";
+          brew install ccache;
+          export PATH="/usr/local/opt/ccache/libexec:$PATH";
       fi
+
+cache: ccache
 
 install:
     - echo ${PATH}
@@ -64,5 +68,3 @@ script:
     - cmake .. 2>&1
     - cmake --build .
     - ctest
-# enable cache
-#cache: ccache
