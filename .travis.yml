@@ -65,6 +65,7 @@ before_script:
 script:
     - mkdir build
     - cd build
-    - cmake .. 2>&1
+    #suppress so many lines that start with this emitted by HUNTER
+    - cmake .. 2>&1 | grep -v '^/home/travis/.hunter'
     - cmake --build .
     - ctest
