@@ -68,6 +68,6 @@ script:
     - cd build
     #line suppression strategy with grep
     #- cmake .. 2>&1 | grep '\[BootsOnTheGround\]\|\[hunter\]'
-    - cmake .. 2>stderr.log
+    - cmake .. 2>stderr.log |  grep '\[BootsOnTheGround\]\|\[hunter\]\|%\]'
     - cmake --build .
     - ctest
