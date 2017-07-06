@@ -203,7 +203,6 @@ MACRO( botgLibrary name )
         ELSE()
             MESSAGE( FATAL_ERROR "[BootsOnTheGround] botgLibrary LANGUAGE ${libraryLanguage} is unknown (Fortran|C|CXX)")
         ENDIF()
-        SET_TARGET_PROPERTIES( "${name}" PROPERTIES LINKER_LANGUAGE "${library_LANGUAGE}" )
     ENDIF()
 
     IF( enabled )
@@ -239,14 +238,29 @@ MACRO( botgLibrary name )
         ENDFOREACH()
 
         #call TriBITS to add a library
-        TRIBITS_ADD_LIBRARY( ${name}
-            SOURCES
-                "${sources}"
-            HEADERS
-                "${headers}"
-            NOINSTALLHEADERS
-                "${headers}"
-        )
+        IF( "${sources}" STREQUAL "" )
+            MESSAGE(STATUS "[BootsOnTheGround] configuring header-only library=${name}")
+            #header-only
+            ADD_LIBRARY( ${name}
+                INTERFACE
+            )
+        ELSE()
+            #traditional source
+            TRIBITS_ADD_LIBRARY( ${name}
+                SOURCES
+                    "${sources}"
+                HEADERS
+                    "${headers}"
+                NOINSTALLHEADERS
+                    "${headers}"
+            )
+
+            #set properties on target
+            IF( NOT "${library_LANGUAGE}" STREQUAL "")
+                SET_TARGET_PROPERTIES( ${name} PROPERTIES LINKER_LANGUAGE ${library_LANGUAGE} )
+            ENDIF()
+
+        ENDIF()
 
         #do linking
         FOREACH( link_to ${library_LINK_TO} )
