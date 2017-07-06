@@ -65,7 +65,7 @@ before_script:
 script:
     - mkdir build
     - cd build
-    #suppress so many lines that start with this emitted by HUNTER
-    - cmake .. 2>&1 | grep -v '^/home/travis/.hunter'
+    #line suppression strategy with grep
+    - cmake .. 2>&1 | grep '\[BootsOnTheGround\]\|\[hunter\]'
     - cmake --build .
     - ctest
