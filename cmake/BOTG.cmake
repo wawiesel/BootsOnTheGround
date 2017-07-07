@@ -163,13 +163,26 @@ ENDMACRO()
 # PUBLIC
 # Define a library (including headers) to build.
 # botgLibrary( <name>
+#    LANGUAGE <lang>
 #    SOURCES
-#        ..
+#        <src1>
+#        <src2>
+#        ...
 #    HEADERS
-#        ..
+#        <hdr1>
+#        <hdr2>
+#        ...
 #    LINK_TO
-#        ..
+#        <lib-target1> <lib-target2>
 # )
+#
+# FLAGS
+# - HEADERS - listing of header files to follow
+# - SOURCES - listing of source files to follow
+# - LANGUAGE - optional language specification <lang>=C|CXX|Fortran
+#              For header-only libraries (i.e. empty SOURCES), it is required.
+#              If provided, does SET_TARGET_PROPERTIES( <name> PROPERTIES LINKER_LANGUAGE <lang> )
+# - LINK_TO - list of library names to apply TARGET_LINK_LIBRARIES
 #
 MACRO( botgLibrary name )
     # parse arguments
@@ -225,14 +238,29 @@ MACRO( botgLibrary name )
         ENDFOREACH()
 
         #call TriBITS to add a library
-        TRIBITS_ADD_LIBRARY( ${name}
-            SOURCES
-                "${sources}"
-            HEADERS
-                "${headers}"
-            NOINSTALLHEADERS
-                "${headers}"
-        )
+        IF( "${sources}" STREQUAL "" )
+            MESSAGE(STATUS "[BootsOnTheGround] configuring header-only library=${name}")
+            #header-only
+            ADD_LIBRARY( ${name}
+                INTERFACE
+            )
+        ELSE()
+            #traditional source
+            TRIBITS_ADD_LIBRARY( ${name}
+                SOURCES
+                    "${sources}"
+                HEADERS
+                    "${headers}"
+                NOINSTALLHEADERS
+                    "${headers}"
+            )
+
+            #set properties on target
+            IF( NOT "${library_LANGUAGE}" STREQUAL "")
+                SET_TARGET_PROPERTIES( ${name} PROPERTIES LINKER_LANGUAGE ${library_LANGUAGE} )
+            ENDIF()
+
+        ENDIF()
 
         #do linking
         FOREACH( link_to ${library_LINK_TO} )

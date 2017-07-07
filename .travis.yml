@@ -34,7 +34,7 @@ addons:
             - gfortran-4.9
             - clang-3.7
 
-before_install:
+install:
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
           export FC="gfortran-4.9";
           if [[ "$CXX" == "g++" ]]; then
@@ -43,27 +43,40 @@ before_install:
           fi;
       elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
           travis_wait brew install gcc && brew install libidn && export FC="gfortran";
+          brew install ccache;
+          export PATH="/usr/local/opt/ccache/libexec:$PATH";
+          brew install coreutils;
+          export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH";
+          rvm get stable --auto-dot-files;
+          rvm reset;
       fi
-
-install:
     - echo ${PATH}
     - echo ${CC}
     - echo ${CXX}
     - echo ${FC}
-
-before_script:
     - cmake --version
     - curl --version
     - ${CC} --version
     - ${CXX} --version
     - ${FC} --version
 
+before_script: |
+  function keep_alive() {
+    while true; do
+      echo -en "\a"
+      sleep 5
+    done
+  }
+  keep_alive &
+
+
 script:
     - mkdir build
     - cd build
-      #limits screen output
-    - cmake .. 2>&1 | grep 'BootsOnTheGround\| TPL'
+    #line suppression strategy
+    - stdbuf -oL cmake .. 2>stderr.log |  grep --line-buffered '\[BootsOnTheGround\]\|\[hunter\]\|%\]'
     - cmake --build .
     - ctest
-# enable cache
-#cache: ccache
+
+cache: ccache
+
