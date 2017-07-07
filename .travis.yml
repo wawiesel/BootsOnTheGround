@@ -48,27 +48,25 @@ before_install:
           rvm get stable --auto-dot-files;
           rvm reset;
       fi
-
-cache: ccache
-
-install:
     - echo ${PATH}
     - echo ${CC}
     - echo ${CXX}
     - echo ${FC}
-
-before_script:
     - cmake --version
     - curl --version
     - ${CC} --version
     - ${CXX} --version
     - ${FC} --version
 
-script:
+cache: ccache
+
+install:
     - mkdir build
     - cd build
     #line suppression strategy with grep
     #- cmake .. 2>&1 | grep '\[BootsOnTheGround\]\|\[hunter\]'
-    - cmake .. 2>stderr.log |  grep '\[BootsOnTheGround\]\|\[hunter\]\|%\]'
+    - travis_wait 30 cmake .. 2>stderr.log |  grep '\[BootsOnTheGround\]\|\[hunter\]\|%\]'
+
+script:
     - cmake --build .
     - ctest
