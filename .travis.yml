@@ -45,6 +45,8 @@ install:
           travis_wait brew install gcc && brew install libidn && export FC="gfortran";
           brew install ccache;
           export PATH="/usr/local/opt/ccache/libexec:$PATH";
+          brew install coreutils; #for stdbuf
+          export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"; #to use stdbuf instead of gstdbuf
           rvm get stable --auto-dot-files;
           rvm reset;
       fi
