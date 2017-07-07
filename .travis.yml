@@ -34,7 +34,7 @@ addons:
             - gfortran-4.9
             - clang-3.7
 
-before_install:
+install:
     - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
           export FC="gfortran-4.9";
           if [[ "$CXX" == "g++" ]]; then
@@ -58,15 +58,23 @@ before_install:
     - ${CXX} --version
     - ${FC} --version
 
-cache: ccache
+before_script: |
+  function keep_alive() {
+    while true; do
+      echo -en "\a"
+      sleep 5
+    done
+  }
+  keep_alive &
 
-install:
-    - mkdir build
-    - cd build
-    #line suppression strategy with grep
-    #- cmake .. 2>&1 | grep '\[BootsOnTheGround\]\|\[hunter\]'
-    - travis_wait 30 cmake .. 2>stderr.log |  grep '\[BootsOnTheGround\]\|\[hunter\]\|%\]'
 
 script:
+    - mkdir build
+    - cd build
+    #line suppression strategy
+    - stdbuf -oL cmake .. 2>stderr.log |  grep --line-buffered '\[BootsOnTheGround\]\|\[hunter\]\|%\]'
     - cmake --build .
     - ctest
+
+cache: ccache
+
