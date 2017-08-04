@@ -470,6 +470,9 @@ MACRO( botgProject )
     # Just good practice.
     botgPreventInSourceBuilds()
 
+    # Assert when packages are missing by default!
+    GLOBAL_SET( ${PROJECT_NAME}_ASSERT_MISSING_PACKAGES ON CACHE BOOL "Assert missing packages by default." )
+
     # Turn on tests by default.
     GLOBAL_SET( ${PROJECT_NAME}_ENABLE_TESTS ON CACHE BOOL "Enable all tests by default.")
 
