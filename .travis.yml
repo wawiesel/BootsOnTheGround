@@ -71,9 +71,8 @@ before_script: |
 
 
 script:
-    - mkdir build
-    - cd build
-    #line suppression strategy
+    - mkdir build && cd build
+    #the configure needs this line suppression strategy
     - stdbuf -oL cmake .. 2>stderr.log |  grep --line-buffered '\[BootsOnTheGround\]\|\[hunter\]\|%\]'
     - cmake --build .
     - ctest
