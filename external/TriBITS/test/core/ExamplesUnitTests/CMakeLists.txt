@@ -81,8 +81,7 @@ TRIBITS_ADD_ADVANCED_TEST( RawHelloWorld
 
 
 SET(TribitsHelloWorld_COMMON_CONFIG_ARGS
-  ${COMMON_ENV_ARGS_PASSTHROUGH}
-  -DTribitsHelloWorld_ENABLE_Fortran=${${PROJECT_NAME}_ENABLE_Fortran}
+  ${SERIAL_PASSTHROUGH_CONFIGURE_ARGS}
   )
 
 TRIBITS_ADD_ADVANCED_TEST( TribitsHelloWorld
@@ -91,12 +90,15 @@ TRIBITS_ADD_ADVANCED_TEST( TribitsHelloWorld
   TEST_0 CMND ${CMAKE_COMMAND}
     ARGS
       ${TribitsHelloWorld_COMMON_CONFIG_ARGS}
-      -DTribitsHelloWorld_ENABLE_CPACK_PACKAGING=ON
+      -DTribitsHelloWorld_ENABLE_TESTS=ON
+      -DHelloWorld_ENABLE_CPACK_PACKAGING=ON
       ${${PROJECT_NAME}_TRIBITS_DIR}/examples/TribitsHelloWorld
     PASS_REGULAR_EXPRESSION_ALL
       "Configuring done"
       "Generating done"
       "Build files have been written to: .*ExamplesUnitTests/TriBITS_TribitsHelloWorld"
+    FAIL_REGULAR_EXPRESSION
+      "Check for working Fortran compiler" # Should not be looking for Fortran!
   TEST_1 CMND make
     ARGS ${CTEST_BUILD_FLAGS}
     PASS_REGULAR_EXPRESSION_ALL
@@ -340,7 +342,7 @@ TRIBITS_ADD_ADVANCED_TEST( TribitsHelloWorld_CONFIGURE_OPTIONS_FILE
     ARGS -DTribitsHelloWorld_CONFIGURE_OPTIONS_FILE=ConfigOptions1.cmake
       .
     PASS_REGULAR_EXPRESSION_ALL
-      "include could not find load file"
+      "(include|INCLUDE) could not find load file"
       "TriBITS_TribitsHelloWorld_CONFIGURE_OPTIONS_FILE/ConfigOptions1.cmake"
     # NOTE: Above shows that FILEPATH type causes relative paths to be
     # evaluated w.r.t. the current working directory.
@@ -424,6 +426,18 @@ ELSE()
 ENDIF()
 
 
+IF (TribitsExProj_CTEST_USE_NEW_AAO_FEATURES)
+  SET(LabelsForSubprojects_CMND_AND_ARGS
+    grep ARGS "^LabelsForSubprojects:" DartConfiguration.tcl)
+  SET(LabelsForSubprojects_REGEX
+    "LabelsForSubprojects: SimpleCxx[;]MixedLang[;]WithSubpackages[;]WrapExternal")
+ELSE()
+  SET(LabelsForSubprojects_CMND_AND_ARGS
+    echo ARGS "No grep, we don't need to look for anything")
+  SET(LabelsForSubprojects_REGEX "No grep, we don't need to look for anything")
+ENDIF()
+
+
 TRIBITS_ADD_ADVANCED_TEST( TribitsExampleProject_ALL_ST_NoFortran
   OVERALL_WORKING_DIRECTORY TEST_NAME
   OVERALL_NUM_MPI_PROCS 1
@@ -444,6 +458,7 @@ TRIBITS_ADD_ADVANCED_TEST( TribitsExampleProject_ALL_ST_NoFortran
       -DTribitsExProj_DUMP_PACKAGE_DEPENDENCIES=ON
       -DTribitsExProj_ENABLE_EXPORT_MAKEFILES=ON
       -DTribitsExProj_ENABLE_INSTALL_CMAKE_CONFIG_FILES=ON
+      -DTribitsExProj_CTEST_USE_NEW_AAO_FEATURES=${TribitsExProj_CTEST_USE_NEW_AAO_FEATURES}
       -DCMAKE_CXX_FLAGS=-DSIMPLECXX_SHOW_DEPRECATED_WARNINGS=1
       -DCMAKE_INSTALL_PREFIX=install
       ${${PROJECT_NAME}_TRIBITS_DIR}/examples/TribitsExampleProject
@@ -524,7 +539,12 @@ TRIBITS_ADD_ADVANCED_TEST( TribitsExampleProject_ALL_ST_NoFortran
       "-- File Trace: PROJECT    INCLUDE    .*/TribitsExampleProject/cmake/CallbackDefineProjectPackaging.cmake"
     ALWAYS_FAIL_ON_NONZERO_RETURN
 
-  TEST_1 CMND make ARGS ${CTEST_BUILD_FLAGS}
+  TEST_1
+    MESSAGE "Make sure that 'LabelsForSubprojects' is set to list of packages"
+    CMND ${LabelsForSubprojects_CMND_AND_ARGS}
+    PASS_REGULAR_EXPRESSION "${LabelsForSubprojects_REGEX}"
+
+  TEST_2 CMND make ARGS ${CTEST_BUILD_FLAGS}
     MESSAGE "Build the default 'all' target using raw 'make'"
     PASS_REGULAR_EXPRESSION_ALL
       "Built target simplecxx"
@@ -535,7 +555,7 @@ TRIBITS_ADD_ADVANCED_TEST( TribitsExampleProject_ALL_ST_NoFortran
       "Built target pws_c"
     ALWAYS_FAIL_ON_NONZERO_RETURN
 
-  TEST_2 CMND ${CMAKE_CTEST_COMMAND} ARGS -VV
+  TEST_3 CMND ${CMAKE_CTEST_COMMAND} ARGS -VV
     MESSAGE "Run all the tests with raw 'ctest'"
     PASS_REGULAR_EXPRESSION_ALL
       "SimpleCxx_HelloWorldTests${TEST_MPI_1_SUFFIX} .* Passed"
@@ -546,7 +566,7 @@ TRIBITS_ADD_ADVANCED_TEST( TribitsExampleProject_ALL_ST_NoFortran
       "100% tests passed, 0 tests failed out of 6"
     ALWAYS_FAIL_ON_NONZERO_RETURN
 
-  TEST_3
+  TEST_4
     MESSAGE "Create and configure a dummy project that includes WithSubpackagesConfig.cmake"
       " from the build tree" 
     CMND ${CMAKE_COMMAND}
@@ -584,7 +604,7 @@ TRIBITS_ADD_ADVANCED_TEST( TribitsExampleProject_ALL_ST_NoFortran
       "-- Generating done"
     ALWAYS_FAIL_ON_NONZERO_RETURN
 
-  TEST_4 CMND make ARGS install ${CTEST_BUILD_FLAGS}
+  TEST_5 CMND make ARGS install ${CTEST_BUILD_FLAGS}
     MESSAGE "Build 'install' target using raw 'make'"
     PASS_REGULAR_EXPRESSION_ALL
       "Installing: .+/install/include/TribitsExProj_version.h"
@@ -620,7 +640,7 @@ TRIBITS_ADD_ADVANCED_TEST( TribitsExampleProject_ALL_ST_NoFortran
       "Installing: .+/install/include/Makefile.export.WithSubpackagesC"
     ALWAYS_FAIL_ON_NONZERO_RETURN
 
-  TEST_5 CMND ${CMAKE_COMMAND}
+  TEST_6 CMND ${CMAKE_COMMAND}
     ARGS
       -DDUMMY_PROJECT_NAME=DummyProject
       -DDUMMY_PROJECT_DIR=dummy_client_of_WithSubpackages
@@ -654,7 +674,7 @@ TRIBITS_ADD_ADVANCED_TEST( TribitsExampleProject_ALL_ST_NoFortran
       "WithSubpackages_TPL_LIST = 'HeaderOnlyTpl'"
     ALWAYS_FAIL_ON_NONZERO_RETURN
 
-  TEST_5 CMND make ARGS package_source
+  TEST_7 CMND make ARGS package_source
     MESSAGE "Create the tarball"
     PASS_REGULAR_EXPRESSION_ALL
       "Run CPack packaging tool for source..."
@@ -670,11 +690,11 @@ TRIBITS_ADD_ADVANCED_TEST( TribitsExampleProject_ALL_ST_NoFortran
       "CPack: - package: .*/ExamplesUnitTests/TriBITS_TribitsExampleProject_ALL_ST_NoFortran/tribitsexproj-1.1-Source.tar.bz2 generated."
     ALWAYS_FAIL_ON_NONZERO_RETURN
 
-  TEST_6 CMND tar ARGS -xzf tribitsexproj-1.1-Source.tar.gz
+  TEST_8 CMND tar ARGS -xzf tribitsexproj-1.1-Source.tar.gz
     MESSAGE "Untar the tarball"
     ALWAYS_FAIL_ON_NONZERO_RETURN
 
-  TEST_7 CMND diff
+  TEST_9 CMND diff
      ARGS -qr
        ${${PROJECT_NAME}_TRIBITS_DIR}/examples/TribitsExampleProject
        tribitsexproj-1.1-Source
@@ -782,7 +802,7 @@ TRIBITS_ADD_ADVANCED_TEST( TribitsExampleProject_ALL_ST_NoFortran_Ninja
       "WithSubpackages_TPL_LIST = 'HeaderOnlyTpl'"
     ALWAYS_FAIL_ON_NONZERO_RETURN
 
-  TEST_5 CMND ninja ARGS -j1 package_source
+  TEST_6 CMND ninja ARGS -j1 package_source
     MESSAGE "Create the tarball"
     PASS_REGULAR_EXPRESSION_ALL
       "Run CPack packaging tool for source..."
@@ -791,10 +811,10 @@ TRIBITS_ADD_ADVANCED_TEST( TribitsExampleProject_ALL_ST_NoFortran_Ninja
     # Above should be 'make package_soruce' but the dummy makefiles don't
     # support that yet!
 
-  TEST_6 CMND tar ARGS -xzf tribitsexproj-1.1-Source.tar.gz
+  TEST_7 CMND tar ARGS -xzf tribitsexproj-1.1-Source.tar.gz
     MESSAGE "Untar the tarball"
 
-  TEST_7 CMND diff
+  TEST_8 CMND diff
      ARGS -qr
        ${${PROJECT_NAME}_TRIBITS_DIR}/examples/TribitsExampleProject
        tribitsexproj-1.1-Source
@@ -902,7 +922,7 @@ TRIBITS_ADD_ADVANCED_TEST( TribitsExampleProject_ALL_ST_NoFortran_Ninja_Makefile
       "WithSubpackages_TPL_LIST = 'HeaderOnlyTpl'"
     ALWAYS_FAIL_ON_NONZERO_RETURN
 
-  TEST_5 CMND make ARGS ${MAKE_PARALLEL_ARG} package_source
+  TEST_6 CMND make ARGS ${MAKE_PARALLEL_ARG} package_source
     MESSAGE "Create the tarball"
     PASS_REGULAR_EXPRESSION_ALL
       "Run CPack packaging tool for source..."
@@ -911,10 +931,10 @@ TRIBITS_ADD_ADVANCED_TEST( TribitsExampleProject_ALL_ST_NoFortran_Ninja_Makefile
     # Above should be 'make package_soruce' but the dummy makefiles don't
     # support that yet!
 
-  TEST_6 CMND tar ARGS -xzf tribitsexproj-1.1-Source.tar.gz
+  TEST_7 CMND tar ARGS -xzf tribitsexproj-1.1-Source.tar.gz
     MESSAGE "Untar the tarball"
 
-  TEST_7 CMND diff
+  TEST_8 CMND diff
      ARGS -qr
        ${${PROJECT_NAME}_TRIBITS_DIR}/examples/TribitsExampleProject
        tribitsexproj-1.1-Source
@@ -2256,14 +2276,18 @@ TRIBITS_ADD_ADVANCED_TEST( TribitsExampleProject_DisableWithSubpackagesB_EnableW
     PASS_REGULAR_EXPRESSION_ALL
       "Explicitly enabled SE packages on input .by user.:  WithSubpackagesB 1"
       "-- Setting TribitsExProj_ENABLE_WrapExternal=OFF because WrapExternal has a required library dependence on disabled package WithSubpackagesA"
-      "Enabling all parent packages that have at least one subpackage enabled [.][.][.]"
+      "Enabling all optional intra-package enables <TRIBITS_PACKAGE>_ENABLE_<DEPPACKAGE> that are not currently disabled if both sets of packages are enabled [.][.][.]"
+      "-- NOT setting WithSubpackagesB_ENABLE_MixedLang=ON since MixedLang is NOT enabled at this point!"
+      "Enabling the shell of non-enabled parent packages [(]mostly for show[)] that have at least one subpackage enabled [.][.][.]"
       "-- Setting TribitsExProj_ENABLE_WithSubpackages=ON because TribitsExProj_ENABLE_WithSubpackagesB=ON"
       "Final set of enabled packages:  SimpleCxx WithSubpackages 2"
       "Final set of enabled SE packages:  SimpleCxx WithSubpackagesB WithSubpackages 3"
 
   )
 # NOTE: The above test is the *only* test that we have that checks that a
-# parent package is re-enabled if any of its subpackages are enabled!
+# parent package is enabled at the end if any of its subpackages are enabled!
+# This is also the only test that looks for the output that an optional
+# package enable is not set.
 
 
 ##################################
@@ -2837,6 +2861,35 @@ TRIBITS_ADD_ADVANCED_TEST( TribitsExampleProjectAddons
 ########################################################################
 # TribitsExampleMetaProject
 ########################################################################
+
+
+TRIBITS_ADD_ADVANCED_TEST( TribitsExampleMetaProject_Empty
+  OVERALL_WORKING_DIRECTORY TEST_NAME
+  OVERALL_NUM_MPI_PROCS 1
+
+  TEST_0
+    MESSAGE "Configure TribitsExampleMetaProject with nothing in it"
+    CMND ${CMAKE_COMMAND}
+    ARGS
+      ${COMMON_ENV_ARGS_PASSTHROUGH}
+      -DTribitsExMetaProj_ENABLE_Fortran=OFF
+      -DTribitsExMetaProj_IGNORE_MISSING_EXTRA_REPOSITORIES=TRUE
+      ${${PROJECT_NAME}_TRIBITS_DIR}/examples/TribitsExampleMetaProject
+    PASS_REGULAR_EXPRESSION_ALL
+      "WARNING: Ignoring missing extra repo 'TribitsExampleProject' as requested since .*/TribitsExampleMetaProject/TribitsExampleProject does not exist"
+      "WARNING: Ignoring missing extra repo 'TribitsExampleProjectAddons' as requested since .*/TribitsExampleMetaProject/TribitsExampleProjectAddons does not exist"
+      "Final set of enabled SE packages:  0"
+      "Final set of non-enabled SE packages:  0"
+      "WARNING:  There were no packages configured so no libraries or tests/examples will be built"
+      "Configuring done"
+      "Generating done"
+    ALWAYS_FAIL_ON_NONZERO_RETURN
+
+  )
+# NOTE: That above test is the only test that triggers an empty list that
+# tries to get reversed.  This is a TriBITS project with no packages and no
+# TPLs.  While not common, it is a starter sitiation that users will have so
+# it should be have smoothly.
 
 
 TRIBITS_ADD_ADVANCED_TEST( TribitsExampleMetaProject
