@@ -35,20 +35,33 @@ addons:
             - clang-3.7
 
 install:
-    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-          export FC="gfortran-4.9";
+    - |
+      if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+          export FC="gfortran-4.9"
           if [[ "$CXX" == "g++" ]]; then
-              export CXX="g++-4.9";
-              export CC="gcc-4.9";
-          fi;
+              export CXX="g++-4.9"
+              export CC="gcc-4.9"
+          fi
       elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-          travis_wait brew install gcc && brew install libidn && export FC="gfortran";
-          brew install ccache;
-          export PATH="/usr/local/opt/ccache/libexec:$PATH";
-          brew install coreutils;
-          export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH";
-          rvm get stable --auto-dot-files;
-          rvm reset;
+          #prevent lots of screen output
+          brew update &>/dev/null
+          #or could do this to prevent updates...
+          #export HOMEBREW_NO_AUTO_UPDATE=1
+
+          #install
+          travis_wait brew install gcc && brew install libidn && export FC="gfortran"
+
+          #UNCOMMENT TO ENABLE CACHIHNG
+          #brew install ccache
+          #export PATH="/usr/local/opt/ccache/libexec:$PATH"
+
+          #for stdbuf below
+          brew install coreutils
+          export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
+
+          #for ruby version management
+          rvm get stable --auto-dot-files
+          rvm reset
       fi
     - echo ${PATH}
     - echo ${CC}
@@ -71,12 +84,12 @@ before_script: |
 
 
 script:
-    - mkdir build
-    - cd build
-    #line suppression strategy
+    - mkdir build && cd build
+    #the configure needs this line suppression strategy
     - stdbuf -oL cmake .. 2>stderr.log |  grep --line-buffered '\[BootsOnTheGround\]\|\[hunter\]\|%\]'
     - cmake --build .
     - ctest
 
-cache: ccache
+#UNCOMMENT TO ENABLE CACHING
+#cache: ccache
 

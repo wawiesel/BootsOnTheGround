@@ -12,4 +12,5 @@ SET( BOTG_TPLS_LIST
     CURL
     BLAS
     LAPACK
+    CBLAS
 )

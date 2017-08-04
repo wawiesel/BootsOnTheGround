@@ -38,7 +38,7 @@
 # @HEADER
 
 INCLUDE(TribitsCreateClientTemplateHeaders)
-INCLUDE(ParseVariableArguments)
+INCLUDE(CMakeParseArguments)
 INCLUDE(GlobalSet)
 INCLUDE(AppendSet)
 INCLUDE(AppendGlob)
@@ -234,7 +234,7 @@ ENDFUNCTION()
 #
 #   ``<libBaseName>``
 #
-#     Required base name of the library.  The name of the actual libray name
+#     Required base name of the library.  The name of the actual library name
 #     will be prefixed by ``${${PROJECT_NAME}_LIBRARY_NAME_PREFIX}`` to
 #     produce::
 #     
@@ -355,7 +355,7 @@ ENDFUNCTION()
 #     If specified, then on output the variable ``<libTargetName>`` will be
 #     set with the name of the library passed to ``ADD_LIBRARY()``.  Having
 #     this name allows the calling ``CMakeLists.txt`` file access and set
-#     additional target propeties (see `Additional Library and Source File
+#     additional target properties (see `Additional Library and Source File
 #     Properties (TRIBITS_ADD_LIBRARY())`_).
 #
 # .. _Include Directories (TRIBITS_ADD_LIBRARY()):
@@ -487,11 +487,16 @@ FUNCTION(TRIBITS_ADD_LIBRARY LIBRARY_NAME_IN)
     PRINT_VAR(${PACKAGE_NAME}_LIBRARIES)
   ENDIF()
 
-  PARSE_ARGUMENTS(
-    PARSE #prefix
-    "HEADERS;HEADERS_INSTALL_SUBDIR;NOINSTALLHEADERS;SOURCES;DEPLIBS;IMPORTEDLIBS;DEFINES;ADDED_LIB_TARGET_NAME_OUT" # Lists
-    "STATIC;SHARED;TESTONLY;NO_INSTALL_LIB_OR_HEADERS;CUDALIBRARY" #Options
-    ${ARGN} # Remaining arguments passed in
+  CMAKE_PARSE_ARGUMENTS(
+    #prefix
+    PARSE
+    #Options    
+    "STATIC;SHARED;TESTONLY;NO_INSTALL_LIB_OR_HEADERS;CUDALIBRARY"
+    #one_value_keywords
+    ""
+    #mulit_value_keywords
+    "HEADERS;HEADERS_INSTALL_SUBDIR;NOINSTALLHEADERS;SOURCES;DEPLIBS;IMPORTEDLIBS;DEFINES;ADDED_LIB_TARGET_NAME_OUT"
+    ${ARGN}
     )
 
   # ToDo: Assert that HEADERS_INSTALL_SUBDIR has 0 or 1 entries!
