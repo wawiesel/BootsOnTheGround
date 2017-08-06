@@ -8,8 +8,8 @@ CMake macros for easy projects with TPLS C/C++/Fortran
 
 .. image:: https://c1.staticflickr.com/3/2860/33135230166_b7890b6015_b.jpg
 
-BOTG_ provides macros for easy project/package setup and a set 
-of FindTPL*.cmake files to find and link Third Party Libraries (TPLs) 
+BOTG_ provides macros for easy project/package setup and a set
+of FindTPL*.cmake files to find and link Third Party Libraries (TPLs)
 to other packages using the CMake_ / TriBITS_ framework for C/C++/Fortran code.
 
 .. code-block:: cmake
@@ -22,11 +22,11 @@ to other packages using the CMake_ / TriBITS_ framework for C/C++/Fortran code.
         TEST_REQUIRED_PACKAGES
             BootsOnTheGround_GTEST
     )
-    
+
 In order to use this command, you need to add BootsOnTheGround as a package
 to your ``PackagesList.cmake`` file in your project. The amazing thing about
-the ``BootsOnTheGround_XXX`` dependencies are that they unify the normal way 
-of finding a TPL on your system with the Hunter_ system for downloading and 
+the ``BootsOnTheGround_XXX`` dependencies are that they unify the normal way
+of finding a TPL on your system with the Hunter_ system for downloading and
 building TPLS on the fly!
 
 The available ``XXX`` allowed are listed below.
