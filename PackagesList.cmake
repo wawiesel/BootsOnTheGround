@@ -1,3 +1,2 @@
-botgProjectContents(
-    BootsOnTheGround src PT
+botgPackagesList(
 )

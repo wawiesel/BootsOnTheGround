@@ -331,17 +331,148 @@ MACRO( botgResolveVersion )
     GLOBAL_SET( ${PACKAGE_NAME}_VERSION "${version}")
 ENDMACRO()
 #------------------------------------------------------------------------------
-# PUBLIC
+# PUBLIC (DEPRECATED)
 # Set contents of a project/repo. (Eventually will process version numbers of
-# packages too)
+# packages, too.)
 #
 # botgProjectContents(
 #   PACKAGE_NAME   PACKAGE_LOCATION   PACKAGE_TEST_LEVEL
 # )
 MACRO( botgProjectContents )
-    TRIBITS_REPOSITORY_DEFINE_PACKAGES(
-      ${ARGN}
+    MESSAGE(WARNING "[BootsOnTheGround] The botgProjectContents MACRO is "
+                    "DEPRECATED and will be removed in v0.11.0!"
+                    " Use botgPackagesList instead.")
+    botgPackagesList( ${ARGN} )
+ENDMACRO()
+#------------------------------------------------------------------------------
+# PUBLIC
+# Register the list packages a project uses. This should be placed in the
+# project PackagesList.cmake file.
+#
+# botgPackagesList(
+#   PACKAGE_NAME   PACKAGE_LOCATION   PACKAGE_TEST_LEVEL
+# )
+#
+# TODO:
+# Process version numbers of packages.
+#
+MACRO( botgPackagesList )
+
+    #get input length
+    SET(local_args0 "${ARGN}")
+    LIST(LENGTH local_args0 ntotal)
+
+    #start out with BOTG!
+    SET_DEFAULT(BOTG_TEST_LEVEL "ST")
+    SET(local_args "BootsOnTheGround;${BOTG_ROOT_DIR}/src;${BOTG_TEST_LEVEL}")
+    SET(external_projects)
+
+    #iterate through and reconstruct components
+    IF( ntotal GREATER 2 )
+        FOREACH(i RANGE 1 ${ntotal} 3)
+
+            #get components
+            MATH(EXPR im1 "${i}-1")
+            MATH(EXPR ip1 "${i}+1")
+            LIST(GET local_args0 "${im1}" pkg)
+            LIST(GET local_args0 "${i}"   loc)
+            LIST(GET local_args0 "${ip1}" tst)
+
+            #check we don't have a double
+            IF( pkg MATCHES "^BootsOnTheGround" )
+                MESSAGE(FATAL_ERROR "[BootsOnTheGround] Do not include BootsOnTheGround in the botgPackagesList!")
+            ENDIF()
+
+            #######################################################################
+            #TODO process special form of package that includes VERSION STRING
+            #######################################################################
+
+            #split location into directory components
+            #If a directory is actually a .in file then load the external project.
+            STRING( REPLACE "/" ";" components "${loc}" )
+            SET(loc)
+            FOREACH( component "${components}" )
+                IF( component MATCHES "\\.in$" )
+                    LIST(APPEND external_projects component)
+                    STRING(REGEX REPLACE "\\.in" "" component "${component}")
+                ENDIF()
+                LIST(APPEND loc "${component}/") #reconstruct with trailing /
+            ENDFOREACH()
+            STRING( REGEX REPLACE "/$" "" loc "${loc}") #remove last trailing /
+
+            #reconstruct full args
+            LIST(APPEND local_args ${pkg} ${loc} ${tst})
+        ENDFOREACH()
+    ENDIF()
+    MESSAGE( STATUS "local_args=${local_args}")
+    #download any external projects
+    botgDownloadExternalProjects(
+        ${external_projects}
     )
+
+    #define packages with tribits
+    TRIBITS_REPOSITORY_DEFINE_PACKAGES(
+      ${local_args}
+    )
+
+ENDMACRO()
+#------------------------------------------------------------------------------
+# PUBLIC
+# Register the TPLs a project uses. This should be placed in the
+# project TPLsList.cmake file.
+#
+# botgTPLsList(
+#   TPL_NAME   FIND_TPL_LOCATION   TPL_TEST_LEVEL
+# )
+#
+# TODO:
+# Process version numbers of TPLS.
+#
+MACRO( botgTPLsList )
+
+    #get input length
+    SET(local_args0 "${ARGN}")
+    LIST(LENGTH local_args0 ntotal)
+
+    #accumulate the user TPL list
+    SET(tpl_list)
+    SET(local_args)
+    #iterate through and reconstruct components
+    IF( ntotal GREATER 2 )
+        FOREACH(i RANGE 1 ${ntotal} 3)
+
+            #get components
+            MATH(EXPR im1 "${i}-1")
+            MATH(EXPR ip1 "${i}+1")
+            LIST(GET local_args0 "${im1}" tpl)
+            LIST(GET local_args0 "${i}"   loc)
+            LIST(GET local_args0 "${ip1}" tst)
+
+            #######################################################################
+            #TODO process special form of TPL that includes VERSION STRING
+            #######################################################################
+
+            #create TPL list
+            LIST(APPEND tpl_list "${tpl}")
+
+            #reconstruct full args
+            LIST(APPEND local_args ${tpl} ${loc} ${tst})
+        ENDFOREACH()
+    ENDIF()
+
+    #now add the standard TPLs list
+    INCLUDE(${BOTG_ROOT_DIR}/src/BOTG_TPLS.cmake)
+    FOREACH( tpl_loc ${BOTG_TPLS_LIST} )
+        STRING(REPLACE "/" "_" tpl_name ${tpl_loc})
+        #only if the user has not registered the name already
+        IF( NOT "${tpl_list}" MATCHES ";${tpl_name};" )
+            LIST(APPEND local_args ${tpl_name} "${BOTG_ROOT_DIR}/src/${tpl_loc}/FindTPL${tpl_name}.cmake" TT )
+        ENDIF()
+    ENDFOREACH()
+
+    #now register all TPLs
+    TRIBITS_REPOSITORY_DEFINE_TPLS( ${local_args} )
+
 ENDMACRO()
 #------------------------------------------------------------------------------
 # PUBLIC
@@ -415,14 +546,6 @@ MACRO( botgPackageDependencies )
             ENDFOREACH()
         ENDFOREACH()
     ENDFOREACH()
-ENDMACRO()
-#-------------------------------------------------------------------------------
-# PUBLIC
-# Add a BOTG third-party-library (TPL).
-#
-MACRO( botgAddTPL type_need name )
-    APPEND_SET( ${type_need}_DEP_PACKAGES BootsOnTheGround_${name} )
-    APPEND_SET( ${type_need}_DEP_TPLS ${name} )
 ENDMACRO()
 
 #------------------------------------------------------------------------------
