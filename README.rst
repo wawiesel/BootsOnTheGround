@@ -48,6 +48,7 @@ Currently we have the following TPLs wrapped up nice and purdy:
 - SPDLOG_ - fast, versatile logging [C++]
 - ZLIB_ - compession/decompression algorithm [C++]
 - BLAS_ - basic linear algebra subprograms [Fortran]
+- CBLAS_ - C bindings for BLAS_ [C/C++]
 - LAPACK_ - linear algebra package [Fortran]
 
 Once the interface of BOTG crystalizes, the only changes will be adding new TPLS,
@@ -63,12 +64,16 @@ project build.
 
 - ``botgProject()`` - declare a project (inside root CMakeLists.txt)
 - ``botgPackage( name )`` - declare a package (inside subdir CMakeLists.txt)
+- ``botgSuperPackage( name )`` - declare a super package (i.e. package with subpackages)
 - ``botgEnd()`` - wrap-up processing a Project or Package
 - ``botgAddCompilerFlags( lang compiler os flags )`` - add compiler flags only for a particular language/compiler/os combination
 - ``botgAddLinkerFlags( compiler os flags )`` - add linker flags only for a particular compiler/os combination
 - ``botgLibrary( name ... )`` - declare and define a library using current compiler and linker flags
 - ``botgTestDir( dir )`` - declare a unit test directory
-- ``botgProjectContents( ... )`` - declare the packages and subdirs in a project
+- ``botgPackagesList( ... )`` - declare the packages and subdirs in a project (inside ``PackagesList.cmake``)
+- ``botgSuperPackageContents( ... )`` - declare the packages and subdirs in a super package 
+    (inside ``cmake/Dependencies.cmake`` for a package
+- ``botgTPLsList( ... )`` - declare the TPLs and ``findTPL*.cmake`` locations (inside ``TPLsList.cmake``)
 - ``botgPackageDependencies( ... )`` - declare the dependencies of a package
 - ``botgDownloadExternalProjects( ... )`` - download an external project at configure time (used to bootstrap BootsOnTheGround)
 
@@ -275,5 +280,6 @@ followed the steps on `Cees-Jan Kiewiet's Blog Post
 .. _CURL: https://curl.haxx.se/libcurl/
 .. _HDF5: https://support.hdfgroup.org/HDF5/
 .. _BLAS: https://www.wikiwand.com/en/Basic_Linear_Algebra_Subprograms
+.. _CBLAS: http://www.netlib.org/blas/#_cblas
 .. _LAPACK: http://www.netlib.org/lapack/
 
