@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+
+## [v0.11.1] - 2017-08-05
+
+### Fixed
+- issue where botgPackagesList macro was not parsing directory paths correctly.
+
+
 ## [v0.11.0] - 2017-08-05
 
 ### Added
@@ -23,5 +30,3 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - some random debugging output of test regexes.
 
-### Security
-- none.
