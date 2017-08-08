@@ -71,8 +71,7 @@ project build.
 - ``botgLibrary( name ... )`` - declare and define a library using current compiler and linker flags
 - ``botgTestDir( dir )`` - declare a unit test directory
 - ``botgPackagesList( ... )`` - declare the packages and subdirs in a project (inside ``PackagesList.cmake``)
-- ``botgSuperPackageContents( ... )`` - declare the packages and subdirs in a super package 
-    (inside ``cmake/Dependencies.cmake`` for a package
+- ``botgSuperPackageContents( ... )`` - declare the packages and subdirs in a super package (inside ``cmake/Dependencies.cmake`` for a package
 - ``botgTPLsList( ... )`` - declare the TPLs and ``findTPL*.cmake`` locations (inside ``TPLsList.cmake``)
 - ``botgPackageDependencies( ... )`` - declare the dependencies of a package
 - ``botgDownloadExternalProjects( ... )`` - download an external project at configure time (used to bootstrap BootsOnTheGround)
