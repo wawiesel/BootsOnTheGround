@@ -389,16 +389,16 @@ MACRO( botgPackagesList )
 
             #split location into directory components
             #If a directory is actually a .in file then load the external project.
-            STRING( REPLACE "/" ";" components "${loc}" )
+            STRING( REPLACE "/" ";" components ${loc} )
             SET(loc)
-            FOREACH( component "${components}" )
+            FOREACH( component ${components} )
                 IF( component MATCHES "\\.in$" )
-                    LIST(APPEND external_projects component)
+                    LIST(APPEND external_projects "${loc}/${component}")
                     STRING(REGEX REPLACE "\\.in" "" component "${component}")
                 ENDIF()
-                LIST(APPEND loc "${component}/") #reconstruct with trailing /
+                SET(loc "${loc}/${component}")
             ENDFOREACH()
-            STRING( REGEX REPLACE "/$" "" loc "${loc}") #remove last trailing /
+            STRING( REGEX REPLACE "^/" "" loc "${loc}") #remove first /
 
             #reconstruct full args
             LIST(APPEND local_args ${pkg} ${loc} ${tst})
@@ -412,7 +412,7 @@ MACRO( botgPackagesList )
 
     #define packages with tribits
     TRIBITS_REPOSITORY_DEFINE_PACKAGES(
-      ${local_args}
+        ${local_args}
     )
 
 ENDMACRO()
