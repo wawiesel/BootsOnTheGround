@@ -1,6 +1,9 @@
 # Build directory
 build/
 
+# Mac files
+.DS_Store
+
 # Compiled Object files
 *.slo
 *.lo
