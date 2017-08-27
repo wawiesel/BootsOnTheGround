@@ -8,9 +8,9 @@ SET(libs
 )
 SET(hunter_name Boost)
 SET(hunter_args
-  COMPONENTS
-    system filesystem
+  system filesystem
 )
+SET(hunter_find_package CONFIG REQUIRED)
 
 botgHuntTPL(
     "${tribits_name}"
@@ -18,4 +18,5 @@ botgHuntTPL(
     "${libs}"
     "${hunter_name}"
     "${hunter_args}"
+    "${hunter_find_package}"
 )

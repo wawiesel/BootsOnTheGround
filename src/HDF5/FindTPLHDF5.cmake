@@ -12,6 +12,7 @@ SET(libs
 )
 SET(hunter_name hdf5)
 SET(hunter_args )
+SET(hunter_find_package CONFIG REQUIRED)
 
 botgHuntTPL(
     "${tribits_name}"
@@ -19,4 +20,5 @@ botgHuntTPL(
     "${libs}"
     "${hunter_name}"
     "${hunter_args}"
+    "${hunter_find_package}"
 )

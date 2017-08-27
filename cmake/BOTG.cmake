@@ -754,7 +754,7 @@ ENDMACRO()
 # PRIVATE
 # Hunt down a TPL using hunter.
 #
-FUNCTION( botgHuntTPL tribits_name headers libs hunter_name hunter_args )
+FUNCTION( botgHuntTPL tribits_name headers libs hunter_name hunter_args hunter_find_package )
 
     SET(${tribits_name}_FORCE_HUNTER OFF
       CACHE BOOL "Force hunter download of TPL ${tribits_name}.")
@@ -784,9 +784,14 @@ FUNCTION( botgHuntTPL tribits_name headers libs hunter_name hunter_args )
       #use hunter!
       IF( NOT ${tribits_name}_FOUND AND NOT (hunter_name STREQUAL "") )
         SET( hunter_argx "" )
-        LIST(APPEND hunter_argx ${hunter_name})
-        LIST(APPEND hunter_argx ${hunter_args} )
-
+        LIST(APPEND hunter_argx ${hunter_name} )
+        
+        #some TPLS have a list of components in hunter
+        IF( hunter_args )
+          LIST(APPEND hunter_argx COMPONENTS )
+          LIST(APPEND hunter_argx ${hunter_args} )
+        ENDIF()
+        
         MESSAGE(STATUS "[BootsOnTheGround] Calling hunter_add_package( ${hunter_argx} )...")
 
         HUNTER_ADD_PACKAGE( ${hunter_argx} )
@@ -794,13 +799,13 @@ FUNCTION( botgHuntTPL tribits_name headers libs hunter_name hunter_args )
         #issue found in: cmake-3.7/Modules/CheckSymbolExists.cmake
         CMAKE_POLICY(PUSH)
         CMAKE_POLICY(SET CMP0054 OLD)
-        FIND_PACKAGE( ${hunter_argx} )
+        FIND_PACKAGE( ${hunter_name} ${hunter_find_package} ${hunter_args} )
         CMAKE_POLICY(POP)
 
         #set global information about where the stuff is, converting names
         #from hunter to tribits.
         IF( ${hunter_name}_FOUND )
-	  FOREACH( type INCLUDE_DIRS LIBRARY_DIRS)
+          FOREACH( type INCLUDE_DIRS LIBRARY_DIRS)
             GLOBAL_SET(${tribits_name}_${type} ${${hunter_name}_${type}})
           ENDFOREACH()
           GLOBAL_SET(${tribits_name}_FOUND TRUE)

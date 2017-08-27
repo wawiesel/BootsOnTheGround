@@ -10,6 +10,7 @@ SET(headers
 SET(libs )
 SET(hunter_name spdlog)
 SET(hunter_args )
+SET(hunter_find_package REQUIRED)
 
 botgHuntTPL(
     "${tribits_name}"
@@ -17,4 +18,5 @@ botgHuntTPL(
     "${libs}"
     "${hunter_name}"
     "${hunter_args}"
+    "${hunter_find_package}"
 )

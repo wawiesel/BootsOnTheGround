@@ -509,6 +509,6 @@ endmacro()
 
 # This dictates the set of available packages and default versions.
 HunterGate(
-    URL "https://github.com/ruslo/hunter/archive/v0.17.13.tar.gz"
-    SHA1 "4454835e9765f1027c1082beebef5cacf80a5fa9"
+    URL "https://github.com/ruslo/hunter/archive/v0.19.84.tar.gz"
+    SHA1 "9086d4b3c32784effdd6f83f45125b55cf95aae8"
 )
