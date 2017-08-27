@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [unreleased] - YYYY-MM-DD
 
 ### Added
-- none.
+- BOOST/MATH TPL with distributions, quaternions, special functions and more
 
 ### Changed
 - upgraded to HunterGate v0.19.84

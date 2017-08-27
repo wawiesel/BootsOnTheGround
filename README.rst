@@ -37,6 +37,7 @@ Current TPLs
 Currently we have the following TPLs wrapped up nice and purdy:
 
 - BOOST_FILESYSTEM_ - Cross-platform file system queries [C++]
+- BOOST_MATH_ - statistical distributions and special functions [C++]
 - CURL_ - push and pull across the web [C++]
 - FMT_ - amazing sprintf, printf replacement [C++]
 - GFLAGS_ - command line flags parsing [C++]
@@ -269,6 +270,7 @@ followed the steps on `Cees-Jan Kiewiet's Blog Post
 .. _GTEST: http://github.com/google/googletest
 .. _GFLAGS: https://gflags.github.io/gflags
 .. _BOOST_FILESYSTEM: http://www.boost.org/doc/libs/1_63_0/libs/filesystem/doc/reference.html
+.. _BOOT_MATH: http://www.boost.org/doc/libs/1_65_0/libs/math/doc/html/index.html
 .. _FMT: http://fmtlib.net/latest/index.html
 .. _SPDLOG: https://github.com/gabime/spdlog/wiki/1.-QuickStart
 .. _SZIP: http://www.compressconsult.com/szip
