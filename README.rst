@@ -270,7 +270,7 @@ followed the steps on `Cees-Jan Kiewiet's Blog Post
 .. _GTEST: http://github.com/google/googletest
 .. _GFLAGS: https://gflags.github.io/gflags
 .. _BOOST_FILESYSTEM: http://www.boost.org/doc/libs/1_63_0/libs/filesystem/doc/reference.html
-.. _BOOT_MATH: http://www.boost.org/doc/libs/1_65_0/libs/math/doc/html/index.html
+.. _BOOST_MATH: http://www.boost.org/doc/libs/1_65_0/libs/math/doc/html/index.html
 .. _FMT: http://fmtlib.net/latest/index.html
 .. _SPDLOG: https://github.com/gabime/spdlog/wiki/1.-QuickStart
 .. _SZIP: http://www.compressconsult.com/szip
