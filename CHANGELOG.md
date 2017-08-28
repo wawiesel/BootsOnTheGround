@@ -5,6 +5,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [v0.12.0] - 2017-08-27
+
+### Added
+- BOOST/MATH TPL with distributions, quaternions, special functions and more
+
+### Changed
+- upgraded to HunterGate v0.19.84
+- interface to botgHuntTPL, now passing arguments for HUNTER_ADD_PACKAGE and FIND_PACKAGE
+
+
 ## [v0.11.1] - 2017-08-05
 
 ### Fixed
@@ -29,4 +39,30 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 - some random debugging output of test regexes.
+
+
+# Clipboard
+
+Every time you make a new release branch off develop, just
+copy-paste this to restart the change log entry.
+
+## [unreleased] - YYYY-MM-DD
+
+### Added
+- none.
+
+### Changed
+- none.
+
+### Deprecated
+- none.
+
+### Removed
+- none.
+
+### Fixed
+- none.
+
+### Security
+- none.
 

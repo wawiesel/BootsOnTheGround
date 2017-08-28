@@ -21,7 +21,7 @@ TEST( Spdlog, Demo )
     try
     {
         // Console logger with color
-        auto console = spd::stdout_logger_mt( "console", /*color=*/true );
+        auto console = spd::stdout_color_mt( "console" );
         console->info( "Welcome to spdlog!" );
         console->error( "Some error message with arg{}..", 1 );
         console->set_level( spdlog::level::trace );
