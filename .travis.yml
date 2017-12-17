@@ -3,7 +3,7 @@
 # This file can be validated on:
 # http://lint.travis-ci.org/
 
-sudo: true
+sudo: required
 
 dist: trusty
 
