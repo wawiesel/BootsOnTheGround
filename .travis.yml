@@ -24,6 +24,7 @@ install:
           sudo apt-get -qq update
           sudo apt-get install -y build-essential
           sudo apt-get install -y gfortran
+          sudo apt-get install -y tree
           export FC="gfortran"
           if [[ "$CXX" == "g++" ]]; then
               export CXX="g++"
@@ -80,5 +81,5 @@ script:
     - ctest
 
 #UNCOMMENT TO ENABLE CACHING
-#cache: ccache
+cache: ccache
 
