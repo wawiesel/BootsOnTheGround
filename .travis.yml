@@ -74,6 +74,7 @@ script:
     - mkdir build && cd build
     #the configure needs this line suppression strategy
     - stdbuf -oL cmake .. 2>stderr.log |  grep --line-buffered '\[BootsOnTheGround\]\|\[hunter\]\|%\]'
+    - echo $PWD
     - cmake --build .
     - ctest
 
