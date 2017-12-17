@@ -17,12 +17,8 @@ compiler:
     - gcc
     - clang
 
-addons:
-    apt:
-        sources:
-            - ubuntu-toolchain-r-test
-        packages:
-            - build-essential
+pre-install:
+    - sudo apt-get install build-essential
 
 install:
     - echo TRAVIS_OS_NAME=$TRAVIS_OS_NAME
