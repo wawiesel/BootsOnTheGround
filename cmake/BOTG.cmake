@@ -216,10 +216,10 @@ MACRO( botgLibrary name )
         #create list of sources
         SET( sources )
         FOREACH( source ${library_SOURCES} )
-            STRING( REGEX REPLACE ".in$" "" replaced "${source}" )
-            IF( NOT "${source}" STREQUAL "${replaced}" )
-                CONFIGURE_FILE( "${source}" "${CMAKE_CURRENT_BINARY_DIR}/${replaced}" )
-                SET( source "${CMAKE_CURRENT_BINARY_DIR}/${replaced}" )
+            IF( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${source}" )
+                SET( source "${CMAKE_CURRENT_SOURCE_DIR}/${source}" )
+            ELSEIF( EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${source}" )
+                SET( source "${CMAKE_CURRENT_BINARY_DIR}/${source}" )
             ENDIF()
             LIST(APPEND sources "${source}" )
         ENDFOREACH()
@@ -227,14 +227,14 @@ MACRO( botgLibrary name )
         #create list of headers and install directives
         SET( headers )
         FOREACH( header ${library_HEADERS} )
-            STRING( REGEX REPLACE ".in$" "" replaced "${header}" )
-            IF( NOT "${header}" STREQUAL "${replaced}" )
-                CONFIGURE_FILE( "${header}" "${CMAKE_CURRENT_BINARY_DIR}/${replaced}" )
-                SET( header "${CMAKE_CURRENT_BINARY_DIR}/${replaced}" )
-            ENDIF()
             GET_FILENAME_COMPONENT( dir "${header}" DIRECTORY )
-            INSTALL(FILES "${header}" DESTINATION "include/${dir}")
+            IF( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${header}" )
+                SET( header "${CMAKE_CURRENT_SOURCE_DIR}/${header}" )
+            ELSEIF( EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${header}" )
+                SET( header "${CMAKE_CURRENT_BINARY_DIR}/${header}" )
+            ENDIF()
             LIST(APPEND headers "${header}" )
+            INSTALL(FILES "${header}" DESTINATION "include/${dir}")
         ENDFOREACH()
 
         #call TriBITS to add a library
@@ -249,8 +249,6 @@ MACRO( botgLibrary name )
             TRIBITS_ADD_LIBRARY( ${name}
                 SOURCES
                     "${sources}"
-                HEADERS
-                    "${headers}"
                 NOINSTALLHEADERS
                     "${headers}"
             )
@@ -785,13 +783,13 @@ FUNCTION( botgHuntTPL tribits_name headers libs hunter_name hunter_args hunter_f
       IF( NOT ${tribits_name}_FOUND AND NOT (hunter_name STREQUAL "") )
         SET( hunter_argx "" )
         LIST(APPEND hunter_argx ${hunter_name} )
-        
+
         #some TPLS have a list of components in hunter
         IF( hunter_args )
           LIST(APPEND hunter_argx COMPONENTS )
           LIST(APPEND hunter_argx ${hunter_args} )
         ENDIF()
-        
+
         MESSAGE(STATUS "[BootsOnTheGround] Calling hunter_add_package( ${hunter_argx} )...")
 
         HUNTER_ADD_PACKAGE( ${hunter_argx} )
